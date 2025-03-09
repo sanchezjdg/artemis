@@ -37,8 +37,20 @@ document.getElementById('timestamp').textContent = data.timestamp || 'N/A';
 
 // If latitude and longitude exist, update the marker's position and pan the map
 if (data.latitude && data.longitude) {
-const latlng = [data.latitude, data.longitude];
-marker.setLatLng(latlng);
-map.setView(latlng, 15);
- }
+  const latlng = [data.latitude, data.longitude];
+  // Update marker position
+  marker.setLatLng(latlng);
+  // Add current position to path history
+  pathCoordinates.push(latlng);
+  path.setLatLngs(pathCoordinates);
+  // Set view with smooth animation
+  map.setView(latlng, 15);
+  // Add a popup with coordinate information
+  marker.bindPopup(`
+    <strong>Current Position</strong><br>
+    Lat: ${data.latitude.toFixed(6)}<br>
+    Lng: ${data.longitude.toFixed(6)}<br>
+    Alt: ${data.altitude ? data.altitude.toFixed(2) + 'm' : 'N/A'}
+  `);
+}
 });
