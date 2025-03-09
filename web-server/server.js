@@ -93,8 +93,8 @@ server.listen(PORT, () => {
 
 // Keys and certificates for HTTPS
 const options = {
-  key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/fullchain.pem`, 'utf8'),
-  cert: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`, 'utf8')
+  key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`, 'utf8'),
+  cert: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/fullchain.pem`, 'utf8')
 };
 
 // Server HTTPS
