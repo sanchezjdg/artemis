@@ -1,0 +1,16 @@
+{
+    "name": "udp-listener",
+    "version": "1.0.0",
+    "description": "A UDP listener service that receives location data and inserts it into a MySQL database.",
+    "main": "udp-listener.js",
+    "scripts": {
+      "start": "node udp-listener.js"
+    },
+    "dependencies": {
+      "dotenv": "^16.0.0",
+      "mysql2": "^3.0.0"
+    },
+    "author": "Juan",
+    "license": "ISC"
+  }
+  

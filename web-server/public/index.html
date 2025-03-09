@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Real-Time Location Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Leaflet Fullscreen CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.6.0/Control.FullScreen.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 1em;
+    }
+    #map {
+      height: 400px;
+      margin-bottom: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .info {
+      margin: 0.5em 0;
+      padding: 0.5em;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+    .info-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .info {
+      flex: 1;
+      min-width: 200px;
+    }
+    h1 {
+      color: #3388ff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Real-Time Location Map</h1>
+  
+  <!-- Map Container -->
+  <div id="map"></div>
+  
+  <!-- Information Display -->
+  <div class="info-container">
+    <div class="info">Latitude: <span id="latitude">N/A</span></div>
+    <div class="info">Longitude: <span id="longitude">N/A</span></div>
+    <div class="info">Altitude: <span id="altitude">N/A</span></div>
+    <div class="info">Timestamp: <span id="timestamp">N/A</span></div>
+  </div>
+
+  <!-- Socket.IO Client Library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Leaflet Fullscreen Plugin -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.6.0/Control.FullScreen.min.js"></script>
+  <!-- Custom Client Script -->
+  <script src="app.js"></script>
+</body>
+</html>
