@@ -93,12 +93,14 @@ server.listen(PORT, () => {
 
 // Keys and certificates for HTTPS
 const options = {
-  key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/fullchain.pem`),
-  cert: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`)
+  key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/fullchain.pem`, 'utf8'),
+  cert: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`, 'utf8')
 };
 
 // Server HTTPS
 https.createServer(options, (req, res) => {
+  res.writeHead(200);
+  res.end('');
 }).listen(443, () => {
   console.log('HTTPS running on 443');
 });
