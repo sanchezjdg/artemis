@@ -1,6 +1,6 @@
 CREATE TABLE locations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     latitude DOUBLE NOT NULL,
     longitude DOUBLE NOT NULL,
-    altitude DOUBLE NOT NULL,
-    timestamp DATETIME NOT NULL PRIMARY KEY
+    timestamp DATETIME NOT NULL
 );
