@@ -98,13 +98,10 @@ const options = {
 };
 
 // Server HTTPS
-https.createServer(options, (req, res) => {
-  res.writeHead(200);
-  res.end('');
-}).listen(443, () => {
-  console.log('HTTPS running on 443');
+const httpsServer = https.createServer(options, app);
+httpsServer.listen(443, () => {
+  console.log('HTTPS running on port 443');
 });
-
 
 
 // Graceful shutdown
