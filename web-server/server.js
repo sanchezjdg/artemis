@@ -31,7 +31,7 @@ const pool = mysql.createPool({
 // Function to get the latest location
 async function getLatestLocation() {
   try {
-    const [rows] = await pool.query('SELECT * FROM locations ORDER BY timestamp DESC LIMIT 1');
+    const [rows] = await pool.query('SELECT * FROM steinstable ORDER BY timestamp DESC LIMIT 1');
     return rows.length > 0 ? rows[0] : null;
   } catch (error) {
     console.error('Error fetching latest location:', error);
