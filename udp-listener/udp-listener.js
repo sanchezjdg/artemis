@@ -39,17 +39,16 @@ server.on('message', (msg, rinfo) => {
 
         if (key.toLowerCase().includes('latitud')) data.latitude = parseFloat(value);
         if (key.toLowerCase().includes('longitud')) data.longitude = parseFloat(value);
-        if (key.toLowerCase().includes('altitud')) data.altitude = parseFloat(value);
         if (key.toLowerCase().includes('tiempo')) {
             // Convert "HH:mm:ss - dd-MM-yyyy" to "yyyy-MM-dd HH:mm:ss"
             data.timestamp = parseTimestamp(value);
         }
     });
 
-    const query = `INSERT INTO locations (latitude, longitude, altitude, timestamp) VALUES (?, ?, ?, ?)`;
+    const query = `INSERT INTO locations (latitude, longitude, timestamp) VALUES (?, ?, ?)`;
 
     // Use the pool to execute the query
-    pool.query(query, [data.latitude, data.longitude, data.altitude, data.timestamp], (err, results) => {
+    pool.query(query, [data.latitude, data.longitude, data.timestamp], (err, results) => {
         if (err) {
             console.error('DB Insert Error:', err);
         } else {
