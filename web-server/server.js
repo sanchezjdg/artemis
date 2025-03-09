@@ -1,6 +1,8 @@
 // server.js
 const express = require('express');
 const http = require('http');
+const https = require('https');
+const fs = require('fs');
 const socketIO = require('socket.io');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
@@ -88,6 +90,20 @@ const PORT = process.env.PORT;
 server.listen(PORT, () => {
   console.log(`Web server listening on port ${PORT}`);
 });
+
+// Keys and certificates for HTTPS
+const options = {
+  key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}//fullchain.pem`),
+  cert: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}//privkey.pem`)
+};
+
+// Server HTTPS
+https.createServer(options, (req, res) => {
+}).listen(443, () => {
+  console.log('HTTPS running on 443');
+});
+
+
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
