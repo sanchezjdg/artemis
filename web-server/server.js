@@ -84,7 +84,7 @@ const POLLING_INTERVAL = 10000; // 10 seconds
 setInterval(checkForUpdates, POLLING_INTERVAL);
 
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 server.listen(PORT, () => {
   console.log(`Web server listening on port ${PORT}`);
 });
