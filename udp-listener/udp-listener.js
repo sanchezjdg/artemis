@@ -45,7 +45,7 @@ server.on('message', (msg, rinfo) => {
         }
     });
 
-    const query = `INSERT INTO locations (latitude, longitude, timestamp) VALUES (?, ?, ?)`;
+    const query = `INSERT INTO steinstable (latitude, longitude, timestamp) VALUES (?, ?, ?)`;
 
     // Use the pool to execute the query
     pool.query(query, [data.latitude, data.longitude, data.timestamp], (err, results) => {
