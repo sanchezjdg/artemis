@@ -32,7 +32,6 @@ console.log('Received updateData event with data:', data);
 // Update the displayed fields with the new data
 document.getElementById('latitude').textContent = data.latitude || 'N/A';
 document.getElementById('longitude').textContent = data.longitude || 'N/A';
-document.getElementById('altitude').textContent = data.altitude || 'N/A';
 document.getElementById('timestamp').textContent = data.timestamp || 'N/A';
 
 // If latitude and longitude exist, update the marker's position and pan the map
@@ -50,7 +49,6 @@ if (data.latitude && data.longitude) {
     <strong>Current Position</strong><br>
     Lat: ${data.latitude.toFixed(6)}<br>
     Lng: ${data.longitude.toFixed(6)}<br>
-    Alt: ${data.altitude ? data.altitude.toFixed(2) + 'm' : 'N/A'}
   `);
 }
 });
