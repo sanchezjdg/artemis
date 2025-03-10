@@ -1,6 +1,6 @@
 CREATE TABLE steinstable (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    latitude DOUBLE NOT NULL,
-    longitude DOUBLE NOT NULL,
+    latitude FLOAT NOT NULL,
+    longitude FLOAT NOT NULL,
     timestamp DATETIME NOT NULL
 );
