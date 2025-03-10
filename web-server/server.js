@@ -99,6 +99,7 @@ const options = {
 
 // Server HTTPS
 const httpsServer = https.createServer(options, app);
+io.attach(httpsServer);
 httpsServer.listen(443, () => {
   console.log('HTTPS running on port 443');
 });
