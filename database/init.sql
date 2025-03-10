@@ -1,4 +1,4 @@
-CREATE TABLE locations (
+CREATE TABLE steinstable (
     id INT AUTO_INCREMENT PRIMARY KEY,
     latitude DOUBLE NOT NULL,
     longitude DOUBLE NOT NULL,
