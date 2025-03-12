@@ -82,7 +82,7 @@ async function checkForUpdates() {
 }
 
 // Set up database change detection
-const POLLING_INTERVAL = 10000; // 10 seconds
+const POLLING_INTERVAL = 5000; // 5 seconds
 setInterval(checkForUpdates, POLLING_INTERVAL);
 
 // Start the server
