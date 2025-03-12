@@ -63,7 +63,6 @@ io.on('connection', async (socket) => {
 });
 
 let lastKnownId = null;
-let lastKnownTimestamp = null;
 
 // Function to check for updates and broadcast changes
 async function checkForUpdates() {
@@ -71,9 +70,8 @@ async function checkForUpdates() {
     const location = await getLatestLocation();
     
     // Only broadcast if there's new location data
-    if (location && (lastKnownId !== location.id || lastKnownTimestamp !== location.timestamp.toString())) {
+    if (location && lastKnownId !== location.id) {
       lastKnownId = location.id;
-      lastKnownTimestamp = location.timestamp.toString();
       
       io.emit('updateData', location);
       console.log('Broadcasting updated data:', location);
