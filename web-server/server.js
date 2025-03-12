@@ -62,17 +62,17 @@ io.on('connection', async (socket) => {
   }
 });
 
-// Function to check for DB updates and broadcast changes
+let lastKnownId = null;
+
+// Function to check for updates and broadcast changes
 async function checkForUpdates() {
   try {
     const location = await getLatestLocation();
     
-    // Only broadcast if there's a new location or if details have changed
-    if (location && (!lastKnownLocation || 
-        location.id !== lastKnownLocation.id || 
-        location.timestamp !== lastKnownLocation.timestamp)) {
+    // Only broadcast if there's new location data
+    if (location && lastKnownId !== location.id) {
+      lastKnownId = location.id;
       
-      lastKnownLocation = location;
       io.emit('updateData', location);
       console.log('Broadcasting updated data:', location);
     }
@@ -114,5 +114,3 @@ process.on('SIGINT', async () => {
     process.exit(0);
   });
 });
-
-//hey
