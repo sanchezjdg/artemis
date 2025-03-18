@@ -29,21 +29,20 @@ const path = L.polyline([], {
 socket.on('updateData', (data) => {
 console.log('Received updateData event with data:', data);
 
-// Update the displayed fields with the new data
-document.getElementById('latitude').textContent = data.latitude || 'N/A';
-document.getElementById('longitude').textContent = data.longitude || 'N/A';
-document.getElementById('timestamp').textContent = data.timestamp || 'N/A';
-
 // If latitude and longitude exist, update the marker's position and pan the map
 if (data.latitude && data.longitude) {
   const latlng = [data.latitude, data.longitude];
+  
   // Update marker position
   marker.setLatLng(latlng);
+
   // Add current position to path history
   pathCoordinates.push(latlng);
   path.setLatLngs(pathCoordinates);
+
   // Set view with smooth animation
   map.setView(latlng, 15);
+
   // Add a popup with coordinate information
   marker.bindPopup(`
     <strong>Current Position</strong><br>
