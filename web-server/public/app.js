@@ -46,8 +46,9 @@ if (data.latitude && data.longitude) {
   // Add a popup with coordinate information
   marker.bindPopup(`
     <strong>Current Position</strong><br>
-    Lat: ${data.latitude.toFixed(6)}<br>
-    Lng: ${data.longitude.toFixed(6)}<br>
+    Latitude: ${data.latitude.toFixed(2)}<br>
+    Longitude: ${data.longitude.toFixed(2)}<br>
+    Timestamp: ${data.timestamp}
   `);
 }
 });
