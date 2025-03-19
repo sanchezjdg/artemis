@@ -22,7 +22,6 @@ jobs:
           cd web-server 
           cp ~/env-variables/.env-web-server ./.env
           npm install
-          npm install ejs
           sudo pm2 restart web-server
 
 
@@ -43,7 +42,6 @@ jobs:
           cd web-server 
           cp ~/env-variables/.env-web-server ./.env
           npm install
-          npm install ejs
           sudo pm2 restart web-server
 
   deploy_e:
@@ -63,7 +61,6 @@ jobs:
           cd web-server 
           cp ~/env-variables/.env-web-server ./.env
           npm install
-          npm install ejs
           sudo pm2 restart web-server
 
   deploy_m:
@@ -83,7 +80,6 @@ jobs:
           cd web-server 
           cp ~/env-variables/.env-web-server ./.env
           npm install
-          npm install ejs
           sudo pm2 restart web-server
 
   deploy_f:
@@ -103,7 +99,6 @@ jobs:
           cd web-server 
           cp ~/env-variables/.env-web-server ./.env
           npm install
-          npm install ejs
           sudo pm2 restart web-server
 
 
