@@ -16,6 +16,13 @@ attribution: '© OpenStreetMap contributors'
 // Add a marker to the map; initially placed at [0,0]
 let marker = L.marker([0, 0]).addTo(map);
 
+//Name 
+app.get('/', (req, res) => {
+  res.render('index', { 
+    WEBSITE_NAME: process.env.WEBSITE_NAME 
+  });
+});
+
 // Create a polyline to show the path history with purple color
 const pathCoordinates = [];
 const path = L.polyline([], {
