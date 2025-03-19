@@ -45,7 +45,7 @@ if (data.latitude && data.longitude) {
 
   // Add a popup with coordinate information
   marker.bindPopup(`
-    <strong>Current Position</strong><br>
+    <strong>Current</strong><br>
     Latitude: ${data.latitude.toFixed(5)}<br>
     Longitude: ${data.longitude.toFixed(5)}<br>
     Timestamp: ${data.timestamp}
