@@ -82,5 +82,24 @@ jobs:
           npm install
           sudo pm2 restart web-server
 
+  deploy_f:
+    runs-on: artemis-felipe
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: run udp-listener
+        run: |
+          cd udp-listener
+          cp ~/env-variables/.env-udp-listener ./.env
+          npm install
+          sudo pm2 restart udp-listener
+
+      - name: run web-server
+        run: |
+          cd web-server 
+          cp ~/env-variables/.env-web-server ./.env
+          npm install
+          sudo pm2 restart web-server
+
 
       
