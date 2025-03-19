@@ -22,6 +22,7 @@ jobs:
           cd web-server 
           cp ~/env-variables/.env-web-server ./.env
           npm install
+          npm install ejs
           sudo pm2 restart web-server
 
 
