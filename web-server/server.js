@@ -11,8 +11,18 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
-// Serve static files from the public folder
+// Set EJS as the view engine
+app.set('view engine', 'ejs');
+
+// Serve static files from the public folder (app.js)
 app.use(express.static('public'));
+
+app.get('/', (req, res) => {
+  res.render('index', {
+    name: process.env.WEBSITE_NAME
+  });
+});
+
 
 // Track the last known location to avoid unnecessary broadcasts
 let lastKnownLocation = null;
