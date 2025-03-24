@@ -1,14 +1,8 @@
-name: Deploy to Server
+name: Deploy to Serverr
 
 on:
   push:
-    branches: 
-      - main
-      - test-may
-      - test-juan
-      - test-s9
-      - test-edwin
-      - test-felipe
+    branches: [main]
 
 jobs:
   deploy:
@@ -25,14 +19,11 @@ jobs:
 
       - name: run web-server
         run: |
-          cd web-server
+          cd web-server 
           cp ~/env-variables/.env-web-server ./.env
           npm install
-          if [ "${{ github.ref }}" == "refs/heads/test-juan" ]; then
-            sudo pm2 restart web-server-test
-          else
-            sudo pm2 restart web-server
-          fi
+          sudo pm2 restart web-server
+
 
   deploy_s:
     runs-on: artemis-s9
