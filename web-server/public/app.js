@@ -19,7 +19,7 @@ let marker = L.marker([0, 0]).addTo(map);
 // Create a polyline to show the path history with purple color
 const pathCoordinates = [];
 const path = L.polyline([], {
-  color: '#433BFF',  // Blue color
+  color: '#5EFF3B',  // Green color
   weight: 4,         // Slightly thicker line
   opacity: 0.8,      // More visible
   lineJoin: 'round'
