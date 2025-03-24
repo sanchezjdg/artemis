@@ -51,4 +51,15 @@ if (data.latitude && data.longitude) {
     Timestamp: ${data.timestamp}
   `);
 }
+
+//Event to change from Historical and Real Time w/o refreshing
+document.getElementById('real-time-btn').addEventListener('click', () => {
+  document.getElementById('historical-form').style.display = 'none';
+});
+
+//Displays forms for historical data
+document.getElementById('historical-btn').addEventListener('click', () => {
+  document.getElementById('historical-form').style.display = 'block';
+});
+
 });

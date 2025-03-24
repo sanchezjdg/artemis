@@ -4,36 +4,32 @@
 <meta charset="UTF-8">
 <title>Artemis <%= name %> </title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="/css/styles.css">
+
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-#map {
-    height: 100%;
-    width: 100%;
-}
-.map-title {
-    position: absolute;
-    top: 10px;
-    left: 50px;
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-}
-</style>
 </head>
+
 <body>
+
+<!--Si elige históricos, se despliega formulario sino el mapa-->
+    <div class="controls">
+        <button id="real-time-btn" class="active">Tiempo Real</button>
+        <button id="historical-btn">Históricos</button>
+    
+        <div id="historical-form" style="display: none;">
+            <label for="start-date">Fecha inicio:</label>
+            <input type="date" id="start-date">
+            
+            <label for="end-date">Fecha fin:</label>
+            <input type="date" id="end-date">
+            
+            <button id="load-data">Cargar Datos</button>
+        </div>
+    </div>
+     
 <!-- Map Container -->
 <div id="map"></div>
 
