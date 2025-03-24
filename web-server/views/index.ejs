@@ -14,6 +14,8 @@
 
 <body>
 
+<h1 style="text-align: center; margin-bottom: 10px;">Rastreo de vehículos</h1>
+
 <!--Si elige históricos, se despliega formulario sino el mapa-->
     <div class="controls">
         <button id="real-time-btn" class="active">Tiempo Real</button>
@@ -23,11 +25,20 @@
             <label for="start-date">Fecha inicio:</label>
             <input type="date" id="start-date">
             
+            <label for="start-time">Hora inicio:</label>
+            <input type="time" id="start-time" class="hour-field">
+            <span id="start-hour-error" style="color: red; display: none;">*</span>
+        
             <label for="end-date">Fecha fin:</label>
             <input type="date" id="end-date">
             
-            <button id="load-data">Cargar Datos</button>
+            <label for="end-time">Hora fin:</label>
+            <input type="time" id="end-time" class="hour-field">
+            <span id="end-hour-error" style="color: red; display: none;">*</span>
+        
+            <button id="load-data">Buscar</button>
         </div>
+        
     </div>
      
 <!-- Map Container -->

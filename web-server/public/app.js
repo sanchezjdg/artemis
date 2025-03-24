@@ -62,4 +62,19 @@ document.getElementById('historical-btn').addEventListener('click', () => {
   document.getElementById('historical-form').style.display = 'block';
 });
 
+
+document.querySelectorAll(".hour-field").forEach((input) => {
+  input.addEventListener("input", function () {
+      let errorSpan = document.getElementById(input.id + "-error");
+
+      if (input.value) {
+          errorSpan.style.display = "none";
+          input.classList.remove("error");
+      } else {
+          errorSpan.style.display = "inline";
+          input.classList.add("error");
+      }
+  });
+});
+
 });
