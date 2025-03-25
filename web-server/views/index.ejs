@@ -18,24 +18,39 @@
 <body>
   <!-- Controls overlay -->
   <div class="controls">
-    <h2>Vehicular Tracking</h2>
-    <button id="real-time-btn" class="active">Real-Time</button>
-    <button id="historical-btn">Historical</button>
+    <!-- Renamed title -->
+    <h2>Artemis</h2>
+    <!-- Brief instructions -->
+    <p class="mode-info">Select the mode you want to use:</p>
     
+    <div class="button-group">
+      <button id="real-time-btn" class="active">Real-Time</button>
+      <button id="historical-btn">Historical</button>
+    </div>
+    
+    <!-- Historical form -->
     <div id="historical-form">
-      <label for="start-date">Start Date:</label>
-      <input type="date" id="start-date">
+      <div class="input-group">
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date">
+      </div>
       
-      <label for="start-time">Start Time:</label>
-      <input type="time" id="start-time">
+      <div class="input-group">
+        <label for="start-time">Start Time:</label>
+        <input type="time" id="start-time">
+      </div>
       
-      <label for="end-date">End Date:</label>
-      <input type="date" id="end-date">
+      <div class="input-group">
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date">
+      </div>
       
-      <label for="end-time">End Time:</label>
-      <input type="time" id="end-time">
+      <div class="input-group">
+        <label for="end-time">End Time:</label>
+        <input type="time" id="end-time">
+      </div>
       
-      <button id="load-data" style="background-color: var(--nord-orange); color: var(--nord-bg);">Load Route</button>
+      <button id="load-data" class="load-button">Load Route</button>
     </div>
   </div>
   
