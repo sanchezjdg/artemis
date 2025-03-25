@@ -3,7 +3,6 @@
     --nord-bg: #2E3440;
     --nord-fg: #D8DEE9;
     --nord-blue: #81A1C1;
-    --nord-green: #A3BE8C;
     --nord-red: #BF616A;
     --nord-orange: #D08770;
     --nord-purple: #B48EAD;
@@ -59,7 +58,7 @@
   }
   
   #real-time-btn {
-      background-color: var(--nord-green);
+      background-color: var(--nord-red);
       color: var(--nord-bg);
   }
   
@@ -94,7 +93,7 @@
   
   #historical-form input:focus {
       outline: none;
-      border-color: var(--nord-green);
+      border-color: var(--nord-red);
   }
   
   .hour-field.error {

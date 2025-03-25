@@ -16,7 +16,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let marker = L.marker([0, 0]).addTo(map);
 const pathCoordinates = [];
 const realTimePath = L.polyline([], {
-  color: varColor = "#A3BE8C", // Nord green
+  color: varColor = "#BF616A", // Nord red
   weight: 4,
   opacity: 0.8,
   lineJoin: 'round'
