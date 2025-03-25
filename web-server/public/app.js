@@ -3,26 +3,14 @@
 const socket = io();
 console.log('Connected to Socket.IO server.');
 
-// Inicializar el mapa centrado en Buenavista, Barranquilla
-const map = L.map('map').setView([10.9886, -74.8148], 15);
+// Initialize the Leaflet map centered at [0,0] with a low zoom level
+const map = L.map('map').setView([0, 0], 2);
 
-// Agregar capa de OpenStreetMap
+// Add OpenStreetMap tiles to the map
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
-
-// Agregar un marcador en la ubicación inicial
-let marker = L.marker([10.9886, -74.8148]).addTo(map)
-  .bindPopup('Buenavista, Barranquilla')
-  .openPopup();
-
-// Función para actualizar la ubicación cuando se necesite
-function updateMap(lat, lng) {
-  map.setView([lat, lng], 15); // Mueve el mapa a la nueva ubicación
-  marker.setLatLng([lat, lng]); // Mueve el marcador
-}
-
 
 // Global variables for tracking layers and state
 let marker = L.marker([0, 0]).addTo(map);
