@@ -32,7 +32,7 @@ body {
   width: 320px;
   background: var(--dark-purple);
   color: var(--white);
-  padding: 18px 24px;
+  padding: 14px 24px; /* Reduced height */
   border-radius: 12px;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
   z-index: 1000;
@@ -45,14 +45,14 @@ body {
 }
 
 .controls h2 {
-  margin: 0 0 10px 0;
-  font-size: 20px;
+  margin: 0 0 8px 0;
+  font-size: 18px;
   text-align: center;
   font-weight: bold;
 }
 
 .mode-info {
-  margin: 0 0 14px 0;
+  margin: 0 0 10px 0;
   font-size: 14px;
   text-align: center;
   opacity: 0.85;
@@ -62,12 +62,12 @@ body {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
-/* Button styles with modern effects */
+/* Button styles with dynamic active effect */
 .controls button {
-  padding: 12px 18px;
+  padding: 10px 16px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -98,20 +98,27 @@ body {
 
 /* Active button effect */
 .controls button.active {
+  background: var(--bright-blue) !important;
+  color: var(--white) !important;
   box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
   filter: brightness(1.2);
 }
 
+.controls button:not(.active) {
+  background: var(--gray) !important;
+  color: var(--black) !important;
+}
+
 /* Historical form styling */
 #historical-form {
-  margin-top: 12px;
+  margin-top: 10px;
   display: none;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .input-group label {
@@ -120,7 +127,7 @@ body {
 }
 
 .input-group input {
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--bright-blue);
   border-radius: 6px;
   background: var(--dark-purple);
@@ -137,7 +144,7 @@ body {
   background-color: var(--bright-blue);
   color: var(--white);
   width: 100%;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .hour-field.error {
