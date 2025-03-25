@@ -34,17 +34,21 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// Function to get the latest location
-async function getLatestLocation() {
-  try {
-    const connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT * FROM steinstable ORDER BY timestamp DESC LIMIT 1');
-    connection.release();
-    return rows.length > 0 ? rows[0] : null;
-  } catch (error) {
-    console.error('Error fetching latest location:', error);
-    return null;
+// Helper function to validate date inputs
+function isValidDateRange(start, end) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const now = new Date();
+  
+  if (startDate >= endDate) {
+    return { valid: false, message: 'Start datetime must be before end datetime.' };
   }
+  
+  if (startDate > now || endDate > now) {
+    return { valid: false, message: 'Future dates/times are not allowed.' };
+  }
+  
+  return { valid: true };
 }
 
 // API endpoint for historical data
@@ -52,6 +56,12 @@ app.get('/historical', async (req, res) => {
   const { start, end } = req.query;
   if (!start || !end) {
     return res.status(400).json({ error: 'Missing start or end datetime parameter.' });
+  }
+  
+  // Server-side validation of the date range
+  const validation = isValidDateRange(start, end);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.message });
   }
   
   try {
@@ -88,6 +98,19 @@ io.on('connection', async (socket) => {
 });
 
 let lastKnownId = null;
+
+// Function to get the latest location
+async function getLatestLocation() {
+  try {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query('SELECT * FROM steinstable ORDER BY timestamp DESC LIMIT 1');
+    connection.release();
+    return rows.length > 0 ? rows[0] : null;
+  } catch (error) {
+    console.error('Error fetching latest location:', error);
+    return null;
+  }
+}
 
 // Function to check for updates and broadcast changes
 async function checkForUpdates() {

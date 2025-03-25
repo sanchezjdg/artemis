@@ -25,13 +25,6 @@ let realTimePath = L.polyline([], {
 let historicalPath = null;
 let isRealTime = true;
 
-// Function to re-add the real-time polyline if missing
-function ensureRealTimeLayer() {
-  if (!map.hasLayer(realTimePath)) {
-    map.addLayer(realTimePath);
-  }
-}
-
 // Function to clear a given layer from the map
 function clearLayer(layer) {
   if (layer && map.hasLayer(layer)) {
@@ -138,6 +131,21 @@ document.getElementById('load-data').addEventListener('click', async () => {
   // Construct ISO datetime strings
   const startDatetime = `${startDate}T${startTime}:00`;
   const endDatetime = `${endDate}T${endTime}:00`;
+  
+  // Client-side validation: Chronological order and future date exclusion
+  const start = new Date(startDatetime);
+  const end = new Date(endDatetime);
+  const now = new Date();
+  
+  if (start >= end) {
+    alert("The start date/time must be earlier than the end date/time.");
+    return;
+  }
+  
+  if (start > now || end > now) {
+    alert("Future dates/times are not allowed.");
+    return;
+  }
   
   try {
     // Fetch historical route data from server endpoint
