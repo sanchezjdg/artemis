@@ -16,7 +16,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let marker = L.marker([0, 0]).addTo(map);
 const pathCoordinates = [];
 const realTimePath = L.polyline([], {
-  color: "#A3BE8C", // Nord green
+  color: varColor = "#5A7D42", // Nord evergreen
   weight: 4,
   opacity: 0.8,
   lineJoin: 'round'
@@ -24,22 +24,6 @@ const realTimePath = L.polyline([], {
 
 // Real-time tracking flag
 let isRealTime = true;
-
-// Fetch available date range on DOM load to restrict date inputs
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const response = await fetch('/available-range');
-    const range = await response.json();
-    if (range.min && range.max) {
-      document.getElementById('start-date').setAttribute('min', range.min);
-      document.getElementById('start-date').setAttribute('max', range.max);
-      document.getElementById('end-date').setAttribute('min', range.min);
-      document.getElementById('end-date').setAttribute('max', range.max);
-    }
-  } catch (err) {
-    console.error('Error fetching available range:', err);
-  }
-});
 
 // Handle incoming real-time data
 socket.on('updateData', (data) => {
@@ -123,7 +107,7 @@ document.getElementById('load-data').addEventListener('click', async () => {
       return;
     }
     
-    // Clear any existing historical paths (optional: you might want to remove or hide previous paths)
+    // Clear existing polyline and add historical path
     const historicalPath = L.polyline([], {
       color: "#81A1C1", // Nord blue for historical route
       weight: 4,
