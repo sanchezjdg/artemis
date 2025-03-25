@@ -31,9 +31,12 @@ function clearLayer(layer) {
 socket.on('updateData', (data) => {
   if (isRealTime && data.latitude && data.longitude) {
     const latlng = [data.latitude, data.longitude];
+
     marker.setLatLng(latlng);
+
     realTimeCoordinates.push(latlng);
     realTimePath.setLatLngs(realTimeCoordinates);
+
     map.setView(latlng, 15, { animate: true });
 
     marker.bindPopup(`
@@ -48,8 +51,10 @@ socket.on('updateData', (data) => {
 document.getElementById('real-time-btn').addEventListener('click', () => {
   isRealTime = true;
   document.getElementById('historical-form').style.display = 'none';
+
   clearLayer(historicalPath);
   historicalPath = null;
+
   clearLayer(realTimePath);
   realTimeCoordinates.length = 0;
   realTimePath = L.polyline([], {
@@ -58,6 +63,7 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
     opacity: 0.8,
     lineJoin: 'round'
   }).addTo(map);
+
   marker.addTo(map);
 
   document.getElementById('real-time-btn').classList.add('active');
@@ -67,7 +73,9 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
 document.getElementById('historical-btn').addEventListener('click', () => {
   isRealTime = false;
   document.getElementById('historical-form').style.display = 'block';
+
   clearLayer(realTimePath);
+
   clearLayer(historicalPath);
   historicalPath = null;
 
@@ -75,25 +83,12 @@ document.getElementById('historical-btn').addEventListener('click', () => {
   document.getElementById('real-time-btn').classList.remove('active');
 });
 
-document.querySelectorAll("#historical-form input").forEach((input) => {
-  input.addEventListener("input", function () {
-    let errorSpan = document.getElementById(input.id + "-error");
-    if (input.value) {
-      if (errorSpan) errorSpan.style.display = "none";
-      input.classList.remove("error");
-    } else {
-      if (errorSpan) errorSpan.style.display = "inline";
-      input.classList.add("error");
-    }
-  });
-});
-
 document.getElementById('load-data').addEventListener('click', async () => {
   const startDate = document.getElementById('start-date').value;
   const startTime = document.getElementById('start-time').value;
   const endDate = document.getElementById('end-date').value;
   const endTime = document.getElementById('end-time').value;
-
+  
   if (!startDate || !startTime || !endDate || !endTime) {
     alert("Please fill in all date and time fields.");
     return;
@@ -106,14 +101,28 @@ document.getElementById('load-data').addEventListener('click', async () => {
   const end = new Date(endDatetime);
   const now = new Date();
 
-  if (start >= end) {
-    alert("The start date/time must be earlier than the end date/time.");
+  if (start >= end || start > now || end > now) {
+    alert("Please select valid historical date/time ranges.");
     return;
   }
 
-  if (start > now || end > now) {
-    alert("Future dates/times are not allowed.");
-    return;
+  const historicalForm = document.getElementById('historical-form');
+  if (historicalForm) {
+    historicalForm.innerHTML = `
+      <h2>Artemis</h2>
+      <p class="mode-info">Buscando desde:</p>
+      <p class="mode-info">${start.toLocaleString()}</p>
+      <p class="mode-info">hasta:</p>
+      <p class="mode-info">${end.toLocaleString()}</p>
+      <button id="back-to-historical" class="load-button">Regresar al Histórico</button>
+    `;
+  }
+
+  const backBtn = document.getElementById('back-to-historical');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      location.reload();
+    });
   }
 
   try {
@@ -122,6 +131,7 @@ document.getElementById('load-data').addEventListener('click', async () => {
 
     if (data.length === 0) {
       alert("No route data found for the selected interval.");
+      location.reload();
       return;
     }
 
@@ -136,26 +146,14 @@ document.getElementById('load-data').addEventListener('click', async () => {
 
     const historicalCoordinates = data.map(loc => [loc.latitude, loc.longitude]);
     historicalPath.setLatLngs(historicalCoordinates);
+
     map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+
     marker.setLatLng(historicalCoordinates[historicalCoordinates.length - 1]);
-
-    document.getElementById('historical-form').style.display = 'none';
-    document.querySelector('.mode-info').style.display = 'none';
-    document.querySelector('.button-group').style.display = 'none';
-
-    document.getElementById('historical-result').style.display = 'block';
-    document.getElementById('result-interval').innerText = `Start: ${startDatetime}\nEnd: ${endDatetime}`;
 
   } catch (error) {
     console.error('Error fetching historical data:', error);
     alert("An error occurred while fetching historical data.");
+    location.reload();
   }
-});
-
-document.getElementById('back-to-historical').addEventListener('click', () => {
-  clearLayer(historicalPath);
-  document.getElementById('historical-result').style.display = 'none';
-  document.querySelector('.mode-info').style.display = 'block';
-  document.querySelector('.button-group').style.display = 'flex';
-  document.getElementById('historical-form').style.display = 'block';
 });
