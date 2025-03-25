@@ -106,16 +106,25 @@ document.getElementById('load-data').addEventListener('click', async () => {
     return;
   }
 
-  document.getElementById('historical-form').innerHTML = `
-    <h2>Artemis</h2>
-    <p class="mode-info">Buscando desde <br>${start.toLocaleString()}<br> hasta <br>${end.toLocaleString()}</p>
-    <button id="back-to-historical" class="load-button">Regresar al Histórico</button>
-  `;
+  const historicalForm = document.getElementById('historical-form');
+  if (historicalForm) {
+    historicalForm.innerHTML = `
+      <h2>Artemis</h2>
+      <p class="mode-info">Buscando desde:</p>
+      <p class="mode-info">${start.toLocaleString()}</p>
+      <p class="mode-info">hasta:</p>
+      <p class="mode-info">${end.toLocaleString()}</p>
+      <button id="back-to-historical" class="load-button">Regresar al Histórico</button>
+    `;
+  }
 
-  document.getElementById('back-to-historical').addEventListener('click', () => {
-    location.reload();
-  });
-  
+  const backBtn = document.getElementById('back-to-historical');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      location.reload();
+    });
+  }
+
   try {
     const response = await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`);
     const data = await response.json();
