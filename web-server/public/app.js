@@ -109,7 +109,6 @@ document.getElementById('load-data').addEventListener('click', async () => {
   const historicalForm = document.getElementById('historical-form');
   if (historicalForm) {
     historicalForm.innerHTML = `
-      <h2>Artemis</h2>
       <p class="mode-info">Buscando desde:</p>
       <p class="mode-info">${start.toLocaleString()}</p>
       <p class="mode-info">hasta:</p>
