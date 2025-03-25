@@ -15,44 +15,38 @@ body {
 .map-title {
     position: absolute;
     top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 50px;
     z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 5px 15px;
-    border-radius: 8px;
-    font-size: 20px;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 16px;
     font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    text-align: center;
-    width: fit-content;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
 }
 
-.controls-container {
+.controls {
     position: absolute;
-    top: 50px; /* Espacio debajo del título */
+    top: 10px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.9);
-    padding: 10px;
+    padding: 15px;
     border-radius: 8px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: fit-content;
+    text-align: center;
 }
 
 .buttons {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 10px; /* Espacio entre los botones y los filtros */
+    margin-top: 10px;
 }
 
 .controls button {
-    padding: 6px 10px;
+    padding: 8px 12px;
     border: none;
     cursor: pointer;
     font-size: 14px;
@@ -74,20 +68,6 @@ body {
     outline: 2px solid black;
 }
 
-.filters {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-}
-
-.filters input {
-    padding: 4px;
-    font-size: 12px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-}
-
 .centered-panel {
     position: absolute;
     top: 10px;
@@ -103,5 +83,18 @@ body {
 .hour-field.error {
     border: 2px solid red;
     background-color: #ffe6e6;
+}
+
+.historical-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.historical-form .date-time-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
