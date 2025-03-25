@@ -14,40 +14,45 @@ body {
 
 .map-title {
     position: absolute;
-    top: 5px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 10px;
+    left: 50px;
     z-index: 1000;
     background-color: rgba(255, 255, 255, 0.7);
-    padding: 3px 8px;
+    padding: 5px 10px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-    text-align: center;
 }
 
 .controls {
     position: absolute;
-    top: 40px;
+    top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(48, 37, 82, 0.9);
     padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     text-align: center;
+    color: white;
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     align-items: center;
+    gap: 10px;
+}
+
+.controls label {
+    font-weight: bold;
+    margin-right: 5px;
 }
 
 .buttons {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin: 10px 0;
+    margin-top: 10px;
 }
 
 .controls button {
@@ -55,18 +60,25 @@ body {
     border: none;
     cursor: pointer;
     font-size: 14px;
-    border-radius: 4px;
+    border-radius: 20px;
     transition: 0.3s;
+    background-color: white;
+    color: black;
+    font-weight: bold;
+}
+
+.controls button:hover {
+    background-color: #ddd;
 }
 
 #real-time-btn {
-    background-color: #28a745;
-    color: white;
+    background-color: #ffffff;
+    color: black;
 }
 
 #historical-btn {
-    background-color: #007bff;
-    color: white;
+    background-color: #ffffff;
+    color: black;
 }
 
 .controls button.active {
@@ -92,20 +104,21 @@ body {
 
 .historical-form {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.historical-form .row {
-    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-    flex-wrap: wrap;
+    align-items: center;
 }
 
 .historical-form .date-time-group {
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+.historical-form input {
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+    text-align: center;
 }
