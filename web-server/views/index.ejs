@@ -1,53 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Artemis <%= name %> </title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- Custom CSS -->
-<link rel="stylesheet" href="/css/styles.css">
-
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta charset="UTF-8">
+  <title>Artemis <%= name %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  
+  <!-- Roboto font for Material Design -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
 </head>
 
 <body>
-
-<h1 style="text-align: center; margin-bottom: 10px;">Rastreo de vehículos</h1>
-
-<!--Si elige históricos, se despliega formulario sino el mapa-->
-<div class="controls">
-    <h1>Rastreo de vehículos</h1>
-    <button id="real-time-btn" class="active">Tiempo Real</button>
-    <button id="historical-btn">Históricos</button>
-
-    <div id="historical-form" style="display: none;">
-        <label for="start-date">Fecha inicio:</label>
-        <input type="date" id="start-date">
-        
-        <label for="start-time">Hora inicio:</label>
-        <input type="time" id="start-time">
-
-        <label for="end-date">Fecha fin:</label>
-        <input type="date" id="end-date">
-        
-        <label for="end-time">Hora fin:</label>
-        <input type="time" id="end-time">
-
-        <button id="load-data">Buscar</button>
+  <!-- Controls overlay -->
+  <div class="controls">
+    <h2>Vehicular Tracking</h2>
+    <button id="real-time-btn" class="active">Real-Time</button>
+    <button id="historical-btn">Historical</button>
+    
+    <div id="historical-form">
+      <label for="start-date">Start Date:</label>
+      <input type="date" id="start-date">
+      
+      <label for="start-time">Start Time:</label>
+      <input type="time" id="start-time">
+      
+      <label for="end-date">End Date:</label>
+      <input type="date" id="end-date">
+      
+      <label for="end-time">End Time:</label>
+      <input type="time" id="end-time">
+      
+      <button id="load-data" style="background-color: var(--nord-orange); color: var(--nord-bg);">Load Route</button>
     </div>
-</div>
-
-     
-<!-- Map Container -->
-<div id="map"></div>
-
-<!-- Socket.IO Client Library -->
-<script src="/socket.io/socket.io.js"></script>
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<!-- Custom Client Script -->
-<script src="app.js"></script>
+  </div>
+  
+  <!-- Map Container -->
+  <div id="map"></div>
+  
+  <!-- Socket.IO Client Library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Custom Client Script -->
+  <script src="app.js"></script>
 </body>
 </html>
