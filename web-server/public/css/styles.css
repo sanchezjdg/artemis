@@ -1,77 +1,104 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-#map {
-    height: 100%;
-    width: 100%;
-}
-.map-title {
-    position: absolute;
-    top: 10px;
-    left: 50px;
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-}
-
-.controls {
-    width: fit-content;  /* Ajusta el ancho al contenido */
-    margin: 0 auto;  /* Centra horizontalmente */
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centra el contenido dentro del div */
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.controls button {
-    margin: 5px;
-    padding: 8px 12px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: 4px;
-    transition: 0.3s;
-}
-
-#real-time-btn {
-    background-color: #28a745;
-    color: white;
-}
-
-#historical-btn {
-    background-color: #007bff;
-    color: white;
-}
-
-.controls button.active {
-    outline: 2px solid black;
-}
-
-.centered-panel {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-.hour-field.error {
-    border: 2px solid red;
-    background-color: #ffe6e6;
-}
+/* Nord theme colors */
+:root {
+    --nord-bg: #2E3440;
+    --nord-fg: #D8DEE9;
+    --nord-blue: #81A1C1;
+    --nord-green: #A3BE8C;
+    --nord-red: #BF616A;
+    --nord-orange: #D08770;
+    --nord-purple: #B48EAD;
+  }
+  
+  /* Reset and map container */
+  body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      background-color: var(--nord-bg);
+      color: var(--nord-fg);
+  }
+  
+  #map {
+      height: 100%;
+      width: 100%;
+  }
+  
+  /* Minimalist controls overlay */
+  .controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 280px;
+      background: var(--nord-bg);
+      color: var(--nord-fg);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      font-size: 14px;
+  }
+  
+  .controls h2 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      text-align: center;
+  }
+  
+  /* Button styles following Material Design */
+  .controls button {
+      margin: 5px 0;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  #real-time-btn {
+      background-color: var(--nord-green);
+      color: var(--nord-bg);
+  }
+  
+  #historical-btn {
+      background-color: var(--nord-blue);
+      color: var(--nord-bg);
+  }
+  
+  .controls button.active {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Historical form styling */
+  #historical-form {
+      margin-top: 10px;
+      display: none;
+  }
+  
+  #historical-form label {
+      display: block;
+      margin: 5px 0 2px;
+  }
+  
+  #historical-form input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--nord-blue);
+      border-radius: 4px;
+      background: var(--nord-bg);
+      color: var(--nord-fg);
+  }
+  
+  #historical-form input:focus {
+      outline: none;
+      border-color: var(--nord-green);
+  }
+  
+  .hour-field.error {
+      border: 2px solid var(--nord-red);
+      background-color: #3B4252;
+  }
+  
