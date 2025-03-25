@@ -19,19 +19,15 @@
 </head>
 
 <body>
-  <!-- Controls overlay -->
-  <div class="controls">
-    <!-- Title -->
+  <div class="controls" id="controls">
     <h2>Artemis</h2>
-    <!-- Brief instructions -->
     <p class="mode-info">Select the mode you want to use:</p>
-    
+  
     <div class="button-group">
       <button id="real-time-btn" class="active">Real-Time</button>
       <button id="historical-btn">Historical</button>
     </div>
-    
-    <!-- Historical form -->
+  
     <div id="historical-form">
       <div class="input-group">
         <label for="start-date">Start Date:</label>
@@ -53,17 +49,17 @@
         <input type="time" id="end-time">
       </div>
       
-      <!-- Historical Result Display -->
-      <div id="historical-result" style="display:none;">
-        <h3>Artemis</h3>
-        <p id="result-interval"></p>
-        <button id="back-to-historical" class="load-button">Back to Historical</button>
-      </div>
-
-
       <button id="load-data" class="load-button">Load Route</button>
     </div>
-  </div>
+  
+    <!-- Agrega esta sección exactamente aquí -->
+    <div id="historical-result" style="display:none; text-align:center;">
+      <h3>Artemis</h3>
+      <p id="result-interval"></p>
+      <button id="back-to-historical" class="load-button">Back to Historical</button>
+    </div>
+  
+  </div>  
   
   <!-- Map Container -->
   <div id="map"></div>
