@@ -14,7 +14,7 @@ const io = socketIO(server);
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 
-// Serve static files from the public folder (app.js)
+// Serve static files from the public folder
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
@@ -22,10 +22,6 @@ app.get('/', (req, res) => {
     name: process.env.WEBSITE_NAME
   });
 });
-
-
-// Track the last known location to avoid unnecessary broadcasts
-let lastKnownLocation = null;
 
 // MySQL connection pool for better performance
 const pool = mysql.createPool({
@@ -38,23 +34,53 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// Function to get the latest location
-async function getLatestLocation() {
-  try {
-    const [rows] = await pool.query('SELECT * FROM steinstable ORDER BY timestamp DESC LIMIT 1');
-    return rows.length > 0 ? rows[0] : null;
-  } catch (error) {
-    console.error('Error fetching latest location:', error);
-    return null;
+// Helper function to validate date inputs
+function isValidDateRange(start, end) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const now = new Date();
+  
+  if (startDate >= endDate) {
+    return { valid: false, message: 'Start datetime must be before end datetime.' };
   }
+  
+  if (startDate > now || endDate > now) {
+    return { valid: false, message: 'Future dates/times are not allowed.' };
+  }
+  
+  return { valid: true };
 }
 
-// Socket.io connection handler
+// API endpoint for historical data
+app.get('/historical', async (req, res) => {
+  const { start, end } = req.query;
+  if (!start || !end) {
+    return res.status(400).json({ error: 'Missing start or end datetime parameter.' });
+  }
+  
+  // Server-side validation of the date range
+  const validation = isValidDateRange(start, end);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.message });
+  }
+  
+  try {
+    const connection = await pool.getConnection();
+    const query = 'SELECT * FROM steinstable WHERE timestamp BETWEEN ? AND ? ORDER BY timestamp ASC';
+    const [rows] = await connection.query(query, [start, end]);
+    connection.release();
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching historical data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Socket.io connection handler for real-time updates
 io.on('connection', async (socket) => {
   console.log('New client connected');
   
   try {
-    // Send the latest location to the newly connected client
     const location = await getLatestLocation();
     if (location) {
       socket.emit('updateData', location);
@@ -62,8 +88,7 @@ io.on('connection', async (socket) => {
     } else {
       console.log('No location data found');
     }
-
-    // Handle disconnect
+    
     socket.on('disconnect', () => {
       console.log('Client disconnected');
     });
@@ -74,15 +99,25 @@ io.on('connection', async (socket) => {
 
 let lastKnownId = null;
 
+// Function to get the latest location
+async function getLatestLocation() {
+  try {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query('SELECT * FROM steinstable ORDER BY timestamp DESC LIMIT 1');
+    connection.release();
+    return rows.length > 0 ? rows[0] : null;
+  } catch (error) {
+    console.error('Error fetching latest location:', error);
+    return null;
+  }
+}
+
 // Function to check for updates and broadcast changes
 async function checkForUpdates() {
   try {
     const location = await getLatestLocation();
-    
-    // Only broadcast if there's new location data
     if (location && lastKnownId !== location.id) {
       lastKnownId = location.id;
-      
       io.emit('updateData', location);
       console.log('Broadcasting updated data:', location);
     }
@@ -91,29 +126,27 @@ async function checkForUpdates() {
   }
 }
 
-// Set up database change detection
-const POLLING_INTERVAL = 5000; // 5 seconds
+// Poll for new location data every 5 seconds
+const POLLING_INTERVAL = 5000;
 setInterval(checkForUpdates, POLLING_INTERVAL);
 
-// Start the server
-const PORT = process.env.PORT;
+// Start HTTP server
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Web server listening on port ${PORT}`);
 });
 
-// Keys and certificates for HTTPS
+// HTTPS setup
 const options = {
   key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`, 'utf8'),
   cert: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/fullchain.pem`, 'utf8')
 };
 
-// Server HTTPS
 const httpsServer = https.createServer(options, app);
 io.attach(httpsServer);
 httpsServer.listen(443, () => {
   console.log('HTTPS running on port 443');
 });
-
 
 // Graceful shutdown
 process.on('SIGINT', async () => {

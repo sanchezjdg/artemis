@@ -1,0 +1,133 @@
+/* Nord theme colors */
+:root {
+    --nord-bg: #2E3440;
+    --nord-fg: #D8DEE9;
+    --nord-blue: #81A1C1;
+    --nord-green: #A3BE8C;
+    --nord-red: #BF616A;
+    --nord-orange: #D08770;
+    --nord-purple: #B48EAD;
+  }
+  
+  /* Reset and map container */
+  body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background-color: var(--nord-bg);
+    color: var(--nord-fg);
+  }
+  
+  #map {
+    height: 100%;
+    width: 100%;
+  }
+  
+  /* Minimalist controls overlay */
+  .controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 300px; /* Increased width to accommodate form fields */
+    background: var(--nord-bg);
+    color: var(--nord-fg);
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* Ensure child elements stretch to container width */
+  }
+  
+  .controls h2 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    text-align: center;
+  }
+  
+  .mode-info {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    text-align: center;
+    opacity: 0.9;
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  /* Button styles following Material Design */
+  .controls button {
+    margin: 0;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  #real-time-btn {
+    background-color: var(--nord-green);
+    color: var(--nord-bg);
+  }
+  
+  #historical-btn {
+    background-color: var(--nord-blue);
+    color: var(--nord-bg);
+  }
+  
+  .controls button.active {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Historical form styling */
+  #historical-form {
+    margin-top: 10px;
+    display: none;
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+  }
+  
+  .input-group label {
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+  
+  .input-group input {
+    padding: 8px;
+    border: 1px solid var(--nord-blue);
+    border-radius: 4px;
+    background: #3B4252; /* Slightly lighter background */
+    color: var(--nord-fg);
+  }
+  
+  .input-group input:focus {
+    outline: none;
+    border-color: var(--nord-green);
+  }
+  
+  .load-button {
+    background-color: var(--nord-orange);
+    color: var(--nord-bg);
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .hour-field.error {
+    border: 2px solid var(--nord-red);
+    background-color: #3B4252;
+  }
+  
