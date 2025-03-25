@@ -6,10 +6,12 @@ body {
     width: 100vw;
     overflow: hidden;
 }
+
 #map {
     height: 100%;
     width: 100%;
 }
+
 .map-title {
     position: absolute;
     top: 10px;
@@ -24,19 +26,27 @@ body {
 }
 
 .controls {
-    width: fit-content;  /* Ajusta el ancho al contenido */
-    margin: 0 auto;  /* Centra horizontalmente */
+    position: absolute; /* Se superpone al mapa */
+    top: 10px; /* Ajusta la distancia desde la parte superior */
+    left: 50%;
+    transform: translateX(-50%); /* Centra horizontalmente */
+    background: rgba(255, 255, 255, 0.9); /* Fondo semitransparente */
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Asegura que esté sobre el mapa */
     display: flex;
     flex-direction: column;
     align-items: center; /* Centra el contenido dentro del div */
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: fit-content;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px; /* Espacio entre los botones */
 }
 
 .controls button {
-    margin: 5px;
     padding: 8px 12px;
     border: none;
     cursor: pointer;
