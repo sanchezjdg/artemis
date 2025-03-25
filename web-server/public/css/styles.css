@@ -163,3 +163,26 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border: 2px solid var(--gray);
   background-color: var(--dark-purple);
 }
+
+/* Loading state */
+#loading-state {
+  text-align: center;
+  padding: 20px;
+}
+
+#loading-state p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+#back-to-historical {
+  background-color: var(--gray);
+  color: var(--black);
+  width: 100%;
+  margin-top: 10px;
+}
+
+#back-to-historical:hover {
+  background-color: var(--bright-blue);
+  color: var(--white);
+}
