@@ -163,3 +163,28 @@
     border: 2px solid var(--gray);
     background-color: var(--dark-purple);
   }
+
+  #loading-screen {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 280px;
+    background: var(--dark-purple);
+    color: var(--white);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+    z-index: 1001;
+    text-align: center;
+  }
+  
+  #loading-screen button {
+    padding: 8px 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background-color: var(--bright-blue);
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+  }
+  
