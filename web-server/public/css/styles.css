@@ -14,20 +14,22 @@ body {
 
 .map-title {
     position: absolute;
-    top: 10px;
-    left: 50px;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1000;
     background-color: rgba(255, 255, 255, 0.7);
-    padding: 5px 10px;
+    padding: 3px 8px;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+    text-align: center;
 }
 
 .controls {
     position: absolute;
-    top: 10px;
+    top: 40px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.9);
@@ -36,13 +38,16 @@ body {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .buttons {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-top: 10px;
+    margin: 10px 0;
 }
 
 .controls button {
@@ -87,9 +92,16 @@ body {
 
 .historical-form {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.historical-form .row {
+    display: flex;
     justify-content: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .historical-form .date-time-group {
@@ -97,4 +109,3 @@ body {
     align-items: center;
     gap: 5px;
 }
-
