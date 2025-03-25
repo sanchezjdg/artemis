@@ -47,6 +47,26 @@ async function getLatestLocation() {
   }
 }
 
+// New API endpoint for available date range
+app.get('/available-range', async (req, res) => {
+  try {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query('SELECT MIN(timestamp) as minTimestamp, MAX(timestamp) as maxTimestamp FROM steinstable');
+    connection.release();
+    if (rows.length > 0 && rows[0].minTimestamp && rows[0].maxTimestamp) {
+      // Convert to ISO date strings (YYYY-MM-DD)
+      const min = new Date(rows[0].minTimestamp).toISOString().split('T')[0];
+      const max = new Date(rows[0].maxTimestamp).toISOString().split('T')[0];
+      res.json({ min, max });
+    } else {
+      res.json({ min: null, max: null });
+    }
+  } catch (error) {
+    console.error('Error fetching available range:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // API endpoint for historical data
 app.get('/historical', async (req, res) => {
   const { start, end } = req.query;
@@ -121,16 +141,4 @@ const options = {
 
 const httpsServer = https.createServer(options, app);
 io.attach(httpsServer);
-httpsServer.listen(443, () => {
-  console.log('HTTPS running on port 443');
-});
-
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('Shutting down server...');
-  await pool.end();
-  server.close(() => {
-    console.log('Server shut down successfully');
-    process.exit(0);
-  });
-});
+httpsServer
