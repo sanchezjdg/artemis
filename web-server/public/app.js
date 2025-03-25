@@ -12,32 +12,48 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-// Marker for current position and polyline for route
+// Global variables for tracking layers and state
 let marker = L.marker([0, 0]).addTo(map);
-const pathCoordinates = [];
-const realTimePath = L.polyline([], {
-  color: varColor = "#5A7D42", // Nord evergreen
+const realTimeCoordinates = [];
+let realTimePath = L.polyline([], {
+  color: "#A3BE8C", // Nord green
   weight: 4,
   opacity: 0.8,
   lineJoin: 'round'
 }).addTo(map);
 
-// Real-time tracking flag
+let historicalPath = null;
 let isRealTime = true;
+
+// Function to re-add the real-time polyline if missing
+function ensureRealTimeLayer() {
+  if (!map.hasLayer(realTimePath)) {
+    map.addLayer(realTimePath);
+  }
+}
+
+// Function to clear a given layer from the map
+function clearLayer(layer) {
+  if (layer && map.hasLayer(layer)) {
+    map.removeLayer(layer);
+  }
+}
 
 // Handle incoming real-time data
 socket.on('updateData', (data) => {
   if (isRealTime && data.latitude && data.longitude) {
     const latlng = [data.latitude, data.longitude];
-    
-    // Update marker position and polyline
+
+    // Update marker position
     marker.setLatLng(latlng);
-    pathCoordinates.push(latlng);
-    realTimePath.setLatLngs(pathCoordinates);
-    
+
+    // Append current position to real-time tracking path
+    realTimeCoordinates.push(latlng);
+    realTimePath.setLatLngs(realTimeCoordinates);
+
     // Smoothly pan the map to the new position
     map.setView(latlng, 15, { animate: true });
-    
+
     // Update marker popup
     marker.bindPopup(`
       <strong>Current Position</strong><br>
@@ -48,19 +64,45 @@ socket.on('updateData', (data) => {
   }
 });
 
-// Toggle to real-time mode
+// Toggle to Real-Time mode
 document.getElementById('real-time-btn').addEventListener('click', () => {
   isRealTime = true;
   document.getElementById('historical-form').style.display = 'none';
+
+  // Remove historical route if present
+  clearLayer(historicalPath);
+  historicalPath = null;
+
+  // Reinitialize the real-time path for clarity
+  clearLayer(realTimePath);
+  realTimeCoordinates.length = 0; // Clear previous data
+  realTimePath = L.polyline([], {
+    color: "#A3BE8C", // Nord green
+    weight: 4,
+    opacity: 0.8,
+    lineJoin: 'round'
+  }).addTo(map);
+
+  // Ensure the marker remains visible
+  marker.addTo(map);
+
   // Update button active states
   document.getElementById('real-time-btn').classList.add('active');
   document.getElementById('historical-btn').classList.remove('active');
 });
 
-// Toggle to historical mode
+// Toggle to Historical mode
 document.getElementById('historical-btn').addEventListener('click', () => {
   isRealTime = false;
   document.getElementById('historical-form').style.display = 'block';
+
+  // Remove the real-time route to avoid confusion
+  clearLayer(realTimePath);
+
+  // Also remove any previous historical route
+  clearLayer(historicalPath);
+  historicalPath = null;
+
   // Update button active states
   document.getElementById('historical-btn').classList.add('active');
   document.getElementById('real-time-btn').classList.remove('active');
@@ -107,14 +149,18 @@ document.getElementById('load-data').addEventListener('click', async () => {
       return;
     }
     
-    // Clear existing polyline and add historical path
-    const historicalPath = L.polyline([], {
-      color: "#81A1C1", // Nord blue for historical route
+    // Remove any previous historical route from the map
+    clearLayer(historicalPath);
+
+    // Create new historical polyline using Nord blue
+    historicalPath = L.polyline([], {
+      color: "#81A1C1", // Nord blue
       weight: 4,
       opacity: 0.8,
       lineJoin: 'round'
     }).addTo(map);
     
+    // Build the historical route coordinates array
     const historicalCoordinates = data.map(loc => [loc.latitude, loc.longitude]);
     historicalPath.setLatLngs(historicalCoordinates);
     
