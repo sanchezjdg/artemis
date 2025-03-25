@@ -110,13 +110,12 @@ document.getElementById('load-data').addEventListener('click', async () => {
   if (historicalForm) {
     historicalForm.innerHTML = `
       <p class="mode-info">Buscando en:</p>
-      <p class="mode-info">${start.toLocaleString()}</p>
-      <p class="mode-info">hasta:</p>
-      <p class="mode-info">${end.toLocaleString()}</p>
+      <p class="mode-info">desde: ${startDatetime.replace('T', ', ')}</p>
+      <p class="mode-info">hasta: ${endDate} ${endTime}</p>
       <button id="back-to-historical" class="load-button">Regresar al Histórico</button>
     `;
   }
-
+  
   const backBtn = document.getElementById('back-to-historical');
   if (backBtn) {
     backBtn.addEventListener('click', () => {
