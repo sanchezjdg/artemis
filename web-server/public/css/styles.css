@@ -29,10 +29,10 @@ body {
   position: absolute;
   top: 20px;
   right: 20px;
-  width: 320px;
+  width: 280px; /* Reduced width */
   background: var(--dark-purple);
   color: var(--white);
-  padding: 14px 24px; /* Reduced height */
+  padding: 12px 18px; /* Further reduced height */
   border-radius: 12px;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
   z-index: 1000;
@@ -45,14 +45,14 @@ body {
 }
 
 .controls h2 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
+  margin: 0 0 6px 0;
+  font-size: 16px;
   text-align: center;
   font-weight: bold;
 }
 
 .mode-info {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   font-size: 14px;
   text-align: center;
   opacity: 0.85;
@@ -61,17 +61,17 @@ body {
 .button-group {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 /* Button styles with dynamic active effect */
 .controls button {
-  padding: 10px 16px;
+  padding: 8px 14px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   transition: all 0.3s ease-in-out;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
@@ -111,14 +111,14 @@ body {
 
 /* Historical form styling */
 #historical-form {
-  margin-top: 10px;
+  margin-top: 8px;
   display: none;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .input-group label {
@@ -140,11 +140,23 @@ body {
   border-color: var(--gray);
 }
 
+/* Style calendar buttons */
+input[type="date"], input[type="time"] {
+  color: var(--white);
+  background-color: var(--dark-purple);
+  border: 1px solid var(--gray);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 .load-button {
   background-color: var(--bright-blue);
   color: var(--white);
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .hour-field.error {
