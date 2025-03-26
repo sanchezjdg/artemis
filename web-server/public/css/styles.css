@@ -183,40 +183,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border: 1px solid var(--gray);
 }
 
-
-/* Mejoras visuales para cuando se carga el histórico */
-.controls h2 {
-  margin-bottom: 12px;
-  font-size: 18px;
-  letter-spacing: 0.5px;
-}
-
-.controls .mode-info {
-  margin: 6px 0;
-  font-size: 15px;
-  opacity: 0.9;
-}
-
-.controls .load-button {
-  margin-top: 14px;
-  padding: 10px;
-  border-radius: 10px;
-  background-color: var(--gray);
-  color: var(--black);
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.controls .load-button:hover {
-  background-color: var(--bright-blue);
-  color: var(--white);
-  transform: translateY(-2px);
-}
-
-.controls .load-button:active {
-  transform: scale(0.97);
-}
-
 .hidden {
   display: none;
 }
