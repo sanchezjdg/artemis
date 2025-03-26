@@ -11,7 +11,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let marker = L.marker([0, 0]).addTo(map);
 const realTimeCoordinates = [];
 let realTimePath = L.polyline([], {
-  color: "#A3BE8C",
+  color: "#3b65ff",
   weight: 4,
   opacity: 0.8,
   lineJoin: 'round'
@@ -99,7 +99,7 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
   clearLayer(realTimePath);
   realTimeCoordinates.length = 0;
   realTimePath = L.polyline([], {
-    color: "#A3BE8C",
+    color: "#3b65ff",
     weight: 4,
     opacity: 0.8,
     lineJoin: 'round'
@@ -112,6 +112,7 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
 
   document.querySelector('.button-group').style.display = 'flex';
   document.querySelector('.controls .mode-info').style.display = 'block';
+  map.closePopup();
 });
 
 // Activa el modo histórico
@@ -126,6 +127,7 @@ document.getElementById('historical-btn').addEventListener('click', () => {
 
   document.getElementById('historical-btn').classList.add('active');
   document.getElementById('real-time-btn').classList.remove('active');
+  map.closePopup(); 
 });
 
 // Carga la ruta histórica
@@ -157,11 +159,11 @@ async function loadHistoricalData() {
 
   const historicalForm = document.getElementById('historical-form');
   historicalForm.innerHTML = `
-    <p class=\"mode-info\">Buscando en:</p>
+    <p class=\"mode-info\">Searching in:</p>
     <p class=\"mode-info\">${start.toLocaleString()}</p>
-    <p class=\"mode-info\">hasta:</p>
+    <p class=\"mode-info\">until:</p>
     <p class=\"mode-info\">${end.toLocaleString()}</p>
-    <button id=\"back-to-historical\" class=\"load-button\">Regresar al Histórico</button>
+    <button id=\"back-to-historical\" class=\"load-button\">Return to History</button>
   `;
 
   document.getElementById('back-to-historical').onclick = restoreHistoricalForm;
@@ -179,7 +181,7 @@ async function loadHistoricalData() {
     clearLayer(historicalPath);
 
     historicalPath = L.polyline(data.map(loc => [loc.latitude, loc.longitude]), {
-      color: "#81A1C1",
+      color: "#8E00C2",
       weight: 4,
       opacity: 0.8,
       lineJoin: 'round'
@@ -214,6 +216,7 @@ function restoreHistoricalForm() {
 
   clearLayer(historicalPath);
   historicalPath = null;
+  map.closePopup(); // Cierra cualquier popup abierto
 }
 
 // Evento inicial al cargar la página
