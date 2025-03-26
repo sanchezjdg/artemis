@@ -151,9 +151,7 @@ document.getElementById('back-to-historical').onclick = () => {
   `;
 
   // Reactivar evento del botón load-data después de restaurar el formulario
-  document.getElementById('load-data').addEventListener('click', async () => {
-    location.reload(); // Esto asegura que al cargar nuevamente datos históricos, la página se recarga completamente.
-  });
+  document.getElementById('load-data').addEventListener('click', loadHistoricalData);
 
   // Limpia la ruta histórica del mapa
   clearLayer(historicalPath);
