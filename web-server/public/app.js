@@ -46,6 +46,7 @@ socket.on('updateData', (data) => {
   }
 });
 
+// Activa el modo tiempo real
 document.getElementById('real-time-btn').addEventListener('click', () => {
   isRealTime = true;
   document.getElementById('historical-form').style.display = 'none';
@@ -71,6 +72,7 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
   document.querySelector('.controls .mode-info').style.display = 'block';
 });
 
+// Activa el modo histórico
 document.getElementById('historical-btn').addEventListener('click', () => {
   isRealTime = false;
   document.getElementById('historical-form').style.display = 'block';
@@ -84,7 +86,8 @@ document.getElementById('historical-btn').addEventListener('click', () => {
   document.getElementById('real-time-btn').classList.remove('active');
 });
 
-document.getElementById('load-data').addEventListener('click', async () => {
+// Carga la ruta histórica
+async function loadHistoricalData() {
   const startDate = document.getElementById('start-date').value;
   const startTime = document.getElementById('start-time').value;
   const endDate = document.getElementById('end-date').value;
@@ -112,51 +115,14 @@ document.getElementById('load-data').addEventListener('click', async () => {
 
   const historicalForm = document.getElementById('historical-form');
   historicalForm.innerHTML = `
-    <p class=\"mode-info\">Buscando en:</p>
-    <p class=\"mode-info\">${start.toLocaleString()}</p>
-    <p class=\"mode-info\">hasta:</p>
-    <p class=\"mode-info\">${end.toLocaleString()}</p>
-    <button id=\"back-to-historical\" class=\"load-button\">Regresar al Histórico</button>
+    <p class="mode-info">Buscando en:</p>
+    <p class="mode-info">${start.toLocaleString()}</p>
+    <p class="mode-info">hasta:</p>
+    <p class="mode-info">${end.toLocaleString()}</p>
+    <button id="back-to-historical" class="load-button">Regresar al Histórico</button>
   `;
 
-document.getElementById('back-to-historical').onclick = () => {
-  // Vuelve a mostrar elementos ocultos
-  document.querySelector('.button-group').style.display = 'flex';
-  document.querySelector('.controls .mode-info').style.display = 'block';
-
-  // Restaura el formulario histórico original
-  const historicalForm = document.getElementById('historical-form');
-  historicalForm.innerHTML = `
-    <div class="input-group">
-      <label for="start-date">Start Date:</label>
-      <input type="date" id="start-date">
-    </div>
-    
-    <div class="input-group">
-      <label for="start-time">Start Time:</label>
-      <input type="time" id="start-time">
-    </div>
-    
-    <div class="input-group">
-      <label for="end-date">End Date:</label>
-      <input type="date" id="end-date">
-    </div>
-    
-    <div class="input-group">
-      <label for="end-time">End Time:</label>
-      <input type="time" id="end-time">
-    </div>
-    
-    <button id="load-data" class="load-button">Load Route</button>
-  `;
-
-  // Reactivar evento del botón load-data después de restaurar el formulario
-  document.getElementById('load-data').addEventListener('click', loadHistoricalData);
-
-  // Limpia la ruta histórica del mapa
-  clearLayer(historicalPath);
-  historicalPath = null;
-};
+  document.getElementById('back-to-historical').onclick = restoreHistoricalForm;
 
   try {
     const response = await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`);
@@ -164,7 +130,7 @@ document.getElementById('back-to-historical').onclick = () => {
 
     if (data.length === 0) {
       alert("No route data found for the selected interval.");
-      location.reload();
+      restoreHistoricalForm();
       return;
     }
 
@@ -184,6 +150,28 @@ document.getElementById('back-to-historical').onclick = () => {
   } catch (error) {
     console.error('Error fetching historical data:', error);
     alert("An error occurred while fetching historical data.");
-    location.reload();
+    restoreHistoricalForm();
   }
-});
+}
+
+// Restaura formulario histórico original
+function restoreHistoricalForm() {
+  document.querySelector('.button-group').style.display = 'flex';
+  document.querySelector('.controls .mode-info').style.display = 'block';
+
+  document.getElementById('historical-form').innerHTML = `
+    <div class="input-group"><label for="start-date">Start Date:</label><input type="date" id="start-date"></div>
+    <div class="input-group"><label for="start-time">Start Time:</label><input type="time" id="start-time"></div>
+    <div class="input-group"><label for="end-date">End Date:</label><input type="date" id="end-date"></div>
+    <div class="input-group"><label for="end-time">End Time:</label><input type="time" id="end-time"></div>
+    <button id="load-data" class="load-button">Load Route</button>
+  `;
+
+  document.getElementById('load-data').addEventListener('click', loadHistoricalData);
+
+  clearLayer(historicalPath);
+  historicalPath = null;
+}
+
+// Evento inicial al cargar la página
+ document.getElementById('load-data').addEventListener('click', loadHistoricalData);
