@@ -54,7 +54,8 @@ function addPolylineClickHandler(polyline, data) {
       .setContent(`
         <b>Position</b><br>
         Latitud: ${lat.toFixed(5)}<br>
-        Longitud: ${lng.toFixed(5)}
+        Longitud: ${lng.toFixed(5)}<br>
+        Timestamp: ${timestamp}
       `)
       .openOn(map);
   });
