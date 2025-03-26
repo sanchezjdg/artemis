@@ -120,39 +120,45 @@ document.getElementById('load-data').addEventListener('click', async () => {
   `;
 
   document.getElementById('back-to-historical').onclick = () => {
-    // Vuelve a mostrar elementos ocultos
+    // Recupera los valores actuales antes de limpiar
+    const startDateVal = startDate;
+    const startTimeVal = startTime;
+    const endDateVal = endDate;
+    const endTimeVal = endTime;
+  
+    // Mostrar nuevamente botones ocultos
     document.querySelector('.button-group').style.display = 'flex';
     document.querySelector('.controls .mode-info').style.display = 'block';
   
-    // Restaura el formulario histórico original
+    // Restaurar formulario histórico con los datos guardados
     const historicalForm = document.getElementById('historical-form');
     historicalForm.innerHTML = `
       <div class="input-group">
         <label for="start-date">Start Date:</label>
-        <input type="date" id="start-date">
+        <input type="date" id="start-date" value="${startDateVal}">
       </div>
-      
+  
       <div class="input-group">
         <label for="start-time">Start Time:</label>
-        <input type="time" id="start-time">
+        <input type="time" id="start-time" value="${startTimeVal}">
       </div>
-      
+  
       <div class="input-group">
         <label for="end-date">End Date:</label>
-        <input type="date" id="end-date">
+        <input type="date" id="end-date" value="${endDateVal}">
       </div>
-      
+  
       <div class="input-group">
         <label for="end-time">End Time:</label>
-        <input type="time" id="end-time">
+        <input type="time" id="end-time" value="${endTimeVal}">
       </div>
-      
+  
       <button id="load-data" class="load-button">Load Route</button>
     `;
   
-    // Reactivar evento del botón load-data después de restaurar el formulario
+    // Reactiva evento del botón load-data nuevamente
     document.getElementById('load-data').addEventListener('click', async () => {
-      location.reload(); // Esto asegura que al cargar nuevamente datos históricos, la página se recarga completamente.
+      location.reload();
     });
   
     // Limpia la ruta histórica del mapa
