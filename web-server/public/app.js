@@ -11,7 +11,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let marker = L.marker([0, 0]).addTo(map);
 const realTimeCoordinates = [];
 let realTimePath = L.polyline([], {
-  color: "#A3BE8C",
+  color: "#3b65ff",
   weight: 4,
   opacity: 0.8,
   lineJoin: 'round'
@@ -99,7 +99,7 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
   clearLayer(realTimePath);
   realTimeCoordinates.length = 0;
   realTimePath = L.polyline([], {
-    color: "#A3BE8C",
+    color: "#3b65ff",
     weight: 4,
     opacity: 0.8,
     lineJoin: 'round'
@@ -179,7 +179,7 @@ async function loadHistoricalData() {
     clearLayer(historicalPath);
 
     historicalPath = L.polyline(data.map(loc => [loc.latitude, loc.longitude]), {
-      color: "#81A1C1",
+      color: "#8E00C2",
       weight: 4,
       opacity: 0.8,
       lineJoin: 'round'
