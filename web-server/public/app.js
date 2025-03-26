@@ -51,13 +51,16 @@ function addPolylineClickHandler(polyline, data) {
   let lng = Array.isArray(closestPoint) ? closestPoint[1] : closestPoint.longitude;
   let timestamp = Array.isArray(closestPoint) ? closestPoint[2] : closestPoint.timestamp;
   
+// Format timestamp to a readable format
+let formattedTimestamp = new Date(timestamp).toLocaleString();
+  
   L.popup()
       .setLatLng([lat, lng])
       .setContent(`
           <b>Position</b><br>
           Latitude: ${lat.toFixed(5)}<br>
           Longitude: ${lng.toFixed(5)}<br>
-          Timestamp: ${timestamp}
+          Timestamp: ${formattedTimestamp}
       `)
       .openOn(map);
   });
