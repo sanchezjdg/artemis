@@ -30,6 +30,29 @@ function clearLayer(layer) {
   }
 }
 
+function addPolylineClickHandler(polyline, data) {
+  polyline.on('click', function (e) {
+    if (data.length === 0) return;
+
+    // Encuentra el punto más cercano al lugar donde hiciste clic
+    let closestPoint = data.reduce((prev, curr) => 
+        (map.distance(e.latlng, L.latLng(curr.latitude, curr.longitude)) < 
+        map.distance(e.latlng, L.latLng(prev.latitude, prev.longitude))) ? curr : prev
+    );
+
+    // Crear un popup en la ubicación más cercana
+    L.popup()
+      .setLatLng([closestPoint.latitude, closestPoint.longitude])
+      .setContent(`
+        <b>Posición</b><br>
+        Latitud: ${closestPoint.latitude.toFixed(5)}<br>
+        Longitud: ${closestPoint.longitude.toFixed(5)}<br>
+        Timestamp: ${closestPoint.timestamp}
+      `)
+      .openOn(map);
+  });
+}
+
 socket.on('updateData', (data) => {
   if (isRealTime && data.latitude && data.longitude) {
     const latlng = [data.latitude, data.longitude];
@@ -66,7 +89,7 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
     opacity: 0.8,
     lineJoin: 'round'
   }).addTo(map);
-
+  addPolylineClickHandler(realTimePath, realTimeCoordinates);
   marker.addTo(map);
 
   document.getElementById('real-time-btn').classList.add('active');
@@ -146,6 +169,7 @@ async function loadHistoricalData() {
       opacity: 0.8,
       lineJoin: 'round'
     }).addTo(map);
+    addPolylineClickHandler(realTimePath, realTimeCoordinates);
 
     map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
 
