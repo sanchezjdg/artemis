@@ -19,6 +19,10 @@ let realTimePath = L.polyline([], {
 
 let historicalPath = null;
 let isRealTime = true;
+let lastStartDate = "";
+let lastStartTime = "";
+let lastEndDate = "";
+let lastEndTime = "";
 
 function clearLayer(layer) {
   if (layer && map.hasLayer(layer)) {
@@ -88,18 +92,18 @@ document.getElementById('historical-btn').addEventListener('click', () => {
 
 // Carga la ruta histórica
 async function loadHistoricalData() {
-  const startDate = document.getElementById('start-date').value;
-  const startTime = document.getElementById('start-time').value;
-  const endDate = document.getElementById('end-date').value;
-  const endTime = document.getElementById('end-time').value;
+  lastStartDate = document.getElementById('start-date').value;
+  lastStartTime = document.getElementById('start-time').value;
+  lastEndDate = document.getElementById('end-date').value;
+  lastEndTime = document.getElementById('end-time').value;
 
-  if (!startDate || !startTime || !endDate || !endTime) {
+  if (!lastStartDate || !lastStartTime || !lastEndDate || !lastEndTime) {
     alert("Please fill in all date and time fields.");
     return;
   }
 
-  const startDatetime = `${startDate}T${startTime}:00`;
-  const endDatetime = `${endDate}T${endTime}:00`;
+  const startDatetime = `${lastStartDate}T${lastStartTime}:00`;
+  const endDatetime = `${lastEndDate}T${lastEndTime}:00`;
 
   const start = new Date(startDatetime);
   const end = new Date(endDatetime);
@@ -115,11 +119,11 @@ async function loadHistoricalData() {
 
   const historicalForm = document.getElementById('historical-form');
   historicalForm.innerHTML = `
-    <p class="mode-info">Buscando en:</p>
-    <p class="mode-info">${start.toLocaleString()}</p>
-    <p class="mode-info">hasta:</p>
-    <p class="mode-info">${end.toLocaleString()}</p>
-    <button id="back-to-historical" class="load-button">Regresar al Histórico</button>
+    <p class=\"mode-info\">Buscando en:</p>
+    <p class=\"mode-info\">${start.toLocaleString()}</p>
+    <p class=\"mode-info\">hasta:</p>
+    <p class=\"mode-info\">${end.toLocaleString()}</p>
+    <button id=\"back-to-historical\" class=\"load-button\">Regresar al Histórico</button>
   `;
 
   document.getElementById('back-to-historical').onclick = restoreHistoricalForm;
@@ -154,17 +158,17 @@ async function loadHistoricalData() {
   }
 }
 
-// Restaura formulario histórico original
+// Restaura formulario histórico original con datos anteriores
 function restoreHistoricalForm() {
   document.querySelector('.button-group').style.display = 'flex';
   document.querySelector('.controls .mode-info').style.display = 'block';
 
   document.getElementById('historical-form').innerHTML = `
-    <div class="input-group"><label for="start-date">Start Date:</label><input type="date" id="start-date"></div>
-    <div class="input-group"><label for="start-time">Start Time:</label><input type="time" id="start-time"></div>
-    <div class="input-group"><label for="end-date">End Date:</label><input type="date" id="end-date"></div>
-    <div class="input-group"><label for="end-time">End Time:</label><input type="time" id="end-time"></div>
-    <button id="load-data" class="load-button">Load Route</button>
+    <div class=\"input-group\"><label for=\"start-date\">Start Date:</label><input type=\"date\" id=\"start-date\" value=\"${lastStartDate}\"></div>
+    <div class=\"input-group\"><label for=\"start-time\">Start Time:</label><input type=\"time\" id=\"start-time\" value=\"${lastStartTime}\"></div>
+    <div class=\"input-group\"><label for=\"end-date\">End Date:</label><input type=\"date\" id=\"end-date\" value=\"${lastEndDate}\"></div>
+    <div class=\"input-group\"><label for=\"end-time\">End Time:</label><input type=\"time\" id=\"end-time\" value=\"${lastEndTime}\"></div>
+    <button id=\"load-data\" class=\"load-button\">Load Route</button>
   `;
 
   document.getElementById('load-data').addEventListener('click', loadHistoricalData);
