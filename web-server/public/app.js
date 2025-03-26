@@ -215,6 +215,7 @@ function restoreHistoricalForm() {
 
   clearLayer(historicalPath);
   historicalPath = null;
+  map.closePopup(); // Cierra cualquier popup abierto
 }
 
 // Evento inicial al cargar la página
