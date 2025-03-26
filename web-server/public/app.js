@@ -69,8 +69,13 @@ socket.on('updateData', (data) => {
 
     marker.setLatLng(latlng);
 
-    realTimeCoordinates.push(latlng);
-    realTimePath.setLatLngs(realTimeCoordinates);
+    realTimeCoordinates.push({
+      latitude: data.latitude,
+      longitude: data.longitude,
+      timestamp: data.timestamp
+    });
+
+    realTimePath.setLatLngs(realTimeCoordinates.map(coord => [coord.latitude, coord.longitude]));
 
     map.setView(latlng, 15, { animate: true });
 
