@@ -131,6 +131,7 @@ document.getElementById('historical-btn').addEventListener('click', () => {
 });
 
 // Carga la ruta histórica
+// Carga la ruta histórica
 async function loadHistoricalData() {
   lastStartDate = document.getElementById('start-date').value;
   lastStartTime = document.getElementById('start-time').value;
@@ -191,6 +192,10 @@ async function loadHistoricalData() {
     map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
 
     marker.setLatLng([data[data.length - 1].latitude, data[data.length - 1].longitude]);
+
+    // <-- LÍNEAS AGREGADAS: Vuelve a mostrar los botones y el texto
+    document.querySelector('.button-group').style.display = 'flex';
+    document.querySelector('.controls .mode-info').style.display = 'block';
 
   } catch (error) {
     console.error('Error fetching historical data:', error);
