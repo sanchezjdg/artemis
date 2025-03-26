@@ -129,8 +129,9 @@ document.getElementById('load-data').addEventListener('click', async () => {
   }
   
   // Construct ISO datetime strings
-  const startDatetime = ${startDate}T${startTime}:00;
-  const endDatetime = ${endDate}T${endTime}:00;
+  const startDatetime = `${startDate}T${startTime}:00`;
+  const endDatetime = `${endDate}T${endTime}:00`;
+  
   
   // Client-side validation: Chronological order and future date exclusion
   const start = new Date(startDatetime);
@@ -149,7 +150,7 @@ document.getElementById('load-data').addEventListener('click', async () => {
   
   try {
     // Fetch historical route data from server endpoint
-    const response = await fetch(/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)});
+    const response = await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`);
     const data = await response.json();
     
     if (data.length === 0) {
