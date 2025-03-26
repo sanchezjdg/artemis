@@ -25,8 +25,11 @@ let lastEndDate = "";
 let lastEndTime = "";
 
 function clearLayer(layer) {
-  if (layer && map.hasLayer(layer)) {
-    map.removeLayer(layer);
+  if (layer) {
+    layer.off(); // <-- Esto quita todos los eventos como el click
+    if (map.hasLayer(layer)) {
+      map.removeLayer(layer);
+    }
   }
 }
 
