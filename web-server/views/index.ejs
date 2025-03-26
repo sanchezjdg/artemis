@@ -37,31 +37,30 @@
         <label for="start-date">Start Date:</label>
         <input type="date" id="start-date">
       </div>
-
+      
       <div class="input-group">
         <label for="start-time">Start Time:</label>
         <input type="time" id="start-time">
       </div>
-
+      
       <div class="input-group">
         <label for="end-date">End Date:</label>
         <input type="date" id="end-date">
+      </div>
+      
+      <!-- Loader Overlay -->
+      <div id="loader-overlay" class="loader-overlay hidden">
+        <p class="mode-info" id="loader-info">Buscando en este tiempo...</p>
+        <button id="back-to-historical" class="load-button">Regresar al Histórico</button>
       </div>
 
       <div class="input-group">
         <label for="end-time">End Time:</label>
         <input type="time" id="end-time">
       </div>
-
+      
       <button id="load-data" class="load-button">Load Route</button>
     </div>
-
-    <!-- Loader Overlay (moved outside) -->
-    <div id="loader-overlay" class="loader-overlay hidden">
-      <p class="mode-info" id="loader-info">Buscando en este tiempo...</p>
-      <button id="back-to-historical" class="load-button">Regresar al Histórico</button>
-    </div>
-
   </div>
   
   <!-- Map Container -->

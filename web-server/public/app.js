@@ -31,9 +31,9 @@ function clearLayer(layer) {
 }
 
 function addPolylineClickHandler(polyline, data) {
-  console.log("Handler asignado a la polilínea con", data.length, "puntos"); // <-- Debug
+  console.log("Handler asignado a la polilínea con", data.length, "puntos");
   polyline.on('click', function (e) {
-    console.log("Click detectado en la polilínea"); // <-- Debug
+    console.log("Click detectado en la polilínea");
     if (data.length === 0) return;
 
     let closestPoint = data.reduce((prev, curr) => {
@@ -48,7 +48,7 @@ function addPolylineClickHandler(polyline, data) {
 
     let lat = Array.isArray(closestPoint) ? closestPoint[0] : closestPoint.latitude;
     let lng = Array.isArray(closestPoint) ? closestPoint[1] : closestPoint.longitude;
-    let timestamp = closestPoint.timestamp || "N/A"; // Si no hay timestamp, muestra "N/A"
+    let timestamp = closestPoint.timestamp || "N/A";
 
     L.popup()
       .setLatLng([lat, lng])
@@ -61,7 +61,6 @@ function addPolylineClickHandler(polyline, data) {
       .openOn(map);
   });
 }
-
 
 socket.on('updateData', (data) => {
   if (isRealTime && data.latitude && data.longitude) {
@@ -88,7 +87,6 @@ socket.on('updateData', (data) => {
   }
 });
 
-// Activa el modo tiempo real
 document.getElementById('real-time-btn').addEventListener('click', () => {
   isRealTime = true;
   document.getElementById('historical-form').style.display = 'none';
@@ -115,7 +113,6 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
   map.closePopup();
 });
 
-// Activa el modo histórico
 document.getElementById('historical-btn').addEventListener('click', () => {
   isRealTime = false;
   document.getElementById('historical-form').style.display = 'block';
@@ -130,7 +127,6 @@ document.getElementById('historical-btn').addEventListener('click', () => {
   map.closePopup(); 
 });
 
-// Carga la ruta histórica
 async function loadHistoricalData() {
   lastStartDate = document.getElementById('start-date').value;
   lastStartTime = document.getElementById('start-time').value;
@@ -157,16 +153,19 @@ async function loadHistoricalData() {
   document.querySelector('.button-group').style.display = 'none';
   document.querySelector('.controls .mode-info').style.display = 'none';
 
-  const historicalForm = document.getElementById('historical-form');
-  historicalForm.innerHTML = `
-    <p class=\"mode-info\">Searching in:</p>
-    <p class=\"mode-info\">${start.toLocaleString()}</p>
-    <p class=\"mode-info\">until:</p>
-    <p class=\"mode-info\">${end.toLocaleString()}</p>
-    <button id=\"back-to-historical\" class=\"load-button\">Return to History</button>
-  `;
+  const loaderOverlay = document.getElementById('loader-overlay');
+  const loaderInfo = document.getElementById('loader-info');
 
-  document.getElementById('back-to-historical').onclick = restoreHistoricalForm;
+  loaderInfo.innerHTML = `
+    Buscando desde<br>${start.toLocaleString()}<br><br>
+    hasta<br>${end.toLocaleString()}
+  `;
+  loaderOverlay.classList.remove('hidden');
+
+  document.getElementById('back-to-historical').onclick = () => {
+    loaderOverlay.classList.add('hidden');
+    restoreHistoricalForm();
+  };
 
   try {
     const response = await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`);
@@ -192,6 +191,9 @@ async function loadHistoricalData() {
 
     marker.setLatLng([data[data.length - 1].latitude, data[data.length - 1].longitude]);
 
+    document.querySelector('.button-group').style.display = 'flex';
+    document.querySelector('.controls .mode-info').style.display = 'block';
+
   } catch (error) {
     console.error('Error fetching historical data:', error);
     alert("An error occurred while fetching historical data.");
@@ -199,25 +201,24 @@ async function loadHistoricalData() {
   }
 }
 
-// Restaura formulario histórico original con datos anteriores
 function restoreHistoricalForm() {
+  document.getElementById('loader-overlay').classList.add('hidden');
   document.querySelector('.button-group').style.display = 'flex';
   document.querySelector('.controls .mode-info').style.display = 'block';
 
   document.getElementById('historical-form').innerHTML = `
-    <div class=\"input-group\"><label for=\"start-date\">Start Date:</label><input type=\"date\" id=\"start-date\" value=\"${lastStartDate}\"></div>
-    <div class=\"input-group\"><label for=\"start-time\">Start Time:</label><input type=\"time\" id=\"start-time\" value=\"${lastStartTime}\"></div>
-    <div class=\"input-group\"><label for=\"end-date\">End Date:</label><input type=\"date\" id=\"end-date\" value=\"${lastEndDate}\"></div>
-    <div class=\"input-group\"><label for=\"end-time\">End Time:</label><input type=\"time\" id=\"end-time\" value=\"${lastEndTime}\"></div>
-    <button id=\"load-data\" class=\"load-button\">Load Route</button>
+    <div class="input-group"><label for="start-date">Start Date:</label><input type="date" id="start-date" value="${lastStartDate}"></div>
+    <div class="input-group"><label for="start-time">Start Time:</label><input type="time" id="start-time" value="${lastStartTime}"></div>
+    <div class="input-group"><label for="end-date">End Date:</label><input type="date" id="end-date" value="${lastEndDate}"></div>
+    <div class="input-group"><label for="end-time">End Time:</label><input type="time" id="end-time" value="${lastEndTime}"></div>
+    <button id="load-data" class="load-button">Load Route</button>
   `;
 
   document.getElementById('load-data').addEventListener('click', loadHistoricalData);
 
   clearLayer(historicalPath);
   historicalPath = null;
-  map.closePopup(); // Cierra cualquier popup abierto
+  map.closePopup();
 }
 
-// Evento inicial al cargar la página
 document.getElementById('load-data').addEventListener('click', loadHistoricalData);
