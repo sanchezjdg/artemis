@@ -127,7 +127,7 @@ document.getElementById('historical-btn').addEventListener('click', () => {
 
   document.getElementById('historical-btn').classList.add('active');
   document.getElementById('real-time-btn').classList.remove('active');
-  map.closePopup(); // <-- Cierra cualquier popup abierto al entrar a modo histórico
+  map.closePopup(); 
 });
 
 // Carga la ruta histórica
@@ -159,11 +159,11 @@ async function loadHistoricalData() {
 
   const historicalForm = document.getElementById('historical-form');
   historicalForm.innerHTML = `
-    <p class=\"mode-info\">Buscando en:</p>
+    <p class=\"mode-info\">Searching in:</p>
     <p class=\"mode-info\">${start.toLocaleString()}</p>
-    <p class=\"mode-info\">hasta:</p>
+    <p class=\"mode-info\">until:</p>
     <p class=\"mode-info\">${end.toLocaleString()}</p>
-    <button id=\"back-to-historical\" class=\"load-button\">Regresar al Histórico</button>
+    <button id=\"back-to-historical\" class=\"load-button\">Return to History</button>
   `;
 
   document.getElementById('back-to-historical').onclick = restoreHistoricalForm;
