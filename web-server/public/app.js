@@ -99,7 +99,7 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
   clearLayer(realTimePath);
   realTimeCoordinates.length = 0;
   realTimePath = L.polyline([], {
-    color: "#B100E8",
+    color: "#3b65ff",
     weight: 4,
     opacity: 0.8,
     lineJoin: 'round'
@@ -179,7 +179,7 @@ async function loadHistoricalData() {
     clearLayer(historicalPath);
 
     historicalPath = L.polyline(data.map(loc => [loc.latitude, loc.longitude]), {
-      color: "#81A1C1",
+      color: "#B100E8",
       weight: 4,
       opacity: 0.8,
       lineJoin: 'round'
