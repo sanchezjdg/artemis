@@ -1,13 +1,16 @@
 const socket = io();
 console.log('Connected to Socket.IO server.');
 
+// Initialize the Leaflet map centered at [0,0] with a low zoom level
 const map = L.map('map').setView([0, 0], 2);
 
+// Add OpenStreetMap tiles to the map
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
+// Global variables for tracking layers and state
 let marker = L.marker([0, 0]).addTo(map);
 const realTimeCoordinates = [];
 let realTimePath = L.polyline([], {
@@ -24,12 +27,14 @@ let lastStartTime = "";
 let lastEndDate = "";
 let lastEndTime = "";
 
+// Function to clear a given layer from the map
 function clearLayer(layer) {
   if (layer && map.hasLayer(layer)) {
     map.removeLayer(layer);
   }
 }
 
+//polyline
 function addPolylineClickHandler(polyline, data) {
   console.log("Handler asignado a la polilínea con", data.length, "puntos"); // <-- Debug
   polyline.on('click', function (e) {
@@ -62,7 +67,7 @@ function addPolylineClickHandler(polyline, data) {
   });
 }
 
-
+// Handle incoming real-time data
 socket.on('updateData', (data) => {
   if (isRealTime && data.latitude && data.longitude) {
     const latlng = [data.latitude, data.longitude];
@@ -88,7 +93,7 @@ socket.on('updateData', (data) => {
   }
 });
 
-// Activa el modo tiempo real
+// Toggle to Real-Time mode
 document.getElementById('real-time-btn').addEventListener('click', () => {
   isRealTime = true;
   document.getElementById('historical-form').style.display = 'none';
@@ -115,7 +120,7 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
   map.closePopup();
 });
 
-// Activa el modo histórico
+// Activate historical mode
 document.getElementById('historical-btn').addEventListener('click', () => {
   isRealTime = false;
   document.getElementById('historical-form').style.display = 'block';
@@ -130,7 +135,7 @@ document.getElementById('historical-btn').addEventListener('click', () => {
   map.closePopup(); 
 });
 
-// Carga la ruta histórica
+// Load the historical route
 async function loadHistoricalData() {
   lastStartDate = document.getElementById('start-date').value;
   lastStartTime = document.getElementById('start-time').value;
@@ -199,7 +204,7 @@ async function loadHistoricalData() {
   }
 }
 
-// Restaura formulario histórico original con datos anteriores
+// Restores original historical form with previous data
 function restoreHistoricalForm() {
   document.querySelector('.button-group').style.display = 'flex';
   document.querySelector('.controls .mode-info').style.display = 'block';
@@ -216,8 +221,8 @@ function restoreHistoricalForm() {
 
   clearLayer(historicalPath);
   historicalPath = null;
-  map.closePopup(); // Cierra cualquier popup abierto
+  map.closePopup(); 
 }
 
-// Evento inicial al cargar la página
+// Initial event on page load
  document.getElementById('load-data').addEventListener('click', loadHistoricalData);
