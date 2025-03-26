@@ -77,6 +77,7 @@ socket.on('updateData', (data) => {
 
     realTimePath.setLatLngs(realTimeCoordinates.map(coord => [coord.latitude, coord.longitude]));
 
+    map.setView(latlng, 15, { animate: true });
 
     marker.bindPopup(`
       <strong>Current Position</strong><br>
@@ -129,7 +130,6 @@ document.getElementById('historical-btn').addEventListener('click', () => {
   map.closePopup(); 
 });
 
-// Carga la ruta histórica
 // Carga la ruta histórica
 async function loadHistoricalData() {
   lastStartDate = document.getElementById('start-date').value;
@@ -192,10 +192,6 @@ async function loadHistoricalData() {
 
     marker.setLatLng([data[data.length - 1].latitude, data[data.length - 1].longitude]);
 
-    // <-- LÍNEAS AGREGADAS: Vuelve a mostrar los botones y el texto
-    document.querySelector('.button-group').style.display = 'flex';
-    document.querySelector('.controls .mode-info').style.display = 'block';
-
   } catch (error) {
     console.error('Error fetching historical data:', error);
     alert("An error occurred while fetching historical data.");
@@ -224,4 +220,4 @@ function restoreHistoricalForm() {
 }
 
 // Evento inicial al cargar la página
- document.getElementById('load-data').addEventListener('click', loadHistoricalData);
+document.getElementById('load-data').addEventListener('click', loadHistoricalData);
