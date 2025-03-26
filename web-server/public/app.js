@@ -119,8 +119,47 @@ document.getElementById('load-data').addEventListener('click', async () => {
     <button id=\"back-to-historical\" class=\"load-button\">Regresar al Histórico</button>
   `;
 
-  document.getElementById('back-to-historical').onclick = () => location.reload();
-
+  document.getElementById('back-to-historical').onclick = () => {
+    // Vuelve a mostrar elementos ocultos
+    document.querySelector('.button-group').style.display = 'flex';
+    document.querySelector('.controls .mode-info').style.display = 'block';
+  
+    // Restaura el formulario histórico original
+    const historicalForm = document.getElementById('historical-form');
+    historicalForm.innerHTML = `
+      <div class="input-group">
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date">
+      </div>
+      
+      <div class="input-group">
+        <label for="start-time">Start Time:</label>
+        <input type="time" id="start-time">
+      </div>
+      
+      <div class="input-group">
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date">
+      </div>
+      
+      <div class="input-group">
+        <label for="end-time">End Time:</label>
+        <input type="time" id="end-time">
+      </div>
+      
+      <button id="load-data" class="load-button">Load Route</button>
+    `;
+  
+    // Reactivar evento del botón load-data después de restaurar el formulario
+    document.getElementById('load-data').addEventListener('click', async () => {
+      location.reload(); // Esto asegura que al cargar nuevamente datos históricos, la página se recarga completamente.
+    });
+  
+    // Limpia la ruta histórica del mapa
+    clearLayer(historicalPath);
+    historicalPath = null;
+  };
+  
   try {
     const response = await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`);
     const data = await response.json();
