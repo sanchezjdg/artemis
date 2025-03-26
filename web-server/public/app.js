@@ -179,7 +179,7 @@ async function loadHistoricalData() {
     clearLayer(historicalPath);
 
     historicalPath = L.polyline(data.map(loc => [loc.latitude, loc.longitude]), {
-      color: "#B100E8",
+      color: "#8E00C2",
       weight: 4,
       opacity: 0.8,
       lineJoin: 'round'
