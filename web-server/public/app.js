@@ -77,7 +77,7 @@ socket.on('updateData', (data) => {
 
     realTimePath.setLatLngs(realTimeCoordinates.map(coord => [coord.latitude, coord.longitude]));
 
-    map.setView(latlng, 15, { animate: true });
+    map.setView(latlng, map.getZoom(), { animate: true });
 
     marker.bindPopup(`
       <strong>Current Position</strong><br>
