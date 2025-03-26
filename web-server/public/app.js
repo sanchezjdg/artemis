@@ -48,6 +48,7 @@ function addPolylineClickHandler(polyline, data) {
 
     let lat = Array.isArray(closestPoint) ? closestPoint[0] : closestPoint.latitude;
     let lng = Array.isArray(closestPoint) ? closestPoint[1] : closestPoint.longitude;
+    let timestamp = closestPoint.timestamp || "N/A"; // Si no hay timestamp, muestra "N/A"
 
     L.popup()
       .setLatLng([lat, lng])
