@@ -31,20 +31,20 @@ function clearLayer(layer) {
 }
 
 function addPolylineClickHandler(polyline, data) {
+  console.log("Handler asignado a la polilínea con", data.length, "puntos"); // <-- Debug
   polyline.on('click', function (e) {
+    console.log("Click detectado en la polilínea"); // <-- Debug
     if (data.length === 0) return;
-
-    // Encuentra el punto más cercano al lugar donde hiciste clic
-    let closestPoint = data.reduce((prev, curr) => 
-        (map.distance(e.latlng, L.latLng(curr.latitude, curr.longitude)) < 
-        map.distance(e.latlng, L.latLng(prev.latitude, prev.longitude))) ? curr : prev
+    
+    let closestPoint = data.reduce((prev, curr) =>
+      (map.distance(e.latlng, L.latLng(curr.latitude, curr.longitude)) <
+      map.distance(e.latlng, L.latLng(prev.latitude, prev.longitude))) ? curr : prev
     );
 
-    // Crear un popup en la ubicación más cercana
     L.popup()
       .setLatLng([closestPoint.latitude, closestPoint.longitude])
       .setContent(`
-        <b>Posición</b><br>
+        <b>Position</b><br>
         Latitud: ${closestPoint.latitude.toFixed(5)}<br>
         Longitud: ${closestPoint.longitude.toFixed(5)}<br>
         Timestamp: ${closestPoint.timestamp}
@@ -52,6 +52,7 @@ function addPolylineClickHandler(polyline, data) {
       .openOn(map);
   });
 }
+
 
 socket.on('updateData', (data) => {
   if (isRealTime && data.latitude && data.longitude) {
@@ -169,7 +170,7 @@ async function loadHistoricalData() {
       opacity: 0.8,
       lineJoin: 'round'
     }).addTo(map);
-    addPolylineClickHandler(realTimePath, realTimeCoordinates);
+    addPolylineClickHandler(historicalPath, data);
 
     map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
 
