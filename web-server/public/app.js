@@ -65,16 +65,12 @@ function addPolylineClickHandler(polyline, data) {
 
 socket.on('updateData', (data) => {
   if (isRealTime && data.latitude && data.longitude) {
-    const locationObj = {
-      latitude: data.latitude,
-      longitude: data.longitude,
-      timestamp: data.timestamp
-    };
+    const latlng = [data.latitude, data.longitude];
 
     marker.setLatLng(latlng);
 
-    realTimeCoordinates.push(locationObj);
-    realTimePath.setLatLngs(realTimeCoordinates.map(loc => [loc.latitude, loc.longitude]));
+    realTimeCoordinates.push(latlng);
+    realTimePath.setLatLngs(realTimeCoordinates);
 
     map.setView(latlng, 15, { animate: true });
 
