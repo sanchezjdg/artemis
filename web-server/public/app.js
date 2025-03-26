@@ -35,19 +35,26 @@ function addPolylineClickHandler(polyline, data) {
   polyline.on('click', function (e) {
     console.log("Click detectado en la polilínea"); // <-- Debug
     if (data.length === 0) return;
-    
-    let closestPoint = data.reduce((prev, curr) =>
-      (map.distance(e.latlng, L.latLng(curr.latitude, curr.longitude)) <
-      map.distance(e.latlng, L.latLng(prev.latitude, prev.longitude))) ? curr : prev
-    );
+
+    let closestPoint = data.reduce((prev, curr) => {
+      let currLat = Array.isArray(curr) ? curr[0] : curr.latitude;
+      let currLng = Array.isArray(curr) ? curr[1] : curr.longitude;
+      let prevLat = Array.isArray(prev) ? prev[0] : prev.latitude;
+      let prevLng = Array.isArray(prev) ? prev[1] : prev.longitude;
+
+      return (map.distance(e.latlng, L.latLng(currLat, currLng)) <
+              map.distance(e.latlng, L.latLng(prevLat, prevLng))) ? curr : prev;
+    });
+
+    let lat = Array.isArray(closestPoint) ? closestPoint[0] : closestPoint.latitude;
+    let lng = Array.isArray(closestPoint) ? closestPoint[1] : closestPoint.longitude;
 
     L.popup()
-      .setLatLng([closestPoint.latitude, closestPoint.longitude])
+      .setLatLng([lat, lng])
       .setContent(`
         <b>Position</b><br>
-        Latitud: ${closestPoint.latitude.toFixed(5)}<br>
-        Longitud: ${closestPoint.longitude.toFixed(5)}<br>
-        Timestamp: ${closestPoint.timestamp}
+        Latitud: ${lat.toFixed(5)}<br>
+        Longitud: ${lng.toFixed(5)}
       `)
       .openOn(map);
   });
