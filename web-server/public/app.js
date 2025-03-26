@@ -39,32 +39,29 @@ function addPolylineClickHandler(polyline, data) {
     let closestPoint = data.reduce((prev, curr) => {
       let currLat = Array.isArray(curr) ? curr[0] : curr.latitude;
       let currLng = Array.isArray(curr) ? curr[1] : curr.longitude;
-      let currTmp = Array.isArray(curr) ? curr[2] : curr.timestamp;
       let prevLat = Array.isArray(prev) ? prev[0] : prev.latitude;
       let prevLng = Array.isArray(prev) ? prev[1] : prev.longitude;
-      let prevTmp = Array.isArray(prev) ? prev[2] : prev.timestamp;
+
       return (map.distance(e.latlng, L.latLng(currLat, currLng)) <
-          map.distance(e.latlng, L.latLng(prevLat, prevLng))) ? curr : prev;
-  });
-  
-  let lat = Array.isArray(closestPoint) ? closestPoint[0] : closestPoint.latitude;
-  let lng = Array.isArray(closestPoint) ? closestPoint[1] : closestPoint.longitude;
-  let timestamp = Array.isArray(closestPoint) ? closestPoint[2] : closestPoint.timestamp;
-  
-// Format timestamp to a readable format
-let formattedTimestamp = new Date(timestamp).toLocaleString();
-  
-  L.popup()
+              map.distance(e.latlng, L.latLng(prevLat, prevLng))) ? curr : prev;
+    });
+
+    let lat = Array.isArray(closestPoint) ? closestPoint[0] : closestPoint.latitude;
+    let lng = Array.isArray(closestPoint) ? closestPoint[1] : closestPoint.longitude;
+    let timestamp = closestPoint.timestamp || "N/A"; // Si no hay timestamp, muestra "N/A"
+
+    L.popup()
       .setLatLng([lat, lng])
       .setContent(`
-          <b>Position</b><br>
-          Latitude: ${lat.toFixed(5)}<br>
-          Longitude: ${lng.toFixed(5)}<br>
-          Timestamp: ${formattedTimestamp}
+        <b>Position</b><br>
+        Latitud: ${lat.toFixed(5)}<br>
+        Longitud: ${lng.toFixed(5)}<br>
+        Timestamp: ${timestamp}
       `)
       .openOn(map);
   });
 }
+
 
 socket.on('updateData', (data) => {
   if (isRealTime && data.latitude && data.longitude) {
