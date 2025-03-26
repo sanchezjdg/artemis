@@ -127,6 +127,7 @@ document.getElementById('historical-btn').addEventListener('click', () => {
 
   document.getElementById('historical-btn').classList.add('active');
   document.getElementById('real-time-btn').classList.remove('active');
+  map.closePopup(); // <-- Cierra cualquier popup abierto al entrar a modo histórico
 });
 
 // Carga la ruta histórica
