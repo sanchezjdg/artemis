@@ -25,11 +25,8 @@ let lastEndDate = "";
 let lastEndTime = "";
 
 function clearLayer(layer) {
-  if (layer) {
-    layer.off(); // <-- Esto quita todos los eventos como el click
-    if (map.hasLayer(layer)) {
-      map.removeLayer(layer);
-    }
+  if (layer && map.hasLayer(layer)) {
+    map.removeLayer(layer);
   }
 }
 
@@ -115,6 +112,7 @@ document.getElementById('real-time-btn').addEventListener('click', () => {
 
   document.querySelector('.button-group').style.display = 'flex';
   document.querySelector('.controls .mode-info').style.display = 'block';
+  map.closePopup();
 });
 
 // Activa el modo histórico
