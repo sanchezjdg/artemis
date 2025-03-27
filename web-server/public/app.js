@@ -7,7 +7,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
-
+//a
 let marker = L.marker([0, 0]).addTo(map);
 const realTimeCoordinates = [];
 let realTimePath = L.polyline([], {
