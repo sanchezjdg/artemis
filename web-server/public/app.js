@@ -383,3 +383,12 @@ function restoreHistoricalForm() {
 document
   .getElementById("load-data")
   .addEventListener("click", loadHistoricalData);
+
+// Initialize real-time mode on page load
+document.addEventListener("DOMContentLoaded", function () {
+  // Trigger the real-time button click to initialize everything properly
+  document.getElementById("real-time-btn").click();
+
+  // Make sure the polyline event handler is attached
+  addPolylineClickHandler(realTimePath, realTimeCoordinates);
+});
