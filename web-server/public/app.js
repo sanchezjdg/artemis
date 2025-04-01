@@ -1,3 +1,4 @@
+// app.js
 const socket = io();
 console.log("Connected to Socket.IO server.");
 
