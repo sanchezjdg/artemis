@@ -384,6 +384,7 @@ document
   .getElementById("load-data")
   .addEventListener("click", loadHistoricalData);
 
+<<<<<<< HEAD
 // Define new mode state
 let isTrace = false;
 
