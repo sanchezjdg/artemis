@@ -155,8 +155,6 @@ async function loadHistoricalData() {
     return;
   }
 
-  document.querySelector(".button-group").style.display = "none";
-  document.querySelector(".controls .mode-info").style.display = "none";
 
   try {
     const loadButton = document.getElementById("load-data");
