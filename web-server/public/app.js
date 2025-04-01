@@ -196,7 +196,7 @@ async function loadHistoricalData() {
     historicalPath = L.polyline(
       data.map((loc) => [loc.latitude, loc.longitude]),
       {
-        color: "#8E00C2",
+        color: "#FFFFFF",
         weight: 4,
         opacity: 0.8,
         lineJoin: "round",
