@@ -1,4 +1,4 @@
-name: Deploy to Serverr
+name: Deploy to Server
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
     runs-on: artemis-juan
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: run udp-listener
         run: |
           cd udp-listener
@@ -19,17 +19,16 @@ jobs:
 
       - name: run web-server
         run: |
-          cd web-server 
+          cd web-server
           cp ~/env-variables/.env-web-server ./.env
           npm install
           sudo pm2 restart web-server
-
 
   deploy_s:
     runs-on: artemis-s9
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: run udp-listener
         run: |
           cd udp-listener
@@ -39,7 +38,7 @@ jobs:
 
       - name: run web-server
         run: |
-          cd web-server 
+          cd web-server
           cp ~/env-variables/.env-web-server ./.env
           npm install
           sudo pm2 restart web-server
@@ -48,7 +47,7 @@ jobs:
     runs-on: artemis-edwin
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: run udp-listener
         run: |
           cd udp-listener
@@ -58,7 +57,7 @@ jobs:
 
       - name: run web-server
         run: |
-          cd web-server 
+          cd web-server
           cp ~/env-variables/.env-web-server ./.env
           npm install
           sudo pm2 restart web-server
@@ -67,7 +66,7 @@ jobs:
     runs-on: artemis-may
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: run udp-listener
         run: |
           cd udp-listener
@@ -77,7 +76,7 @@ jobs:
 
       - name: run web-server
         run: |
-          cd web-server 
+          cd web-server
           cp ~/env-variables/.env-web-server ./.env
           npm install
           sudo pm2 restart web-server
@@ -86,7 +85,7 @@ jobs:
     runs-on: artemis-felipe
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: run udp-listener
         run: |
           cd udp-listener
@@ -96,10 +95,7 @@ jobs:
 
       - name: run web-server
         run: |
-          cd web-server 
+          cd web-server
           cp ~/env-variables/.env-web-server ./.env
           npm install
           sudo pm2 restart web-server
-
-
-      
