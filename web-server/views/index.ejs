@@ -10,10 +10,10 @@
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="/css/styles.css">
-  
+
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  
+
   <!-- Roboto font for Material Design -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
 </head>
@@ -25,29 +25,52 @@
     <h2>Artemis</h2>
     <!-- Brief instructions -->
     <p class="mode-info">Select the mode you want to use:</p>
-    
+
     <div class="button-group">
       <button id="real-time-btn" class="active">Real-Time</button>
       <button id="historical-btn">Historical</button>
+      <button id="trace-btn">Trace</button>
     </div>
-    
+
+    <!-- Trace form -->
+    <div id="trace-form" style="display: none;">
+        <div class="input-group">
+            <label for="trace-start-date">Start Date:</label>
+            <input type="date" id="trace-start-date">
+        </div>
+        <div class="input-group">
+            <label for="trace-start-time">Start Time:</label>
+            <input type="time" id="trace-start-time">
+        </div>
+        <div class="input-group">
+            <label for="trace-end-date">End Date:</label>
+            <input type="date" id="trace-end-date">
+        </div>
+        <div class="input-group">
+            <label for="trace-end-time">End Time:</label>
+            <input type="time" id="trace-end-time">
+        </div>
+        <button id="load-trace-data">Load Trace Data</button>
+    </div>
+
+
     <!-- Historical form -->
     <div id="historical-form">
       <div class="input-group">
         <label for="start-date">Start Date:</label>
         <input type="date" id="start-date">
       </div>
-      
+
       <div class="input-group">
         <label for="start-time">Start Time:</label>
         <input type="time" id="start-time">
       </div>
-      
+
       <div class="input-group">
         <label for="end-date">End Date:</label>
         <input type="date" id="end-date">
       </div>
-      
+
       <!-- Loader Overlay -->
       <div id="loader-overlay" class="loader-overlay hidden">
         <p class="mode-info" id="loader-info">Buscando en este tiempo...</p>
@@ -58,14 +81,14 @@
         <label for="end-time">End Time:</label>
         <input type="time" id="end-time">
       </div>
-      
+
       <button id="load-data" class="load-button">Load Route</button>
     </div>
   </div>
-  
+
   <!-- Map Container -->
   <div id="map"></div>
-  
+
   <!-- Socket.IO Client Library -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Leaflet JS -->
