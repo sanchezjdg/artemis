@@ -169,26 +169,3 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     border: 2px solid var(--gray);
     background-color: var(--dark-purple);
 }
-
-.loader-overlay {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 280px;
-    background: var(--dark-purple);
-    color: var(--white);
-    padding: 12px 18px;
-    border-radius: 12px;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
-    z-index: 1100;
-    font-size: 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--gray);
-}
-
-.hidden {
-    display: none;
-}
