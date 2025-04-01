@@ -1,3 +1,4 @@
+// app.js
 const socket = io();
 console.log("Connected to Socket.IO server.");
 
@@ -23,147 +24,6 @@ let lastStartDate = "";
 let lastStartTime = "";
 let lastEndDate = "";
 let lastEndTime = "";
-
-// Define new mode state
-let isTrace = false;
-
-// Global variable to hold historical data for trace mode (ensure it is available)
-let traceHistoricalData = [];
-
-// Trace Mode Activation Handler
-document.getElementById("trace-btn").addEventListener("click", () => {
-  isRealTime = false;
-  isTrace = true;
-
-  // Hide other forms and update UI states
-  document.getElementById("historical-form").style.display = "none";
-  document.getElementById("trace-form").style.display = "block";
-
-  document.getElementById("trace-btn").classList.add("active");
-  document.getElementById("real-time-btn").classList.remove("active");
-  document.getElementById("historical-btn").classList.remove("active");
-
-  document.querySelector(".controls .mode-info").innerText =
-    "Trace Mode: Input date/time and click 'Load Trace Data'. Once the data loads, click anywhere on the map to see when the vehicle passed that location.";
-
-  // Remove any previous map click listeners for trace mode
-  map.off("click", onMapClickTrace);
-});
-
-// New function: Fetch historical data for Trace Mode based on user input
-async function loadUserDefinedHistoricalData() {
-  const startDate = document.getElementById("trace-start-date").value;
-  const startTime = document.getElementById("trace-start-time").value;
-  const endDate = document.getElementById("trace-end-date").value;
-  const endTime = document.getElementById("trace-end-time").value;
-
-  if (!startDate || !startTime || !endDate || !endTime) {
-    alert("Please fill in all date and time fields for Trace Mode.");
-    return;
-  }
-
-  const startDatetime = `${startDate}T${startTime}:00`;
-  const endDatetime = `${endDate}T${endTime}:00`;
-
-  const start = new Date(startDatetime);
-  const end = new Date(endDatetime);
-  const now = new Date();
-
-  if (start >= end || start > now || end > now) {
-    alert("Please select a valid historical date/time range for Trace Mode.");
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`,
-    );
-    const data = await response.json();
-    if (data.length === 0) {
-      alert(
-        "No historical data found for the selected interval in Trace Mode.",
-      );
-      return;
-    }
-    traceHistoricalData = data;
-    alert(
-      "Historical data loaded for Trace Mode. Now click on the map to trace.",
-    );
-
-    // Attach click handler for tracing on the map
-    map.off("click", onMapClickTrace);
-    map.on("click", onMapClickTrace);
-  } catch (error) {
-    console.error("Error fetching historical data for Trace Mode:", error);
-    alert("An error occurred while fetching historical data for Trace Mode.");
-  }
-}
-
-// Attach event listener for the "Load Trace Data" button
-document
-  .getElementById("load-trace-data")
-  .addEventListener("click", loadUserDefinedHistoricalData);
-
-function onMapClickTrace(e) {
-  if (!traceHistoricalData || traceHistoricalData.length === 0) {
-    alert("Historical data not loaded. Please load the data first.");
-    return;
-  }
-
-  // Define a threshold distance in meters (we are using 100m)
-  const threshold = 100;
-  const clickedLatLng = e.latlng;
-
-  // Find the closest historical data point
-  let closestPoint = traceHistoricalData.reduce((prev, curr) => {
-    let prevLatLng = L.latLng(prev.latitude, prev.longitude);
-    let currLatLng = L.latLng(curr.latitude, curr.longitude);
-    return clickedLatLng.distanceTo(currLatLng) <
-      clickedLatLng.distanceTo(prevLatLng)
-      ? curr
-      : prev;
-  });
-
-  // Calculate the distance to the closest point
-  let closestDistance = clickedLatLng.distanceTo(
-    L.latLng(closestPoint.latitude, closestPoint.longitude),
-  );
-
-  if (closestDistance <= threshold) {
-    // Display a popup with the timestamp
-    L.popup()
-      .setLatLng(clickedLatLng)
-      .setContent(
-        `
-        <b>Historical Trace</b><br>
-        The vehicle passed here at:<br>
-        ${closestPoint.timestamp}<br>
-        (Distance: ${closestDistance.toFixed(1)} m)
-      `,
-      )
-      .openOn(map);
-  } else {
-    alert(
-      "No historical record within the search area. Try clicking closer to the route.",
-    );
-  }
-}
-
-// Clear trace when switching modes
-document.getElementById("real-time-btn").addEventListener("click", () => {
-  isTrace = false;
-  isRealTime = true;
-  document.getElementById("trace-form").style.display = "none";
-  map.off("click", onMapClickTrace);
-});
-
-document.getElementById("historical-btn").addEventListener("click", () => {
-  isTrace = false;
-  document.getElementById("trace-form").style.display = "none";
-  map.off("click", onMapClickTrace);
-  document.querySelector(".controls .mode-info").innerText =
-    "Select the mode you want to use:";
-});
 
 // Clear layer
 function clearLayer(layer) {
@@ -384,11 +244,124 @@ document
   .getElementById("load-data")
   .addEventListener("click", loadHistoricalData);
 
-// Initialize real-time mode on page load
-document.addEventListener("DOMContentLoaded", function () {
-  // Trigger the real-time button click to initialize everything properly
-  document.getElementById("real-time-btn").click();
+// Define new mode state
+let isTrace = false;
 
-  // Make sure the polyline event handler is attached
-  addPolylineClickHandler(realTimePath, realTimeCoordinates);
+// Global variable to hold historical data for trace mode (ensure it is available)
+let traceHistoricalData = [];
+
+// New function: Fetch full historical data for trace mode
+async function loadFullHistoricalData() {
+  // Adjust the date range as needed; here we assume a broad range is used
+  const defaultStart = "2020-01-01T00:00:00"; // Example start date
+  const defaultEnd = new Date().toISOString(); // Up to now
+
+  try {
+    const response = await fetch(
+      `/historical?start=${encodeURIComponent(defaultStart)}&end=${encodeURIComponent(defaultEnd)}`,
+    );
+    const data = await response.json();
+    if (data.length === 0) {
+      alert("No historical data available for tracing.");
+      return;
+    }
+    traceHistoricalData = data;
+    alert("Historical data loaded for trace mode. Click on the map to query.");
+  } catch (error) {
+    console.error("Error fetching full historical data:", error);
+    alert("An error occurred while loading historical data for trace mode.");
+  }
+}
+
+// New function: Handle map click in trace mode
+function onMapClickTrace(e) {
+  if (!traceHistoricalData || traceHistoricalData.length === 0) {
+    alert("Historical data not loaded. Please try again.");
+    return;
+  }
+
+  // Define a threshold distance in meters (e.g., 100m)
+  const threshold = 100;
+  const clickedLatLng = e.latlng;
+
+  // Find the closest historical data point
+  let closestPoint = traceHistoricalData.reduce((prev, curr) => {
+    let prevLatLng = L.latLng(prev.latitude, prev.longitude);
+    let currLatLng = L.latLng(curr.latitude, curr.longitude);
+    return clickedLatLng.distanceTo(currLatLng) <
+      clickedLatLng.distanceTo(prevLatLng)
+      ? curr
+      : prev;
+  });
+
+  // Calculate the distance to the closest point
+  let closestDistance = clickedLatLng.distanceTo(
+    L.latLng(closestPoint.latitude, closestPoint.longitude),
+  );
+
+  if (closestDistance <= threshold) {
+    // Display a popup with the timestamp
+    L.popup()
+      .setLatLng(clickedLatLng)
+      .setContent(
+        `
+         <b>Historical Trace</b><br>
+         The vehicle passed here at:<br>
+         ${closestPoint.timestamp}<br>
+         (Distance: ${closestDistance.toFixed(1)} m)
+       `,
+      )
+      .openOn(map);
+  } else {
+    alert(
+      "No historical record within the search area. Try clicking closer to the route.",
+    );
+  }
+}
+
+// Trace Mode Activation Handler
+document.getElementById("trace-btn").addEventListener("click", () => {
+  // Set mode states: disable real-time and historical modes
+  isRealTime = false;
+  isTrace = true;
+  // Hide historical form if visible
+  document.getElementById("historical-form").style.display = "none";
+  // Clear existing layers if necessary
+  clearLayer(realTimePath);
+  clearLayer(historicalPath);
+
+  // Update UI button states
+  document.getElementById("trace-btn").classList.add("active");
+  document.getElementById("real-time-btn").classList.remove("active");
+  document.getElementById("historical-btn").classList.remove("active");
+
+  // Provide on-screen instructions (optional)
+  document.querySelector(".controls .mode-info").innerText =
+    "Trace Mode: Click on the map to see when the vehicle passed that point.";
+
+  // Load full historical data if not already loaded
+  if (traceHistoricalData.length === 0) {
+    loadFullHistoricalData();
+  }
+
+  // Attach a one-time map click listener for trace queries
+  map.off("click"); // Remove other click listeners if any
+  map.on("click", onMapClickTrace);
+});
+
+// When switching to Real-Time or Historical, remove the trace click handler
+document.getElementById("real-time-btn").addEventListener("click", () => {
+  isTrace = false;
+  isRealTime = true;
+  // Restore the standard behavior
+  map.off("click", onMapClickTrace);
+  // (Re)attach other mode-specific handlers as needed
+});
+
+document.getElementById("historical-btn").addEventListener("click", () => {
+  isTrace = false;
+  // Hide trace-specific instructions
+  document.querySelector(".controls .mode-info").innerText =
+    "Select the mode you want to use:";
+  map.off("click", onMapClickTrace);
 });

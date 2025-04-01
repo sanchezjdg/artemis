@@ -145,27 +145,6 @@ body {
     border-color: var(--gray);
 }
 
-<!-- New Trace form -->
-<div id="trace-form" style="display: none;">
-  <div class="input-group">
-    <label for="trace-start-date">Start Date:</label>
-    <input type="date" id="trace-start-date">
-  </div>
-  <div class="input-group">
-    <label for="trace-start-time">Start Time:</label>
-    <input type="time" id="trace-start-time">
-  </div>
-  <div class="input-group">
-    <label for="trace-end-date">End Date:</label>
-    <input type="date" id="trace-end-date">
-  </div>
-  <div class="input-group">
-    <label for="trace-end-time">End Time:</label>
-    <input type="time" id="trace-end-time">
-  </div>
-  <button id="load-trace-data" class="load-button">Load Trace Data</button>
-</div>
-
 /* Style calendar buttons */
 input[type="date"],
 input[type="time"] {
