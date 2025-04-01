@@ -119,7 +119,8 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
     lineJoin: "round",
   }).addTo(map);
   addPolylineClickHandler(realTimePath, realTimeCoordinates);
-  marker.addTo(map);
+
+  marker.addTo(map); // <- volver a mostrar el marcador
 
   setActiveButton("real-time-btn");
   document.querySelector(".button-group").style.display = "flex";
@@ -135,6 +136,8 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   clearLayer(realTimePath);
   clearLayer(historicalPath);
   historicalPath = null;
+
+  marker.addTo(map); // <- volver a mostrar el marcador
 
   setActiveButton("historical-btn");
   document.querySelector(".controls .mode-info").innerText =
@@ -307,6 +310,8 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   clearLayer(realTimePath);
   clearLayer(historicalPath);
 
+  map.removeLayer(marker); // <- ocultar el marcador
+
   setActiveButton("trace-btn");
 
   document.querySelector(".controls .mode-info").innerText =
@@ -326,6 +331,8 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   isRealTime = true;
   map.off("click", onMapClickTrace);
   map.closePopup();
+
+  marker.addTo(map); // <- volver a mostrar el marcador
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
@@ -334,4 +341,6 @@ document.getElementById("historical-btn").addEventListener("click", () => {
     "Select the mode you want to use:";
   map.off("click", onMapClickTrace);
   map.closePopup();
+
+  marker.addTo(map); // <- volver a mostrar el marcador
 });
