@@ -1,4 +1,3 @@
-// app.js
 const socket = io();
 console.log("Connected to Socket.IO server.");
 
@@ -93,8 +92,19 @@ socket.on("updateData", (data) => {
   }
 });
 
+function setActiveButton(activeId) {
+  ["real-time-btn", "historical-btn", "trace-btn"].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.classList.remove("active");
+    }
+  });
+  document.getElementById(activeId).classList.add("active");
+}
+
 document.getElementById("real-time-btn").addEventListener("click", () => {
   isRealTime = true;
+  isTrace = false;
   document.getElementById("historical-form").style.display = "none";
 
   clearLayer(historicalPath);
@@ -111,9 +121,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   addPolylineClickHandler(realTimePath, realTimeCoordinates);
   marker.addTo(map);
 
-  document.getElementById("real-time-btn").classList.add("active");
-  document.getElementById("historical-btn").classList.remove("active");
-
+  setActiveButton("real-time-btn");
   document.querySelector(".button-group").style.display = "flex";
   document.querySelector(".controls .mode-info").style.display = "block";
   map.closePopup();
@@ -121,14 +129,17 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 
 document.getElementById("historical-btn").addEventListener("click", () => {
   isRealTime = false;
+  isTrace = false;
   document.getElementById("historical-form").style.display = "block";
 
   clearLayer(realTimePath);
   clearLayer(historicalPath);
   historicalPath = null;
 
-  document.getElementById("historical-btn").classList.add("active");
-  document.getElementById("real-time-btn").classList.remove("active");
+  setActiveButton("historical-btn");
+  document.querySelector(".controls .mode-info").innerText =
+    "Select the mode you want to use:";
+  map.off("click", onMapClickTrace);
   map.closePopup();
 });
 
@@ -154,7 +165,6 @@ async function loadHistoricalData() {
     alert("Please select valid historical date/time ranges.");
     return;
   }
-
 
   try {
     const loadButton = document.getElementById("load-data");
@@ -297,9 +307,7 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   clearLayer(realTimePath);
   clearLayer(historicalPath);
 
-  document.getElementById("trace-btn").classList.add("active");
-  document.getElementById("real-time-btn").classList.remove("active");
-  document.getElementById("historical-btn").classList.remove("active");
+  setActiveButton("trace-btn");
 
   document.querySelector(".controls .mode-info").innerText =
     "Trace Mode: Click on the map to see when the vehicle passed that point.";
@@ -310,12 +318,14 @@ document.getElementById("trace-btn").addEventListener("click", () => {
 
   map.off("click");
   map.on("click", onMapClickTrace);
+  map.closePopup();
 });
 
 document.getElementById("real-time-btn").addEventListener("click", () => {
   isTrace = false;
   isRealTime = true;
   map.off("click", onMapClickTrace);
+  map.closePopup();
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
@@ -323,4 +333,5 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   document.querySelector(".controls .mode-info").innerText =
     "Select the mode you want to use:";
   map.off("click", onMapClickTrace);
+  map.closePopup();
 });
