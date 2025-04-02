@@ -170,12 +170,6 @@ async function loadHistoricalData() {
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
 
-  const start = new Date(startDatetime);
-  const end = new Date(endDatetime);
-  const now = new Date();
-
-
-
   try {
     const loadButton = document.getElementById("load-data");
     loadButton.disabled = true;
