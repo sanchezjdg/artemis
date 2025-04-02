@@ -24,6 +24,18 @@ let lastStartTime = "";
 let lastEndDate = "";
 let lastEndTime = "";
 
+flatpickr("#start-datetime", {
+  enableTime: true,
+  dateFormat: "Y-m-d\\TH:i",
+  maxDate: "today"
+});
+
+flatpickr("#end-datetime", {
+  enableTime: true,
+  dateFormat: "Y-m-d\\TH:i",
+  maxDate: "today"
+});
+
 function clearLayer(layer) {
   if (layer && map.hasLayer(layer)) {
     map.removeLayer(layer);
@@ -147,18 +159,16 @@ document.getElementById("historical-btn").addEventListener("click", () => {
 });
 
 async function loadHistoricalData() {
-  lastStartDate = document.getElementById("start-date").value;
-  lastStartTime = document.getElementById("start-time").value;
-  lastEndDate = document.getElementById("end-date").value;
-  lastEndTime = document.getElementById("end-time").value;
+  lastStartDate = document.getElementById("start-datetime").value;
+  lastEndDate = document.getElementById("end-datetime").value;
 
-  if (!lastStartDate || !lastStartTime || !lastEndDate || !lastEndTime) {
-    alert("Please fill in all date and time fields.");
+  if (!lastStartDate || !lastEndDate) {
+    alert("Please fill in both datetime fields.");
     return;
   }
 
-  const startDatetime = `${lastStartDate}T${lastStartTime}:00`;
-  const endDatetime = `${lastEndDate}T${lastEndTime}:00`;
+  const startDatetime = `${lastStartDate}:00`;
+  const endDatetime = `${lastEndDate}:00`;
 
   const start = new Date(startDatetime);
   const end = new Date(endDatetime);
@@ -221,16 +231,32 @@ function restoreHistoricalForm() {
   document.querySelector(".controls .mode-info").style.display = "block";
 
   document.getElementById("historical-form").innerHTML = `
-    <div class="input-group"><label for="start-date">Start Date:</label><input type="date" id="start-date" value="${lastStartDate}"></div>
-    <div class="input-group"><label for="start-time">Start Time:</label><input type="time" id="start-time" value="${lastStartTime}"></div>
-    <div class="input-group"><label for="end-date">End Date:</label><input type="date" id="end-date" value="${lastEndDate}"></div>
-    <div class="input-group"><label for="end-time">End Time:</label><input type="time" id="end-time" value="${lastEndTime}"></div>
+    <div class="input-group">
+      <label for="start-datetime">Start:</label>
+      <input type="text" id="start-datetime" value="${lastStartDate}">
+    </div>
+    <div class="input-group">
+      <label for="end-datetime">End:</label>
+      <input type="text" id="end-datetime" value="${lastEndDate}">
+    </div>
     <button id="load-data" class="load-button">Load Route</button>
   `;
 
-  document
-    .getElementById("load-data")
-    .addEventListener("click", loadHistoricalData);
+  flatpickr("#start-datetime", {
+    enableTime: true,
+    dateFormat: "Y-m-d\\TH:i",
+    defaultDate: lastStartDate,
+    maxDate: "today"
+  });
+
+  flatpickr("#end-datetime", {
+    enableTime: true,
+    dateFormat: "Y-m-d\\TH:i",
+    defaultDate: lastEndDate,
+    maxDate: "today"
+  });
+
+  document.getElementById("load-data").addEventListener("click", loadHistoricalData);
 
   clearLayer(historicalPath);
   historicalPath = null;

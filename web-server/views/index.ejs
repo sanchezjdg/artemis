@@ -14,6 +14,9 @@
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
+  <!-- Flatpickr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
   <!-- Roboto font for Material Design -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
 </head>
@@ -36,12 +39,12 @@
     <div id="historical-form">
       <div class="input-group">
         <label for="start-date">Start Date:</label>
-        <input type="date" id="start-date">
+        <input type="text" id="start-datetime">
       </div>
 
       <div class="input-group">
         <label for="start-time">Start Time:</label>
-        <input type="time" id="start-time">
+        <input type="text" id="end-datetime">
       </div>
 
       <div class="input-group">
@@ -67,5 +70,7 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <!-- Custom Client Script -->
   <script src="app.js"></script>
+  <!-- Flatpickr JS -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
 </html>
