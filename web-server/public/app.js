@@ -24,22 +24,28 @@ let lastStartTime = "";
 let lastEndDate = "";
 let lastEndTime = "";
 
-// Obtener fecha actual y comienzo del día
+// Generar fecha y hora actual + inicio del día
 const now = new Date();
-const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+const pad = (n) => n.toString().padStart(2, "0");
+const toFlatpickrString = (date) => {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
 
-// Flatpickr con fechas por defecto
+const defaultStartString = toFlatpickrString(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0));
+const defaultEndString = toFlatpickrString(now);
+
+// Flatpickr con valores por defecto
 flatpickr("#start-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
-  defaultDate: startOfDay,
+  defaultDate: defaultStartString,
   maxDate: "today"
 });
 
 flatpickr("#end-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
-  defaultDate: now,
+  defaultDate: defaultEndString,
   maxDate: "today"
 });
 
