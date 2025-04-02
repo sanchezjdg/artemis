@@ -4,29 +4,15 @@
   <meta charset="UTF-8">
   <title>Artemis <%= name %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="/images/favicon.png" />
-
-  <!-- Custom CSS -->
   <link rel="stylesheet" href="/css/styles.css">
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
-  <!-- Flatpickr CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-  <!-- Roboto font for Material Design -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
 </head>
-
 <body>
-  <!-- Controls overlay -->
   <div class="controls">
-    <!-- Title -->
     <h2>Artemis</h2>
-    <!-- Brief instructions -->
     <p class="mode-info">Select the mode you want to use:</p>
 
     <div class="button-group">
@@ -35,7 +21,7 @@
       <button id="trace-btn">Trace</button>
     </div>
 
-    <!-- Historical + Trace form -->
+    <!-- El formulario ahora inicia oculto -->
     <div id="historical-form" style="display: none;">
       <div class="input-group">
         <label for="start-datetime">Start:</label>
@@ -49,27 +35,21 @@
 
       <button id="load-data" class="load-button">Load Route</button>
 
-      <!-- Trace radius control (solo visible en modo Trace) -->
+      <!-- Este control se oculta por defecto -->
       <div id="trace-radius-control" style="display: none; margin-top: 10px;">
         <label for="search-radius">Radio de búsqueda: <span id="radius-value">100</span> m</label>
         <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
       </div>
     </div>
 
-    <!-- Resultados de búsqueda en modo Trace -->
     <div id="trace-results" class="trace-results" style="margin-top: 10px;"></div>
   </div>
 
-  <!-- Map Container -->
   <div id="map"></div>
 
-  <!-- Socket.IO Client Library -->
   <script src="/socket.io/socket.io.js"></script>
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <!-- Flatpickr JS -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <!-- Custom Client Script -->
   <script src="app.js"></script>
 </body>
 </html>
