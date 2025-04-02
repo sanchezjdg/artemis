@@ -137,8 +137,9 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   clearSearchCircle();
   isRealTime = true;
   isTrace = false;
-  document.getElementById("historical-form").style.display = "none";
-  document.getElementById("trace-radius-control").style.display = "none";
+
+  document.getElementById("historical-form").style.display = "none"; // NUEVO
+  document.getElementById("trace-radius-control").style.display = "none"; // NUEVO
 
   clearLayer(historicalPath);
   historicalPath = null;
@@ -165,8 +166,9 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   clearSearchCircle();
   isRealTime = false;
   isTrace = false;
+
   document.getElementById("historical-form").style.display = "block";
-  document.getElementById("trace-radius-control").style.display = "none";
+  document.getElementById("trace-radius-control").style.display = "none"; // NUEVO
 
   clearLayer(realTimePath);
   clearLayer(historicalPath);
@@ -193,7 +195,7 @@ document.getElementById("trace-btn").addEventListener("click", () => {
     radiusValue.textContent = radiusSlider.value;
   });
 
-  document.getElementById("historical-form").style.display = "block"; // cambio necesario
+  document.getElementById("historical-form").style.display = "block";
   document.getElementById("trace-radius-control").style.display = "block";
 
   clearLayer(realTimePath);
