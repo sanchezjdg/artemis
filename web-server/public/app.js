@@ -5,13 +5,10 @@ document.getElementById("trace-results").style.display = "none";
 
 const map = L.map("map").setView([0, 0], 2);
 
-L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {
-    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
-    maxZoom: 18,
-  },
-).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution: "© OpenStreetMap contributors",
+}).addTo(map);
 
 let marker = L.marker([0, 0]).addTo(map);
 const realTimeCoordinates = [];
