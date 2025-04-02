@@ -1,6 +1,8 @@
 const socket = io();
 console.log("Connected to Socket.IO server.");
 
+document.getElementById("trace-results").style.display = "none";
+
 const map = L.map("map").setView([0, 0], 2);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
