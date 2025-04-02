@@ -230,7 +230,7 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   setActiveButton("trace-btn");
 
   document.querySelector(".controls .mode-info").innerText =
-    "Trace Mode: Selecciona un rango de tiempo y haz clic en el mapa para ver cuándo pasó el vehículo por ese punto.";
+  "Trace Mode: Select a time range and click on the map to see when the vehicle passed through that point."
 
   map.off("click");
   map.on("click", onMapClickTrace);
@@ -295,7 +295,7 @@ document.getElementById("load-data").addEventListener("click", async () => {
       ]);
     } else {
       traceHistoricalData = data;
-      alert("Datos cargados. Haz clic en el mapa para consultar.");
+      alert("Data loaded. Click on the map to query.");
     }
 
     loadButton.disabled = false;
@@ -358,7 +358,7 @@ function onMapClickTrace(e) {
   resultsContainer.innerHTML = "";
 
   if (nearbyPoints.length === 0) {
-    alert("No se encontró ningún paso del vehículo dentro del radio. Intenta más cerca de la ruta.");
+    alert("No vehicle passage was found within the radius. Try clicking closer to the route.");
     return;
   }
 
