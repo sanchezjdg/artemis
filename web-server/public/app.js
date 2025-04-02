@@ -387,4 +387,3 @@ document.getElementById("historical-btn").addEventListener("click", () => {
 
   marker.addTo(map); // <- volver a mostrar el marcador
 });
-}
