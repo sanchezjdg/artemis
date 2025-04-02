@@ -1,6 +1,7 @@
 const socket = io();
 console.log("Connected to Socket.IO server.");
 
+// Ocultar el panel de resultados del modo Trace al cargar la página
 document.getElementById("trace-results").style.display = "none";
 
 const map = L.map("map").setView([0, 0], 2);
@@ -231,6 +232,14 @@ document.getElementById("load-data").addEventListener("click", async () => {
 
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
+
+  const startDateObj = new Date(startDatetime);
+  const endDateObj = new Date(endDatetime);
+
+  if (startDateObj >= endDateObj) {
+    alert("Start datetime must be before end datetime.");
+    return;
+  }
 
   try {
     const loadButton = document.getElementById("load-data");
