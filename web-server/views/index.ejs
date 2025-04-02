@@ -47,14 +47,17 @@
         <input type="text" id="end-datetime">
       </div>
 
+      <!-- Trace radius control (solo visible en modo Trace) -->
+      <div id="trace-radius-control" style="display: none; margin-top: 10px;">
+        <label for="search-radius">Radio de búsqueda: <span id="radius-value">100</span> m</label>
+        <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
+      </div>
+
       <button id="load-data" class="load-button">Load Route</button>
     </div>
 
-    <!-- Trace radius control (solo visible en modo Trace) -->
-    <div id="trace-radius-control" style="display: none; margin-top: 10px;">
-      <label for="search-radius">Radio de búsqueda: <span id="radius-value">100</span> m</label>
-      <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
-    </div>
+    <!-- Resultados de búsqueda en modo Trace -->
+    <div id="trace-results" class="trace-results" style="margin-top: 10px;"></div>
   </div> <!-- cierre correcto del panel de controles -->
 
   <!-- Map Container -->

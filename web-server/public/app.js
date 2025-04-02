@@ -1,6 +1,9 @@
 const socket = io();
 console.log("Connected to Socket.IO server.");
 
+// Ocultar el panel de resultados del modo Trace al cargar la página
+document.getElementById("trace-results").style.display = "none";
+
 const map = L.map("map").setView([0, 0], 2);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -26,8 +29,8 @@ let lastEndTime = "";
 let isTrace = false;
 let traceHistoricalData = [];
 let searchCircle = null;
+let traceViewLine = null;
 
-// Función para limpiar el círculo rojo de búsqueda
 function clearSearchCircle() {
   if (searchCircle && map.hasLayer(searchCircle)) {
     map.removeLayer(searchCircle);
@@ -35,7 +38,6 @@ function clearSearchCircle() {
   }
 }
 
-// Obtener fecha actual y formatear
 const now = new Date();
 const pad = (n) => n.toString().padStart(2, "0");
 const formatDate = (d) => {
@@ -45,11 +47,9 @@ const formatDate = (d) => {
 const startValue = formatDate(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0));
 const endValue = formatDate(now);
 
-// Mostrar valores por defecto en los inputs
 document.getElementById("start-datetime").value = startValue;
 document.getElementById("end-datetime").value = endValue;
 
-// Inicializar flatpickr con los mismos valores
 flatpickr("#start-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
@@ -80,28 +80,23 @@ function addPolylineClickHandler(polyline, data) {
       let prevLat = Array.isArray(prev) ? prev[0] : prev.latitude;
       let prevLng = Array.isArray(prev) ? prev[1] : prev.longitude;
 
-      return map.distance(e.latlng, L.latLng(currLat, currLng)) <
-        map.distance(e.latlng, L.latLng(prevLat, prevLng))
+      return map.distance(e.latlng, L.latLng(currLat, currLng)) < map.distance(e.latlng, L.latLng(prevLat, prevLng))
         ? curr
         : prev;
     });
 
-    let lat = Array.isArray(closestPoint)
-      ? closestPoint[0]
-      : closestPoint.latitude;
-    let lng = Array.isArray(closestPoint)
-      ? closestPoint[1]
-      : closestPoint.longitude;
+    let lat = Array.isArray(closestPoint) ? closestPoint[0] : closestPoint.latitude;
+    let lng = Array.isArray(closestPoint) ? closestPoint[1] : closestPoint.longitude;
     let timestamp = closestPoint.timestamp || "N/A";
 
     L.popup()
       .setLatLng([lat, lng])
-      .setContent(`
-        <b>Position</b><br>
+      .setContent(
+        `<b>Position</b><br>
         Latitud: ${lat.toFixed(5)}<br>
         Longitud: ${lng.toFixed(5)}<br>
-        Timestamp: ${timestamp}
-      `)
+        Timestamp: ${timestamp}`
+      )
       .openOn(map);
   });
 }
@@ -123,12 +118,12 @@ socket.on("updateData", (data) => {
 
     map.setView(latlng, 15, { animate: true });
 
-    marker.bindPopup(`
-      <strong>Current Position</strong><br>
+    marker.bindPopup(
+      `<strong>Current Position</strong><br>
       Latitude: ${data.latitude.toFixed(5)}<br>
       Longitude: ${data.longitude.toFixed(5)}<br>
-      Timestamp: ${data.timestamp}
-    `);
+      Timestamp: ${data.timestamp}`
+    );
   }
 });
 
@@ -143,7 +138,15 @@ function setActiveButton(activeId) {
 }
 
 document.getElementById("real-time-btn").addEventListener("click", () => {
-  clearSearchCircle(); // limpia el círculo
+  clearSearchCircle();
+  document.getElementById("trace-results").innerHTML = "";
+  document.getElementById("trace-results").style.display = "none";
+
+  if (traceViewLine) {
+    map.removeLayer(traceViewLine);
+    traceViewLine = null;
+  }
+
   isRealTime = true;
   isTrace = false;
   document.getElementById("historical-form").style.display = "none";
@@ -171,7 +174,15 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
-  clearSearchCircle(); // limpia el círculo
+  clearSearchCircle();
+  document.getElementById("trace-results").innerHTML = "";
+  document.getElementById("trace-results").style.display = "none";
+
+  if (traceViewLine) {
+    map.removeLayer(traceViewLine);
+    traceViewLine = null;
+  }
+
   isRealTime = false;
   isTrace = false;
   document.getElementById("historical-form").style.display = "block";
@@ -191,7 +202,7 @@ document.getElementById("historical-btn").addEventListener("click", () => {
 });
 
 document.getElementById("trace-btn").addEventListener("click", () => {
-  clearSearchCircle(); // limpia el círculo
+  clearSearchCircle();
   isRealTime = false;
   isTrace = true;
 
@@ -202,8 +213,14 @@ document.getElementById("trace-btn").addEventListener("click", () => {
     radiusValue.textContent = radiusSlider.value;
   });
 
-  document.getElementById("historical-form").style.display = "none";
+  document.getElementById("historical-form").style.display = "block";
   document.getElementById("trace-radius-control").style.display = "block";
+  document.getElementById("trace-results").style.display = "block";
+
+  if (traceViewLine) {
+    map.removeLayer(traceViewLine);
+    traceViewLine = null;
+  }
 
   clearLayer(realTimePath);
   clearLayer(historicalPath);
@@ -213,18 +230,14 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   setActiveButton("trace-btn");
 
   document.querySelector(".controls .mode-info").innerText =
-    "Trace Mode: Click on the map to see when the vehicle passed that point.";
-
-  if (traceHistoricalData.length === 0) {
-    loadFullHistoricalData();
-  }
+    "Trace Mode: Selecciona un rango de tiempo y haz clic en el mapa para ver cuándo pasó el vehículo por ese punto.";
 
   map.off("click");
   map.on("click", onMapClickTrace);
   map.closePopup();
 });
 
-async function loadHistoricalData() {
+document.getElementById("load-data").addEventListener("click", async () => {
   lastStartDate = document.getElementById("start-datetime").value;
   lastEndDate = document.getElementById("end-datetime").value;
 
@@ -235,6 +248,14 @@ async function loadHistoricalData() {
 
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
+
+  const startDateObj = new Date(startDatetime);
+  const endDateObj = new Date(endDatetime);
+
+  if (startDateObj >= endDateObj) {
+    alert("Start datetime must be before end datetime.");
+    return;
+  }
 
   try {
     const loadButton = document.getElementById("load-data");
@@ -253,24 +274,29 @@ async function loadHistoricalData() {
       return;
     }
 
-    clearLayer(historicalPath);
-    historicalPath = L.polyline(
-      data.map((loc) => [loc.latitude, loc.longitude]),
-      {
-        color: "#8E00C2",
-        weight: 4,
-        opacity: 0.8,
-        lineJoin: "round",
-      }
-    ).addTo(map);
+    if (!isTrace) {
+      clearLayer(historicalPath);
+      historicalPath = L.polyline(
+        data.map((loc) => [loc.latitude, loc.longitude]),
+        {
+          color: "#8E00C2",
+          weight: 4,
+          opacity: 0.8,
+          lineJoin: "round",
+        }
+      ).addTo(map);
 
-    addPolylineClickHandler(historicalPath, data);
-    map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+      addPolylineClickHandler(historicalPath, data);
+      map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
 
-    marker.setLatLng([
-      data[data.length - 1].latitude,
-      data[data.length - 1].longitude,
-    ]);
+      marker.setLatLng([
+        data[data.length - 1].latitude,
+        data[data.length - 1].longitude,
+      ]);
+    } else {
+      traceHistoricalData = data;
+      alert("Datos cargados. Haz clic en el mapa para consultar.");
+    }
 
     loadButton.disabled = false;
     loadButton.innerText = "Load Route";
@@ -281,9 +307,7 @@ async function loadHistoricalData() {
     loadButton.disabled = false;
     loadButton.innerText = "Load Route";
   }
-}
-
-document.getElementById("load-data").addEventListener("click", loadHistoricalData);
+});
 
 async function loadFullHistoricalData() {
   const defaultStart = "2020-01-01T00:00:00";
@@ -325,32 +349,96 @@ function onMapClickTrace(e) {
     fillOpacity: 0.2,
   }).addTo(map);
 
-  let closestPoint = traceHistoricalData.reduce((prev, curr) => {
-    let prevLatLng = L.latLng(prev.latitude, prev.longitude);
-    let currLatLng = L.latLng(curr.latitude, curr.longitude);
-    return clickedLatLng.distanceTo(currLatLng) <
-      clickedLatLng.distanceTo(prevLatLng)
-      ? curr
-      : prev;
+  const nearbyPoints = traceHistoricalData.filter((point) => {
+    const dist = clickedLatLng.distanceTo(L.latLng(point.latitude, point.longitude));
+    return dist <= threshold;
   });
 
-  let closestDistance = clickedLatLng.distanceTo(
-    L.latLng(closestPoint.latitude, closestPoint.longitude)
-  );
+  const resultsContainer = document.getElementById("trace-results");
+  resultsContainer.innerHTML = "";
 
-  if (closestDistance <= threshold) {
-    L.popup()
-      .setLatLng(clickedLatLng)
-      .setContent(`
-         <b>Historical Trace</b><br>
-         El vehículo pasó cerca de aquí a:<br>
-         ${closestPoint.timestamp}<br>
-         (Distancia: ${closestDistance.toFixed(1)} m)
-       `)
-      .openOn(map);
-  } else {
+  if (nearbyPoints.length === 0) {
     alert("No se encontró ningún paso del vehículo dentro del radio. Intenta más cerca de la ruta.");
+    return;
   }
+
+  const fragment = document.createDocumentFragment();
+
+  nearbyPoints.forEach((point) => {
+    const div = document.createElement("div");
+    div.className = "trace-result";
+
+    div.innerHTML = 
+      `<div><b>${point.timestamp}</b></div>
+      <button class="view-point" data-lat="${point.latitude}" data-lng="${point.longitude}" data-time="${point.timestamp}">Ver</button>
+      <hr>`;
+    fragment.appendChild(div);
+  });
+
+  resultsContainer.appendChild(fragment);
+
+  document.querySelectorAll(".view-point").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const lat = parseFloat(btn.dataset.lat);
+      const lng = parseFloat(btn.dataset.lng);
+      const time = btn.dataset.time;
+
+      if (traceViewLine && map.hasLayer(traceViewLine)) {
+        map.removeLayer(traceViewLine);
+      }
+
+      map.setView([lat, lng], 17);
+      L.popup()
+        .setLatLng([lat, lng])
+        .setContent(
+          `<b>Momento registrado</b><br>
+          Lat: ${lat.toFixed(5)}<br>
+          Lng: ${lng.toFixed(5)}<br>
+          Timestamp: ${time}`
+        )
+        .openOn(map);
+
+      const threshold = parseFloat(document.getElementById("search-radius").value) || 100;
+      const center = L.latLng(lat, lng);
+
+      const clickedIndex = traceHistoricalData.findIndex(p =>
+        p.latitude === lat && p.longitude === lng && p.timestamp === time
+      );
+
+      if (clickedIndex === -1) return;
+
+      let startIndex = clickedIndex;
+      while (startIndex > 0) {
+        const dist = center.distanceTo(L.latLng(traceHistoricalData[startIndex].latitude, traceHistoricalData[startIndex].longitude));
+        if (dist > threshold) {
+          startIndex++;
+          break;
+        }
+        startIndex--;
+      }
+
+      let endIndex = clickedIndex;
+      while (endIndex < traceHistoricalData.length) {
+        const dist = center.distanceTo(L.latLng(traceHistoricalData[endIndex].latitude, traceHistoricalData[endIndex].longitude));
+        if (dist > threshold) {
+          endIndex--;
+          break;
+        }
+        endIndex++;
+      }
+
+      const segment = traceHistoricalData.slice(startIndex, endIndex + 1).map(p => [p.latitude, p.longitude]);
+
+      if (segment.length >= 2) {
+        traceViewLine = L.polyline(segment, {
+          color: "#8E00C2",
+          weight: 4,
+          opacity: 0.9,
+          lineJoin: "round",
+        }).addTo(map);
+      }
+    });
+  });
 }
 
 document.getElementById("restore-form")?.addEventListener("click", restoreHistoricalForm);

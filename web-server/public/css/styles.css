@@ -201,3 +201,40 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     width: 100%;
     margin-top: 6px;
   }  
+
+  /* Trace Results Panel */
+#trace-results {
+    margin-top: 10px;
+    max-height: 180px;
+    overflow-y: auto;
+    background: var(--dark-purple);
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--gray);
+  }
+  
+  .trace-result {
+    background: var(--black);
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--gray);
+    font-size: 13px;
+  }
+  
+  .trace-result button {
+    margin-top: 6px;
+    background-color: var(--bright-blue);
+    color: var(--white);
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .trace-result button:hover {
+    background-color: #2e4fd0;
+  }
+  
