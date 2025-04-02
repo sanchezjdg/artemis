@@ -123,7 +123,10 @@ socket.on("updateData", (data) => {
       realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
     );
 
-    map.setView(latlng, 15, { animate: true });
+    const autoCenter = document.getElementById("auto-center-toggle").checked;
+    if (autoCenter) {
+      map.setView(latlng, 15, { animate: true });
+    }
 
     marker.bindPopup(
       `<strong>Current Position</strong><br>
