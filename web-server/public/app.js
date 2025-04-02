@@ -6,11 +6,10 @@ document.getElementById("trace-results").style.display = "none";
 const map = L.map("map").setView([0, 0], 2);
 
 L.tileLayer(
-  "https://stamen-tiles.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png",
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://stamen.com/">Stamen</a>',
-    maxZoom: 20,
+    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
+    maxZoom: 18,
   },
 ).addTo(map);
 
