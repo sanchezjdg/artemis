@@ -24,15 +24,22 @@ let lastStartTime = "";
 let lastEndDate = "";
 let lastEndTime = "";
 
+// Obtener fecha actual y comienzo del día
+const now = new Date();
+const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+
+// Flatpickr con fechas por defecto
 flatpickr("#start-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
+  defaultDate: startOfDay,
   maxDate: "today"
 });
 
 flatpickr("#end-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
+  defaultDate: now,
   maxDate: "today"
 });
 
@@ -256,9 +263,7 @@ function restoreHistoricalForm() {
   map.closePopup();
 }
 
-document
-  .getElementById("load-data")
-  .addEventListener("click", loadHistoricalData);
+document.getElementById("load-data").addEventListener("click", loadHistoricalData);
 
 let isTrace = false;
 let traceHistoricalData = [];
@@ -337,11 +342,11 @@ document.getElementById("trace-btn").addEventListener("click", () => {
 
   const radiusSlider = document.getElementById("search-radius");
   const radiusValue = document.getElementById("radius-value");
-  
+
   radiusSlider.addEventListener("input", () => {
     radiusValue.textContent = radiusSlider.value;
   });
-  
+
   document.getElementById("historical-form").style.display = "none";
   document.getElementById("trace-radius-control").style.display = "block";
 
