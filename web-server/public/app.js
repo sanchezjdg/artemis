@@ -299,7 +299,7 @@ document.getElementById("load-data").addEventListener("click", async () => {
     }
 
     loadButton.disabled = false;
-    loadButton.innerText = "Click to reload route";
+    loadButton.innerText = "Load route";
   } catch (error) {
     console.error("Error fetching historical data:", error);
     alert("Start datetime must be before end datetime.");
