@@ -288,42 +288,7 @@ async function loadFullHistoricalData() {
   }
 }
 
-function onMapClickTrace(e) {
-  if (!traceHistoricalData || traceHistoricalData.length === 0) {
-    alert("Historical data not loaded. Please try again.");
-    return;
-  }
-
-  const threshold = 100;
-  const clickedLatLng = e.latlng;
-
-  // Filtrar todos los puntos dentro del umbral de 100 metros
-  let closestPoint = traceHistoricalData.filter((point) => {
-    let pointLatLng = L.latLng(point.latitude, point.longitude);
-    return clickedLatLng.distanceTo(pointLatLng) <= threshold;
-  });
-
-  if (closestPoint.length === 0) {
-    alert("No historical record within the search area. Try clicking closer to the route.");
-    return;
-  }
-
-  // Ordenar por tiempo ascendente
-  closestPoint.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-  // Tomar el primer punto para calcular la distancia (como referencia)
-  let firstPoint = closestPoint[0];
-  let closestDistance = clickedLatLng.distanceTo(
-    L.latLng(firstPoint.latitude, firstPoint.longitude)
-  );
-
-  // Construir el contenido del popup con todas las horas encontradas
-  let popupContent = `<b>Historical Trace</b><br>The vehicle passed here at:<br>`;
-  popupContent += closestPoint.map((point) => `${point.timestamp}`).join("<br>");
-  popupContent += `<br>(Distance: ${closestDistance.toFixed(1)} m)`;
-
-
-  // Variable para almacenar el círculo de selección (fuera de la función)
+// Variable global para el círculo de selección
 let selectionCircle = null;
 
 function onMapClickTrace(e) {
@@ -349,28 +314,28 @@ function onMapClickTrace(e) {
   }).addTo(map);
 
   // Filtrar todos los puntos dentro del umbral de 100 metros
-  let closestPoint = traceHistoricalData.filter((point) => {
+  let closestPoints = traceHistoricalData.filter((point) => {
     let pointLatLng = L.latLng(point.latitude, point.longitude);
     return clickedLatLng.distanceTo(pointLatLng) <= threshold;
   });
 
-  if (closestPoint.length === 0) {
+  if (closestPoints.length === 0) {
     alert("No historical record within the search area. Try clicking closer to the route.");
     return;
   }
 
   // Ordenar por tiempo ascendente
-  closestPoint.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  closestPoints.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
   // Tomar el primer punto para calcular la distancia (como referencia)
-  let firstPoint = closestPoint[0];
+  let firstPoint = closestPoints[0];
   let closestDistance = clickedLatLng.distanceTo(
     L.latLng(firstPoint.latitude, firstPoint.longitude)
   );
 
   // Construir el contenido del popup con todas las horas encontradas
   let popupContent = `<b>Historical Trace</b><br>The vehicle passed here at:<br>`;
-  popupContent += closestPoint.map((point) => `${point.timestamp}`).join("<br>");
+  popupContent += closestPoints.map((point) => `${point.timestamp}`).join("<br>");
   popupContent += `<br>(Distance: ${closestDistance.toFixed(1)} m)`;
 
   L.popup()
@@ -378,7 +343,6 @@ function onMapClickTrace(e) {
     .setContent(popupContent)
     .openOn(map);
 }
-
 
 
 document.getElementById("trace-btn").addEventListener("click", () => {
@@ -423,3 +387,4 @@ document.getElementById("historical-btn").addEventListener("click", () => {
 
   marker.addTo(map); // <- volver a mostrar el marcador
 });
+}
