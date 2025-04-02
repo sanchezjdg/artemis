@@ -174,10 +174,7 @@ async function loadHistoricalData() {
   const end = new Date(endDatetime);
   const now = new Date();
 
-  if (start >= end || start > now || end > now) {
-    alert("Please select valid historical date/time ranges.");
-    return;
-  }
+
 
   try {
     const loadButton = document.getElementById("load-data");
