@@ -27,7 +27,6 @@ let isTrace = false;
 let traceHistoricalData = [];
 let searchCircle = null;
 
-// Función para limpiar el círculo rojo de búsqueda
 function clearSearchCircle() {
   if (searchCircle && map.hasLayer(searchCircle)) {
     map.removeLayer(searchCircle);
@@ -35,7 +34,6 @@ function clearSearchCircle() {
   }
 }
 
-// Obtener fecha actual y formatear
 const now = new Date();
 const pad = (n) => n.toString().padStart(2, "0");
 const formatDate = (d) => {
@@ -45,11 +43,9 @@ const formatDate = (d) => {
 const startValue = formatDate(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0));
 const endValue = formatDate(now);
 
-// Mostrar valores por defecto en los inputs
 document.getElementById("start-datetime").value = startValue;
 document.getElementById("end-datetime").value = endValue;
 
-// Inicializar flatpickr con los mismos valores
 flatpickr("#start-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
@@ -80,18 +76,13 @@ function addPolylineClickHandler(polyline, data) {
       let prevLat = Array.isArray(prev) ? prev[0] : prev.latitude;
       let prevLng = Array.isArray(prev) ? prev[1] : prev.longitude;
 
-      return map.distance(e.latlng, L.latLng(currLat, currLng)) <
-        map.distance(e.latlng, L.latLng(prevLat, prevLng))
+      return map.distance(e.latlng, L.latLng(currLat, currLng)) < map.distance(e.latlng, L.latLng(prevLat, prevLng))
         ? curr
         : prev;
     });
 
-    let lat = Array.isArray(closestPoint)
-      ? closestPoint[0]
-      : closestPoint.latitude;
-    let lng = Array.isArray(closestPoint)
-      ? closestPoint[1]
-      : closestPoint.longitude;
+    let lat = Array.isArray(closestPoint) ? closestPoint[0] : closestPoint.latitude;
+    let lng = Array.isArray(closestPoint) ? closestPoint[1] : closestPoint.longitude;
     let timestamp = closestPoint.timestamp || "N/A";
 
     L.popup()
@@ -143,7 +134,7 @@ function setActiveButton(activeId) {
 }
 
 document.getElementById("real-time-btn").addEventListener("click", () => {
-  clearSearchCircle(); // limpia el círculo
+  clearSearchCircle();
   isRealTime = true;
   isTrace = false;
   document.getElementById("historical-form").style.display = "none";
@@ -171,7 +162,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
-  clearSearchCircle(); // limpia el círculo
+  clearSearchCircle();
   isRealTime = false;
   isTrace = false;
   document.getElementById("historical-form").style.display = "block";
@@ -191,7 +182,7 @@ document.getElementById("historical-btn").addEventListener("click", () => {
 });
 
 document.getElementById("trace-btn").addEventListener("click", () => {
-  clearSearchCircle(); // limpia el círculo
+  clearSearchCircle();
   isRealTime = false;
   isTrace = true;
 
@@ -202,8 +193,7 @@ document.getElementById("trace-btn").addEventListener("click", () => {
     radiusValue.textContent = radiusSlider.value;
   });
 
-  // Mostrar también el formulario de fechas para Trace
-  document.getElementById("historical-form").style.display = "block";
+  document.getElementById("historical-form").style.display = "block"; // cambio necesario
   document.getElementById("trace-radius-control").style.display = "block";
 
   clearLayer(realTimePath);
@@ -221,7 +211,6 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   map.closePopup();
 });
 
-// NUEVA función para cargar datos históricos solo para el modo Trace
 document.getElementById("load-data").addEventListener("click", async () => {
   lastStartDate = document.getElementById("start-datetime").value;
   lastEndDate = document.getElementById("end-datetime").value;
@@ -251,7 +240,6 @@ document.getElementById("load-data").addEventListener("click", async () => {
       return;
     }
 
-    // Si estás en modo histórico: dibujar ruta
     if (!isTrace) {
       clearLayer(historicalPath);
       historicalPath = L.polyline(
@@ -271,10 +259,7 @@ document.getElementById("load-data").addEventListener("click", async () => {
         data[data.length - 1].latitude,
         data[data.length - 1].longitude,
       ]);
-    }
-
-    // Si estás en modo trace: guardar datos para la búsqueda
-    if (isTrace) {
+    } else {
       traceHistoricalData = data;
       alert("Datos cargados. Haz clic en el mapa para consultar.");
     }
@@ -289,67 +274,6 @@ document.getElementById("load-data").addEventListener("click", async () => {
     loadButton.innerText = "Load Route";
   }
 });
-
-async function loadHistoricalData() {
-  lastStartDate = document.getElementById("start-datetime").value;
-  lastEndDate = document.getElementById("end-datetime").value;
-
-  if (!lastStartDate || !lastEndDate) {
-    alert("Please fill in both datetime fields.");
-    return;
-  }
-
-  const startDatetime = `${lastStartDate}:00`;
-  const endDatetime = `${lastEndDate}:00`;
-
-  try {
-    const loadButton = document.getElementById("load-data");
-    loadButton.disabled = true;
-    loadButton.innerText = "Loading...";
-
-    const response = await fetch(
-      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`
-    );
-    const data = await response.json();
-
-    if (data.length === 0) {
-      alert("No route data found for the selected interval.");
-      loadButton.disabled = false;
-      loadButton.innerText = "Load Route";
-      return;
-    }
-
-    clearLayer(historicalPath);
-    historicalPath = L.polyline(
-      data.map((loc) => [loc.latitude, loc.longitude]),
-      {
-        color: "#8E00C2",
-        weight: 4,
-        opacity: 0.8,
-        lineJoin: "round",
-      }
-    ).addTo(map);
-
-    addPolylineClickHandler(historicalPath, data);
-    map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
-
-    marker.setLatLng([
-      data[data.length - 1].latitude,
-      data[data.length - 1].longitude,
-    ]);
-
-    loadButton.disabled = false;
-    loadButton.innerText = "Load Route";
-  } catch (error) {
-    console.error("Error fetching historical data:", error);
-    alert("Start datetime must be before end datetime.");
-    const loadButton = document.getElementById("load-data");
-    loadButton.disabled = false;
-    loadButton.innerText = "Load Route";
-  }
-}
-
-document.getElementById("load-data").addEventListener("click", loadHistoricalData);
 
 async function loadFullHistoricalData() {
   const defaultStart = "2020-01-01T00:00:00";
@@ -391,32 +315,53 @@ function onMapClickTrace(e) {
     fillOpacity: 0.2,
   }).addTo(map);
 
-  let closestPoint = traceHistoricalData.reduce((prev, curr) => {
-    let prevLatLng = L.latLng(prev.latitude, prev.longitude);
-    let currLatLng = L.latLng(curr.latitude, curr.longitude);
-    return clickedLatLng.distanceTo(currLatLng) <
-      clickedLatLng.distanceTo(prevLatLng)
-      ? curr
-      : prev;
+  const nearbyPoints = traceHistoricalData.filter((point) => {
+    const dist = clickedLatLng.distanceTo(L.latLng(point.latitude, point.longitude));
+    return dist <= threshold;
   });
 
-  let closestDistance = clickedLatLng.distanceTo(
-    L.latLng(closestPoint.latitude, closestPoint.longitude)
-  );
+  const resultsContainer = document.getElementById("trace-results");
+  resultsContainer.innerHTML = "";
 
-  if (closestDistance <= threshold) {
-    L.popup()
-      .setLatLng(clickedLatLng)
-      .setContent(`
-         <b>Historical Trace</b><br>
-         El vehículo pasó cerca de aquí a:<br>
-         ${closestPoint.timestamp}<br>
-         (Distancia: ${closestDistance.toFixed(1)} m)
-       `)
-      .openOn(map);
-  } else {
+  if (nearbyPoints.length === 0) {
     alert("No se encontró ningún paso del vehículo dentro del radio. Intenta más cerca de la ruta.");
+    return;
   }
+
+  const fragment = document.createDocumentFragment();
+
+  nearbyPoints.forEach((point) => {
+    const div = document.createElement("div");
+    div.className = "trace-result";
+
+    div.innerHTML = `
+      <div><b>${point.timestamp}</b></div>
+      <button class="view-point" data-lat="${point.latitude}" data-lng="${point.longitude}" data-time="${point.timestamp}">Ver</button>
+      <hr>
+    `;
+    fragment.appendChild(div);
+  });
+
+  resultsContainer.appendChild(fragment);
+
+  document.querySelectorAll(".view-point").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const lat = parseFloat(btn.dataset.lat);
+      const lng = parseFloat(btn.dataset.lng);
+      const time = btn.dataset.time;
+
+      map.setView([lat, lng], 17);
+      L.popup()
+        .setLatLng([lat, lng])
+        .setContent(`
+          <b>Momento registrado</b><br>
+          Lat: ${lat.toFixed(5)}<br>
+          Lng: ${lng.toFixed(5)}<br>
+          Timestamp: ${time}
+        `)
+        .openOn(map);
+    });
+  });
 }
 
 document.getElementById("restore-form")?.addEventListener("click", restoreHistoricalForm);
