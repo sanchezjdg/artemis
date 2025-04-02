@@ -169,3 +169,30 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     border: 2px solid var(--gray);
     background-color: var(--dark-purple);
 }
+
+/* Trace Radius Control */
+#trace-radius-control {
+    display: none;
+    margin-top: 10px;
+}
+
+#trace-radius-control label {
+    font-size: 13px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+#trace-radius-control input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--bright-blue);
+    border-radius: 6px;
+    background: var(--dark-purple);
+    color: var(--white);
+    transition: border-color 0.3s;
+}
+
+#trace-radius-control input[type="number"]:focus {
+    outline: none;
+    border-color: var(--gray);
+}

@@ -118,6 +118,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   isRealTime = true;
   isTrace = false;
   document.getElementById("historical-form").style.display = "none";
+  document.getElementById("trace-radius-control").style.display = "none";
 
   clearLayer(historicalPath);
   historicalPath = null;
@@ -132,7 +133,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   }).addTo(map);
   addPolylineClickHandler(realTimePath, realTimeCoordinates);
 
-  marker.addTo(map); // <- volver a mostrar el marcador
+  marker.addTo(map);
 
   setActiveButton("real-time-btn");
   document.querySelector(".button-group").style.display = "flex";
@@ -144,12 +145,13 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   isRealTime = false;
   isTrace = false;
   document.getElementById("historical-form").style.display = "block";
+  document.getElementById("trace-radius-control").style.display = "none";
 
   clearLayer(realTimePath);
   clearLayer(historicalPath);
   historicalPath = null;
 
-  marker.addTo(map); // <- volver a mostrar el marcador
+  marker.addTo(map);
 
   setActiveButton("historical-btn");
   document.querySelector(".controls .mode-info").innerText =
@@ -260,6 +262,7 @@ document
 
 let isTrace = false;
 let traceHistoricalData = [];
+let searchCircle = null;
 
 async function loadFullHistoricalData() {
   const defaultStart = "2020-01-01T00:00:00";
@@ -288,8 +291,17 @@ function onMapClickTrace(e) {
     return;
   }
 
-  const threshold = 100;
+  const radiusInput = document.getElementById("search-radius");
+  const threshold = parseFloat(radiusInput.value) || 100;
   const clickedLatLng = e.latlng;
+
+  if (searchCircle) map.removeLayer(searchCircle);
+  searchCircle = L.circle(clickedLatLng, {
+    radius: threshold,
+    color: "red",
+    fillColor: "#f03",
+    fillOpacity: 0.2,
+  }).addTo(map);
 
   let closestPoint = traceHistoricalData.reduce((prev, curr) => {
     let prevLatLng = L.latLng(prev.latitude, prev.longitude);
@@ -309,13 +321,13 @@ function onMapClickTrace(e) {
       .setLatLng(clickedLatLng)
       .setContent(`
          <b>Historical Trace</b><br>
-         The vehicle passed here at:<br>
+         El vehículo pasó cerca de aquí a:<br>
          ${closestPoint.timestamp}<br>
-         (Distance: ${closestDistance.toFixed(1)} m)
+         (Distancia: ${closestDistance.toFixed(1)} m)
        `)
       .openOn(map);
   } else {
-    alert("No historical record within the search area. Try clicking closer to the route.");
+    alert("No se encontró ningún paso del vehículo dentro del radio. Intenta más cerca de la ruta.");
   }
 }
 
@@ -324,10 +336,12 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   isTrace = true;
 
   document.getElementById("historical-form").style.display = "none";
+  document.getElementById("trace-radius-control").style.display = "block";
+
   clearLayer(realTimePath);
   clearLayer(historicalPath);
 
-  map.removeLayer(marker); // <- ocultar el marcador
+  map.removeLayer(marker);
 
   setActiveButton("trace-btn");
 
@@ -346,18 +360,20 @@ document.getElementById("trace-btn").addEventListener("click", () => {
 document.getElementById("real-time-btn").addEventListener("click", () => {
   isTrace = false;
   isRealTime = true;
+  document.getElementById("trace-radius-control").style.display = "none";
+
   map.off("click", onMapClickTrace);
   map.closePopup();
-
-  marker.addTo(map); // <- volver a mostrar el marcador
+  marker.addTo(map);
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
   isTrace = false;
+  document.getElementById("trace-radius-control").style.display = "none";
+
   document.querySelector(".controls .mode-info").innerText =
     "Select the mode you want to use:";
   map.off("click", onMapClickTrace);
   map.closePopup();
-
-  marker.addTo(map); // <- volver a mostrar el marcador
+  marker.addTo(map);
 });
