@@ -1,7 +1,6 @@
 const socket = io();
 console.log("Connected to Socket.IO server.");
 
-// Ocultar el panel de resultados del modo Trace al cargar la página
 document.getElementById("trace-results").style.display = "none";
 
 const map = L.map("map").setView([0, 0], 2);
@@ -23,8 +22,6 @@ let realTimePath = L.polyline([], {
 let historicalPath = null;
 let isRealTime = true;
 let lastStartDate = "";
-let lastStartTime = "";
-let lastEndDate = "";
 let lastEndTime = "";
 let isTrace = false;
 let traceHistoricalData = [];
@@ -107,35 +104,6 @@ function addPolylineClickHandler(polyline, data) {
       .openOn(map);
   });
 }
-
-socket.on("updateData", (data) => {
-  if (isRealTime && data.latitude && data.longitude) {
-    const latlng = [data.latitude, data.longitude];
-    marker.setLatLng(latlng);
-
-    realTimeCoordinates.push({
-      latitude: data.latitude,
-      longitude: data.longitude,
-      timestamp: data.timestamp,
-    });
-
-    realTimePath.setLatLngs(
-      realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
-    );
-
-    const autoCenter = document.getElementById("auto-center-toggle").checked;
-    if (autoCenter) {
-      map.setView(latlng, 15, { animate: true });
-    }
-
-    marker.bindPopup(
-      `<strong>Current Position</strong><br>
-      Latitude: ${data.latitude.toFixed(5)}<br> exampl
-      Longitude: ${data.longitude.toFixed(5)}<br>
-      Timestamp: ${data.timestamp}`,
-    );
-  }
-});
 
 function setActiveButton(activeId) {
   ["real-time-btn", "historical-btn", "trace-btn"].forEach((id) => {
@@ -446,9 +414,6 @@ function onMapClickTrace(e) {
     });
   });
 }
-
-// Define autoCenter state variable
-let autoCenter = true;
 
 // Add event listener for auto-center toggle (ensure this runs after the DOM is loaded)
 document
