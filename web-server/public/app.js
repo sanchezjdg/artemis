@@ -24,28 +24,32 @@ let lastStartTime = "";
 let lastEndDate = "";
 let lastEndTime = "";
 
-// Generar fecha y hora actual + inicio del día
+// Obtener fecha actual y formatear
 const now = new Date();
 const pad = (n) => n.toString().padStart(2, "0");
-const toFlatpickrString = (date) => {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+const formatDate = (d) => {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-const defaultStartString = toFlatpickrString(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0));
-const defaultEndString = toFlatpickrString(now);
+const startValue = formatDate(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0));
+const endValue = formatDate(now);
 
-// Flatpickr con valores por defecto
+// Mostrar valores por defecto en los inputs
+document.getElementById("start-datetime").value = startValue;
+document.getElementById("end-datetime").value = endValue;
+
+// Inicializar flatpickr con los mismos valores
 flatpickr("#start-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
-  defaultDate: defaultStartString,
+  defaultDate: startValue,
   maxDate: "today"
 });
 
 flatpickr("#end-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
-  defaultDate: defaultEndString,
+  defaultDate: endValue,
   maxDate: "today"
 });
 
