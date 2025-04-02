@@ -123,11 +123,14 @@ socket.on("updateData", (data) => {
       realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
     );
 
-    map.setView(latlng, 15, { animate: true });
+    const autoCenter = document.getElementById("auto-center-toggle").checked;
+    if (autoCenter) {
+      map.setView(latlng, 15, { animate: true });
+    }
 
     marker.bindPopup(
       `<strong>Current Position</strong><br>
-      Latitude: ${data.latitude.toFixed(5)}<br>
+      Latitude: ${data.latitude.toFixed(5)}<br> exampl
       Longitude: ${data.longitude.toFixed(5)}<br>
       Timestamp: ${data.timestamp}`,
     );
@@ -464,6 +467,91 @@ function onMapClickTrace(e) {
     });
   });
 }
+
+// Define autoCenter state variable
+let autoCenter = true;
+
+// Add event listener for auto-center toggle (ensure this runs after the DOM is loaded)
+document
+  .getElementById("auto-center-toggle")
+  .addEventListener("change", (e) => {
+    autoCenter = e.target.checked;
+  });
+
+socket.on("updateData", (data) => {
+  if (isRealTime && data.latitude && data.longitude) {
+    const latlng = [data.latitude, data.longitude];
+    marker.setLatLng(latlng);
+
+    realTimeCoordinates.push({
+      latitude: data.latitude,
+      longitude: data.longitude,
+      timestamp: data.timestamp,
+    });
+
+    realTimePath.setLatLngs(
+      realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
+    );
+
+    // Directly check the state of the auto-center toggle
+    if (document.getElementById("auto-center-toggle").checked) {
+      map.setView(latlng, 15, { animate: true });
+    }
+
+    marker.bindPopup(
+      `<strong>Current Position</strong><br>
+      Latitude: ${data.latitude.toFixed(5)}<br>
+      Longitude: ${data.longitude.toFixed(5)}<br>
+      Timestamp: ${data.timestamp}`,
+    );
+  }
+});
+
+// Real-time mode activation handler
+document.getElementById("real-time-btn").addEventListener("click", () => {
+  clearSearchCircle();
+  document.getElementById("trace-results").innerHTML = "";
+  document.getElementById("trace-results").style.display = "none";
+
+  if (traceViewLine) {
+    map.removeLayer(traceViewLine);
+    traceViewLine = null;
+  }
+
+  isRealTime = true;
+  isTrace = false;
+  document.getElementById("historical-form").style.display = "none";
+  document.getElementById("trace-radius-control").style.display = "none";
+
+  // Show dynamic centering control only in real-time mode
+  document.getElementById("real-time-controls").style.display = "block";
+
+  clearLayer(historicalPath);
+  historicalPath = null;
+
+  clearLayer(realTimePath);
+  realTimeCoordinates.length = 0;
+  realTimePath = L.polyline([], {
+    color: "#3b65ff",
+    weight: 4,
+    opacity: 0.8,
+    lineJoin: "round",
+  }).addTo(map);
+  addPolylineClickHandler(realTimePath, realTimeCoordinates);
+
+  marker.addTo(map);
+
+  setActiveButton("real-time-btn");
+  document.querySelector(".button-group").style.display = "flex";
+  document.querySelector(".controls .mode-info").style.display = "block";
+  map.closePopup();
+});
+
+// Ensure to hide the control in other modes (e.g., historical mode)
+document.getElementById("historical-btn").addEventListener("click", () => {
+  document.getElementById("real-time-controls").style.display = "none";
+  // Additional historical mode setup code...
+});
 
 document
   .getElementById("restore-form")
