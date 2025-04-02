@@ -29,7 +29,7 @@ let lastEndTime = "";
 let isTrace = false;
 let traceHistoricalData = [];
 let searchCircle = null;
-let traceViewLine = null; // NUEVA LÍNEA: línea de entrada/salida del radio
+let traceViewLine = null;
 
 function clearSearchCircle() {
   if (searchCircle && map.hasLayer(searchCircle)) {
@@ -383,7 +383,6 @@ function onMapClickTrace(e) {
       const lng = parseFloat(btn.dataset.lng);
       const time = btn.dataset.time;
 
-      // Eliminar línea anterior si existe
       if (traceViewLine && map.hasLayer(traceViewLine)) {
         map.removeLayer(traceViewLine);
       }
@@ -399,31 +398,36 @@ function onMapClickTrace(e) {
         )
         .openOn(map);
 
-      // Obtener puntos dentro del radio (entrada y salida)
       const threshold = parseFloat(document.getElementById("search-radius").value) || 100;
-      const clickedLatLng = L.latLng(lat, lng);
+      const center = L.latLng(lat, lng);
 
-      let inside = false;
-      let segment = [];
+      const clickedIndex = traceHistoricalData.findIndex(p =>
+        p.latitude === lat && p.longitude === lng && p.timestamp === time
+      );
 
-      for (let point of traceHistoricalData) {
-        const pointLatLng = L.latLng(point.latitude, point.longitude);
-        const distance = pointLatLng.distanceTo(clickedLatLng);
+      if (clickedIndex === -1) return;
 
-        if (distance <= threshold) {
-          if (!inside) {
-            inside = true;
-            segment.push([point.latitude, point.longitude]);
-          } else {
-            segment.push([point.latitude, point.longitude]);
-          }
-        } else {
-          if (inside) {
-            segment.push([point.latitude, point.longitude]);
-            break;
-          }
+      let startIndex = clickedIndex;
+      while (startIndex > 0) {
+        const dist = center.distanceTo(L.latLng(traceHistoricalData[startIndex].latitude, traceHistoricalData[startIndex].longitude));
+        if (dist > threshold) {
+          startIndex++;
+          break;
         }
+        startIndex--;
       }
+
+      let endIndex = clickedIndex;
+      while (endIndex < traceHistoricalData.length) {
+        const dist = center.distanceTo(L.latLng(traceHistoricalData[endIndex].latitude, traceHistoricalData[endIndex].longitude));
+        if (dist > threshold) {
+          endIndex--;
+          break;
+        }
+        endIndex++;
+      }
+
+      const segment = traceHistoricalData.slice(startIndex, endIndex + 1).map(p => [p.latitude, p.longitude]);
 
       if (segment.length >= 2) {
         traceViewLine = L.polyline(segment, {
