@@ -36,7 +36,7 @@
     </div>
 
     <!-- Historical form -->
-    <div id="historical-form">
+    <div id="historical-form" style="display: none;">
       <div class="input-group">
         <label for="start-datetime">Start:</label>
         <input type="text" id="start-datetime">
@@ -48,12 +48,12 @@
       </div>
 
       <button id="load-data" class="load-button">Load Route</button>
-    </div>
 
-    <!-- Trace radius control (solo visible en modo Trace) -->
-    <div id="trace-radius-control" style="display: none; margin-top: 10px;">
-      <label for="search-radius">Radio de búsqueda: <span id="radius-value">100</span> m</label>
-      <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
+      <!-- Trace radius control (solo visible en modo Trace) -->
+      <div id="trace-radius-control" style="display: none; margin-top: 10px;">
+        <label for="search-radius">Radio de búsqueda: <span id="radius-value">100</span> m</label>
+        <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
+      </div>
     </div>
 
     <!-- Resultados de búsqueda en modo Trace -->
