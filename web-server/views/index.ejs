@@ -35,26 +35,16 @@
       <button id="trace-btn">Trace</button>
     </div>
 
-   <!-- Historical form -->
+    <!-- Historical form -->
     <div id="historical-form">
       <div class="input-group">
-        <label for="start-date">Start Date:</label>
+        <label for="start-datetime">Start:</label>
         <input type="text" id="start-datetime">
       </div>
 
       <div class="input-group">
-        <label for="start-time">Start Time:</label>
+        <label for="end-datetime">End:</label>
         <input type="text" id="end-datetime">
-      </div>
-
-      <div class="input-group">
-        <label for="end-date">End Date:</label>
-        <input type="date" id="end-date">
-      </div>
-
-      <div class="input-group">
-        <label for="end-time">End Time:</label>
-        <input type="time" id="end-time">
       </div>
 
       <button id="load-data" class="load-button">Load Route</button>
@@ -68,9 +58,9 @@
   <script src="/socket.io/socket.io.js"></script>
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Flatpickr JS (antes de app.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <!-- Custom Client Script -->
   <script src="app.js"></script>
-  <!-- Flatpickr JS -->
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
 </html>
