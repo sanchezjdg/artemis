@@ -319,27 +319,6 @@ document.getElementById("load-data").addEventListener("click", async () => {
   }
 });
 
-async function loadFullHistoricalData() {
-  const defaultStart = "2020-01-01T00:00:00";
-  const defaultEnd = new Date().toISOString();
-
-  try {
-    const response = await fetch(
-      `/historical?start=${encodeURIComponent(defaultStart)}&end=${encodeURIComponent(defaultEnd)}`,
-    );
-    const data = await response.json();
-    if (data.length === 0) {
-      alert("No historical data available for tracing.");
-      return;
-    }
-    traceHistoricalData = data;
-    alert("Historical data loaded for trace mode. Click on the map to query.");
-  } catch (error) {
-    console.error("Error fetching full historical data:", error);
-    alert("An error occurred while loading historical data for trace mode.");
-  }
-}
-
 function onMapClickTrace(e) {
   if (!traceHistoricalData || traceHistoricalData.length === 0) {
     alert("Historical data not loaded. Please try again.");
