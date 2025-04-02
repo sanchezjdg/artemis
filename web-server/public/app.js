@@ -23,16 +23,44 @@ let lastStartDate = "";
 let lastStartTime = "";
 let lastEndDate = "";
 let lastEndTime = "";
+let isTrace = false;
+let traceHistoricalData = [];
+let searchCircle = null;
 
+// Función para limpiar el círculo rojo de búsqueda
+function clearSearchCircle() {
+  if (searchCircle && map.hasLayer(searchCircle)) {
+    map.removeLayer(searchCircle);
+    searchCircle = null;
+  }
+}
+
+// Obtener fecha actual y formatear
+const now = new Date();
+const pad = (n) => n.toString().padStart(2, "0");
+const formatDate = (d) => {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+const startValue = formatDate(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0));
+const endValue = formatDate(now);
+
+// Mostrar valores por defecto en los inputs
+document.getElementById("start-datetime").value = startValue;
+document.getElementById("end-datetime").value = endValue;
+
+// Inicializar flatpickr con los mismos valores
 flatpickr("#start-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
+  defaultDate: startValue,
   maxDate: "today"
 });
 
 flatpickr("#end-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
+  defaultDate: endValue,
   maxDate: "today"
 });
 
@@ -115,9 +143,11 @@ function setActiveButton(activeId) {
 }
 
 document.getElementById("real-time-btn").addEventListener("click", () => {
+  clearSearchCircle(); // limpia el círculo
   isRealTime = true;
   isTrace = false;
   document.getElementById("historical-form").style.display = "none";
+  document.getElementById("trace-radius-control").style.display = "none";
 
   clearLayer(historicalPath);
   historicalPath = null;
@@ -132,7 +162,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   }).addTo(map);
   addPolylineClickHandler(realTimePath, realTimeCoordinates);
 
-  marker.addTo(map); // <- volver a mostrar el marcador
+  marker.addTo(map);
 
   setActiveButton("real-time-btn");
   document.querySelector(".button-group").style.display = "flex";
@@ -141,20 +171,56 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
+  clearSearchCircle(); // limpia el círculo
   isRealTime = false;
   isTrace = false;
   document.getElementById("historical-form").style.display = "block";
+  document.getElementById("trace-radius-control").style.display = "none";
 
   clearLayer(realTimePath);
   clearLayer(historicalPath);
   historicalPath = null;
 
-  marker.addTo(map); // <- volver a mostrar el marcador
+  marker.addTo(map);
 
   setActiveButton("historical-btn");
   document.querySelector(".controls .mode-info").innerText =
     "Select the mode you want to use:";
   map.off("click", onMapClickTrace);
+  map.closePopup();
+});
+
+document.getElementById("trace-btn").addEventListener("click", () => {
+  clearSearchCircle(); // limpia el círculo
+  isRealTime = false;
+  isTrace = true;
+
+  const radiusSlider = document.getElementById("search-radius");
+  const radiusValue = document.getElementById("radius-value");
+
+  radiusSlider.addEventListener("input", () => {
+    radiusValue.textContent = radiusSlider.value;
+  });
+
+  document.getElementById("historical-form").style.display = "none";
+  document.getElementById("trace-radius-control").style.display = "block";
+
+  clearLayer(realTimePath);
+  clearLayer(historicalPath);
+
+  map.removeLayer(marker);
+
+  setActiveButton("trace-btn");
+
+  document.querySelector(".controls .mode-info").innerText =
+    "Trace Mode: Click on the map to see when the vehicle passed that point.";
+
+  if (traceHistoricalData.length === 0) {
+    loadFullHistoricalData();
+  }
+
+  map.off("click");
+  map.on("click", onMapClickTrace);
   map.closePopup();
 });
 
@@ -217,49 +283,7 @@ async function loadHistoricalData() {
   }
 }
 
-function restoreHistoricalForm() {
-  document.querySelector(".button-group").style.display = "flex";
-  document.querySelector(".controls .mode-info").style.display = "block";
-
-  document.getElementById("historical-form").innerHTML = `
-    <div class="input-group">
-      <label for="start-datetime">Start:</label>
-      <input type="text" id="start-datetime" value="${lastStartDate}">
-    </div>
-    <div class="input-group">
-      <label for="end-datetime">End:</label>
-      <input type="text" id="end-datetime" value="${lastEndDate}">
-    </div>
-    <button id="load-data" class="load-button">Load Route</button>
-  `;
-
-  flatpickr("#start-datetime", {
-    enableTime: true,
-    dateFormat: "Y-m-d\\TH:i",
-    defaultDate: lastStartDate,
-    maxDate: "today"
-  });
-
-  flatpickr("#end-datetime", {
-    enableTime: true,
-    dateFormat: "Y-m-d\\TH:i",
-    defaultDate: lastEndDate,
-    maxDate: "today"
-  });
-
-  document.getElementById("load-data").addEventListener("click", loadHistoricalData);
-
-  clearLayer(historicalPath);
-  historicalPath = null;
-  map.closePopup();
-}
-
-document
-  .getElementById("load-data")
-  .addEventListener("click", loadHistoricalData);
-
-let isTrace = false;
-let traceHistoricalData = [];
+document.getElementById("load-data").addEventListener("click", loadHistoricalData);
 
 async function loadFullHistoricalData() {
   const defaultStart = "2020-01-01T00:00:00";
@@ -288,8 +312,18 @@ function onMapClickTrace(e) {
     return;
   }
 
-  const threshold = 100;
+  const radiusInput = document.getElementById("search-radius");
+  const threshold = parseFloat(radiusInput.value) || 100;
   const clickedLatLng = e.latlng;
+
+  clearSearchCircle();
+
+  searchCircle = L.circle(clickedLatLng, {
+    radius: threshold,
+    color: "red",
+    fillColor: "#f03",
+    fillOpacity: 0.2,
+  }).addTo(map);
 
   let closestPoint = traceHistoricalData.reduce((prev, curr) => {
     let prevLatLng = L.latLng(prev.latitude, prev.longitude);
@@ -309,55 +343,14 @@ function onMapClickTrace(e) {
       .setLatLng(clickedLatLng)
       .setContent(`
          <b>Historical Trace</b><br>
-         The vehicle passed here at:<br>
+         El vehículo pasó cerca de aquí a:<br>
          ${closestPoint.timestamp}<br>
-         (Distance: ${closestDistance.toFixed(1)} m)
+         (Distancia: ${closestDistance.toFixed(1)} m)
        `)
       .openOn(map);
   } else {
-    alert("No historical record within the search area. Try clicking closer to the route.");
+    alert("No se encontró ningún paso del vehículo dentro del radio. Intenta más cerca de la ruta.");
   }
 }
 
-document.getElementById("trace-btn").addEventListener("click", () => {
-  isRealTime = false;
-  isTrace = true;
-
-  document.getElementById("historical-form").style.display = "none";
-  clearLayer(realTimePath);
-  clearLayer(historicalPath);
-
-  map.removeLayer(marker); // <- ocultar el marcador
-
-  setActiveButton("trace-btn");
-
-  document.querySelector(".controls .mode-info").innerText =
-    "Trace Mode: Click on the map to see when the vehicle passed that point.";
-
-  if (traceHistoricalData.length === 0) {
-    loadFullHistoricalData();
-  }
-
-  map.off("click");
-  map.on("click", onMapClickTrace);
-  map.closePopup();
-});
-
-document.getElementById("real-time-btn").addEventListener("click", () => {
-  isTrace = false;
-  isRealTime = true;
-  map.off("click", onMapClickTrace);
-  map.closePopup();
-
-  marker.addTo(map); // <- volver a mostrar el marcador
-});
-
-document.getElementById("historical-btn").addEventListener("click", () => {
-  isTrace = false;
-  document.querySelector(".controls .mode-info").innerText =
-    "Select the mode you want to use:";
-  map.off("click", onMapClickTrace);
-  map.closePopup();
-
-  marker.addTo(map); // <- volver a mostrar el marcador
-});
+document.getElementById("restore-form")?.addEventListener("click", restoreHistoricalForm);
