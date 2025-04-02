@@ -29,6 +29,7 @@ let lastEndTime = "";
 let isTrace = false;
 let traceHistoricalData = [];
 let searchCircle = null;
+let traceViewLine = null; // NUEVA LÍNEA: línea de entrada/salida del radio
 
 function clearSearchCircle() {
   if (searchCircle && map.hasLayer(searchCircle)) {
@@ -141,6 +142,11 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   document.getElementById("trace-results").innerHTML = "";
   document.getElementById("trace-results").style.display = "none";
 
+  if (traceViewLine) {
+    map.removeLayer(traceViewLine);
+    traceViewLine = null;
+  }
+
   isRealTime = true;
   isTrace = false;
   document.getElementById("historical-form").style.display = "none";
@@ -171,6 +177,11 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   clearSearchCircle();
   document.getElementById("trace-results").innerHTML = "";
   document.getElementById("trace-results").style.display = "none";
+
+  if (traceViewLine) {
+    map.removeLayer(traceViewLine);
+    traceViewLine = null;
+  }
 
   isRealTime = false;
   isTrace = false;
@@ -205,6 +216,11 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   document.getElementById("historical-form").style.display = "block";
   document.getElementById("trace-radius-control").style.display = "block";
   document.getElementById("trace-results").style.display = "block";
+
+  if (traceViewLine) {
+    map.removeLayer(traceViewLine);
+    traceViewLine = null;
+  }
 
   clearLayer(realTimePath);
   clearLayer(historicalPath);
@@ -367,6 +383,11 @@ function onMapClickTrace(e) {
       const lng = parseFloat(btn.dataset.lng);
       const time = btn.dataset.time;
 
+      // Eliminar línea anterior si existe
+      if (traceViewLine && map.hasLayer(traceViewLine)) {
+        map.removeLayer(traceViewLine);
+      }
+
       map.setView([lat, lng], 17);
       L.popup()
         .setLatLng([lat, lng])
@@ -377,6 +398,41 @@ function onMapClickTrace(e) {
           Timestamp: ${time}`
         )
         .openOn(map);
+
+      // Obtener puntos dentro del radio (entrada y salida)
+      const threshold = parseFloat(document.getElementById("search-radius").value) || 100;
+      const clickedLatLng = L.latLng(lat, lng);
+
+      let inside = false;
+      let segment = [];
+
+      for (let point of traceHistoricalData) {
+        const pointLatLng = L.latLng(point.latitude, point.longitude);
+        const distance = pointLatLng.distanceTo(clickedLatLng);
+
+        if (distance <= threshold) {
+          if (!inside) {
+            inside = true;
+            segment.push([point.latitude, point.longitude]);
+          } else {
+            segment.push([point.latitude, point.longitude]);
+          }
+        } else {
+          if (inside) {
+            segment.push([point.latitude, point.longitude]);
+            break;
+          }
+        }
+      }
+
+      if (segment.length >= 2) {
+        traceViewLine = L.polyline(segment, {
+          color: "#8E00C2",
+          weight: 4,
+          opacity: 0.9,
+          lineJoin: "round",
+        }).addTo(map);
+      }
     });
   });
 }
