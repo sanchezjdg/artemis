@@ -34,45 +34,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// New endpoint to fetch the earliest available timestamp
-app.get("/earliest", async (req, res) => {
-  try {
-    const connection = await pool.getConnection();
-    const [rows] = await connection.query(
-      "SELECT timestamp FROM steinstable ORDER BY timestamp ASC LIMIT 1",
-    );
-    connection.release();
-    if (rows.length > 0) {
-      res.json({ earliest: rows[0].timestamp });
-    } else {
-      res.status(404).json({ error: "No data found" });
-    }
-  } catch (error) {
-    console.error("Error fetching earliest date:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// Helper function to validate date inputs
-function isValidDateRange(start, end) {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const now = new Date();
-
-  if (startDate >= endDate) {
-    return {
-      valid: false,
-      message: "Start datetime must be before end datetime.",
-    };
-  }
-
-  if (startDate > now || endDate > now) {
-    return { valid: false, message: "Future dates/times are not allowed." };
-  }
-
-  return { valid: true };
-}
-
 // API endpoint for historical data
 app.get("/historical", async (req, res) => {
   const { start, end } = req.query;
