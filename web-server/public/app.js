@@ -490,8 +490,8 @@ socket.on("updateData", (data) => {
       realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
     );
 
-    // Only auto-center if the user enabled it
-    if (autoCenter) {
+    // Directly check the state of the auto-center toggle
+    if (document.getElementById("auto-center-toggle").checked) {
       map.setView(latlng, 15, { animate: true });
     }
 
