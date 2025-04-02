@@ -270,7 +270,7 @@ document.getElementById("load-data").addEventListener("click", async () => {
     if (data.length === 0) {
       alert("No route data found for the selected interval.");
       loadButton.disabled = false;
-      loadButton.innerText = "Load Route";
+      loadButton.innerText = "Return to Loud Route";
       return;
     }
 
@@ -299,13 +299,13 @@ document.getElementById("load-data").addEventListener("click", async () => {
     }
 
     loadButton.disabled = false;
-    loadButton.innerText = "Load Route";
+    loadButton.innerText = "Return to Loud Route";
   } catch (error) {
     console.error("Error fetching historical data:", error);
     alert("Start datetime must be before end datetime.");
     const loadButton = document.getElementById("load-data");
     loadButton.disabled = false;
-    loadButton.innerText = "Load Route";
+    loadButton.innerText = "Return to Loud Route";
   }
 });
 
