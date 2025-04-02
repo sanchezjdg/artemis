@@ -202,7 +202,8 @@ document.getElementById("trace-btn").addEventListener("click", () => {
     radiusValue.textContent = radiusSlider.value;
   });
 
-  document.getElementById("historical-form").style.display = "none";
+  // Mostrar también el formulario de fechas para Trace
+  document.getElementById("historical-form").style.display = "block";
   document.getElementById("trace-radius-control").style.display = "block";
 
   clearLayer(realTimePath);
@@ -213,15 +214,80 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   setActiveButton("trace-btn");
 
   document.querySelector(".controls .mode-info").innerText =
-    "Trace Mode: Click on the map to see when the vehicle passed that point.";
-
-  if (traceHistoricalData.length === 0) {
-    loadFullHistoricalData();
-  }
+    "Trace Mode: Selecciona un rango de tiempo y haz clic en el mapa para ver cuándo pasó el vehículo por ese punto.";
 
   map.off("click");
   map.on("click", onMapClickTrace);
   map.closePopup();
+});
+
+// NUEVA función para cargar datos históricos solo para el modo Trace
+document.getElementById("load-data").addEventListener("click", async () => {
+  lastStartDate = document.getElementById("start-datetime").value;
+  lastEndDate = document.getElementById("end-datetime").value;
+
+  if (!lastStartDate || !lastEndDate) {
+    alert("Please fill in both datetime fields.");
+    return;
+  }
+
+  const startDatetime = `${lastStartDate}:00`;
+  const endDatetime = `${lastEndDate}:00`;
+
+  try {
+    const loadButton = document.getElementById("load-data");
+    loadButton.disabled = true;
+    loadButton.innerText = "Loading...";
+
+    const response = await fetch(
+      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`
+    );
+    const data = await response.json();
+
+    if (data.length === 0) {
+      alert("No route data found for the selected interval.");
+      loadButton.disabled = false;
+      loadButton.innerText = "Load Route";
+      return;
+    }
+
+    // Si estás en modo histórico: dibujar ruta
+    if (!isTrace) {
+      clearLayer(historicalPath);
+      historicalPath = L.polyline(
+        data.map((loc) => [loc.latitude, loc.longitude]),
+        {
+          color: "#8E00C2",
+          weight: 4,
+          opacity: 0.8,
+          lineJoin: "round",
+        }
+      ).addTo(map);
+
+      addPolylineClickHandler(historicalPath, data);
+      map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+
+      marker.setLatLng([
+        data[data.length - 1].latitude,
+        data[data.length - 1].longitude,
+      ]);
+    }
+
+    // Si estás en modo trace: guardar datos para la búsqueda
+    if (isTrace) {
+      traceHistoricalData = data;
+      alert("Datos cargados. Haz clic en el mapa para consultar.");
+    }
+
+    loadButton.disabled = false;
+    loadButton.innerText = "Load Route";
+  } catch (error) {
+    console.error("Error fetching historical data:", error);
+    alert("Start datetime must be before end datetime.");
+    const loadButton = document.getElementById("load-data");
+    loadButton.disabled = false;
+    loadButton.innerText = "Load Route";
+  }
 });
 
 async function loadHistoricalData() {
