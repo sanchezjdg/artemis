@@ -46,6 +46,7 @@ function addPolylineClickHandler(polyline, data) {
   polyline.on("click", function (e) {
     if (data.length === 0) return;
 
+    // Buscar el punto más cercano
     let closestPoint = data.reduce((prev, curr) => {
       let currLat = Array.isArray(curr) ? curr[0] : curr.latitude;
       let currLng = Array.isArray(curr) ? curr[1] : curr.longitude;
@@ -58,25 +59,30 @@ function addPolylineClickHandler(polyline, data) {
         : prev;
     });
 
-    let lat = Array.isArray(closestPoint)
-      ? closestPoint[0]
-      : closestPoint.latitude;
-    let lng = Array.isArray(closestPoint)
-      ? closestPoint[1]
-      : closestPoint.longitude;
-    let timestamp = closestPoint.timestamp || "N/A";
+    // Filtrar todos los puntos en la misma ubicación que el `closestPoint`
+    let sameLocationPoints = data.filter((point) => 
+      point.latitude === closestPoint.latitude && point.longitude === closestPoint.longitude
+    );
+
+    let lat = closestPoint.latitude;
+    let lng = closestPoint.longitude;
+
+    // Construir el contenido del popup con todas las horas en esta ubicación
+    let popupContent = `
+      <b>Position</b><br>
+      Latitud: ${lat.toFixed(5)}<br>
+      Longitud: ${lng.toFixed(5)}<br>
+      Timestamps:<br>
+      ${sameLocationPoints.map((point) => point.timestamp).join("<br>")}
+    `;
 
     L.popup()
       .setLatLng([lat, lng])
-      .setContent(`
-        <b>Position</b><br>
-        Latitud: ${lat.toFixed(5)}<br>
-        Longitud: ${lng.toFixed(5)}<br>
-        Timestamp: ${timestamp}
-      `)
+      .setContent(popupContent)
       .openOn(map);
   });
 }
+
 
 socket.on("updateData", (data) => {
   if (isRealTime && data.latitude && data.longitude) {
@@ -291,33 +297,89 @@ function onMapClickTrace(e) {
   const threshold = 100;
   const clickedLatLng = e.latlng;
 
-  let closestPoint = traceHistoricalData.reduce((prev, curr) => {
-    let prevLatLng = L.latLng(prev.latitude, prev.longitude);
-    let currLatLng = L.latLng(curr.latitude, curr.longitude);
-    return clickedLatLng.distanceTo(currLatLng) <
-      clickedLatLng.distanceTo(prevLatLng)
-      ? curr
-      : prev;
+  // Filtrar todos los puntos dentro del umbral de 100 metros
+  let closestPoint = traceHistoricalData.filter((point) => {
+    let pointLatLng = L.latLng(point.latitude, point.longitude);
+    return clickedLatLng.distanceTo(pointLatLng) <= threshold;
   });
 
+  if (closestPoint.length === 0) {
+    alert("No historical record within the search area. Try clicking closer to the route.");
+    return;
+  }
+
+  // Ordenar por tiempo ascendente
+  closestPoint.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+  // Tomar el primer punto para calcular la distancia (como referencia)
+  let firstPoint = closestPoint[0];
   let closestDistance = clickedLatLng.distanceTo(
-    L.latLng(closestPoint.latitude, closestPoint.longitude)
+    L.latLng(firstPoint.latitude, firstPoint.longitude)
   );
 
-  if (closestDistance <= threshold) {
-    L.popup()
-      .setLatLng(clickedLatLng)
-      .setContent(`
-         <b>Historical Trace</b><br>
-         The vehicle passed here at:<br>
-         ${closestPoint.timestamp}<br>
-         (Distance: ${closestDistance.toFixed(1)} m)
-       `)
-      .openOn(map);
-  } else {
-    alert("No historical record within the search area. Try clicking closer to the route.");
+  // Construir el contenido del popup con todas las horas encontradas
+  let popupContent = `<b>Historical Trace</b><br>The vehicle passed here at:<br>`;
+  popupContent += closestPoint.map((point) => `${point.timestamp}`).join("<br>");
+  popupContent += `<br>(Distance: ${closestDistance.toFixed(1)} m)`;
+
+
+  // Variable para almacenar el círculo de selección (fuera de la función)
+let selectionCircle = null;
+
+function onMapClickTrace(e) {
+  if (!traceHistoricalData || traceHistoricalData.length === 0) {
+    alert("Historical data not loaded. Please try again.");
+    return;
   }
+
+  const threshold = 100;
+  const clickedLatLng = e.latlng;
+
+  // Eliminar el círculo anterior si existe
+  if (selectionCircle) {
+    map.removeLayer(selectionCircle);
+  }
+
+  // Dibujar un círculo de 100m en la ubicación clickeada
+  selectionCircle = L.circle(clickedLatLng, {
+    color: "red",
+    fillColor: "#f03",
+    fillOpacity: 0.2,
+    radius: threshold,
+  }).addTo(map);
+
+  // Filtrar todos los puntos dentro del umbral de 100 metros
+  let closestPoint = traceHistoricalData.filter((point) => {
+    let pointLatLng = L.latLng(point.latitude, point.longitude);
+    return clickedLatLng.distanceTo(pointLatLng) <= threshold;
+  });
+
+  if (closestPoint.length === 0) {
+    alert("No historical record within the search area. Try clicking closer to the route.");
+    return;
+  }
+
+  // Ordenar por tiempo ascendente
+  closestPoint.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+  // Tomar el primer punto para calcular la distancia (como referencia)
+  let firstPoint = closestPoint[0];
+  let closestDistance = clickedLatLng.distanceTo(
+    L.latLng(firstPoint.latitude, firstPoint.longitude)
+  );
+
+  // Construir el contenido del popup con todas las horas encontradas
+  let popupContent = `<b>Historical Trace</b><br>The vehicle passed here at:<br>`;
+  popupContent += closestPoint.map((point) => `${point.timestamp}`).join("<br>");
+  popupContent += `<br>(Distance: ${closestDistance.toFixed(1)} m)`;
+
+  L.popup()
+    .setLatLng(clickedLatLng)
+    .setContent(popupContent)
+    .openOn(map);
 }
+
+
 
 document.getElementById("trace-btn").addEventListener("click", () => {
   isRealTime = false;
