@@ -196,3 +196,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     outline: none;
     border-color: var(--gray);
 }
+
+#trace-radius-control input[type="range"] {
+    width: 100%;
+    margin-top: 6px;
+  }  

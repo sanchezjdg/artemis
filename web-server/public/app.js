@@ -335,6 +335,13 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   isRealTime = false;
   isTrace = true;
 
+  const radiusSlider = document.getElementById("search-radius");
+  const radiusValue = document.getElementById("radius-value");
+  
+  radiusSlider.addEventListener("input", () => {
+    radiusValue.textContent = radiusSlider.value;
+  });
+  
   document.getElementById("historical-form").style.display = "none";
   document.getElementById("trace-radius-control").style.display = "block";
 
