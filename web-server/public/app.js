@@ -44,7 +44,9 @@ const formatDate = (d) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-const startValue = formatDate(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0));
+const startValue = formatDate(
+  new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0),
+);
 const endValue = formatDate(now);
 
 document.getElementById("start-datetime").value = startValue;
@@ -54,14 +56,14 @@ flatpickr("#start-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
   defaultDate: startValue,
-  maxDate: "today"
+  maxDate: "today",
 });
 
 flatpickr("#end-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
   defaultDate: endValue,
-  maxDate: "today"
+  maxDate: "today",
 });
 
 function clearLayer(layer) {
@@ -80,13 +82,18 @@ function addPolylineClickHandler(polyline, data) {
       let prevLat = Array.isArray(prev) ? prev[0] : prev.latitude;
       let prevLng = Array.isArray(prev) ? prev[1] : prev.longitude;
 
-      return map.distance(e.latlng, L.latLng(currLat, currLng)) < map.distance(e.latlng, L.latLng(prevLat, prevLng))
+      return map.distance(e.latlng, L.latLng(currLat, currLng)) <
+        map.distance(e.latlng, L.latLng(prevLat, prevLng))
         ? curr
         : prev;
     });
 
-    let lat = Array.isArray(closestPoint) ? closestPoint[0] : closestPoint.latitude;
-    let lng = Array.isArray(closestPoint) ? closestPoint[1] : closestPoint.longitude;
+    let lat = Array.isArray(closestPoint)
+      ? closestPoint[0]
+      : closestPoint.latitude;
+    let lng = Array.isArray(closestPoint)
+      ? closestPoint[1]
+      : closestPoint.longitude;
     let timestamp = closestPoint.timestamp || "N/A";
 
     L.popup()
@@ -95,7 +102,7 @@ function addPolylineClickHandler(polyline, data) {
         `<b>Position</b><br>
         Latitud: ${lat.toFixed(5)}<br>
         Longitud: ${lng.toFixed(5)}<br>
-        Timestamp: ${timestamp}`
+        Timestamp: ${timestamp}`,
       )
       .openOn(map);
   });
@@ -113,7 +120,7 @@ socket.on("updateData", (data) => {
     });
 
     realTimePath.setLatLngs(
-      realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude])
+      realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
     );
 
     map.setView(latlng, 15, { animate: true });
@@ -122,7 +129,7 @@ socket.on("updateData", (data) => {
       `<strong>Current Position</strong><br>
       Latitude: ${data.latitude.toFixed(5)}<br>
       Longitude: ${data.longitude.toFixed(5)}<br>
-      Timestamp: ${data.timestamp}`
+      Timestamp: ${data.timestamp}`,
     );
   }
 });
@@ -230,7 +237,7 @@ document.getElementById("trace-btn").addEventListener("click", () => {
   setActiveButton("trace-btn");
 
   document.querySelector(".controls .mode-info").innerText =
-    "Trace Mode: Selecciona un rango de tiempo y haz clic en el mapa para ver cuándo pasó el vehículo por ese punto.";
+    "Trace Mode: Select a time range and click on the map to see when the vehicle passed through that point.";
 
   map.off("click");
   map.on("click", onMapClickTrace);
@@ -263,7 +270,7 @@ document.getElementById("load-data").addEventListener("click", async () => {
     loadButton.innerText = "Loading...";
 
     const response = await fetch(
-      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`
+      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`,
     );
     const data = await response.json();
 
@@ -283,7 +290,7 @@ document.getElementById("load-data").addEventListener("click", async () => {
           weight: 4,
           opacity: 0.8,
           lineJoin: "round",
-        }
+        },
       ).addTo(map);
 
       addPolylineClickHandler(historicalPath, data);
@@ -315,7 +322,7 @@ async function loadFullHistoricalData() {
 
   try {
     const response = await fetch(
-      `/historical?start=${encodeURIComponent(defaultStart)}&end=${encodeURIComponent(defaultEnd)}`
+      `/historical?start=${encodeURIComponent(defaultStart)}&end=${encodeURIComponent(defaultEnd)}`,
     );
     const data = await response.json();
     if (data.length === 0) {
@@ -350,7 +357,9 @@ function onMapClickTrace(e) {
   }).addTo(map);
 
   const nearbyPoints = traceHistoricalData.filter((point) => {
-    const dist = clickedLatLng.distanceTo(L.latLng(point.latitude, point.longitude));
+    const dist = clickedLatLng.distanceTo(
+      L.latLng(point.latitude, point.longitude),
+    );
     return dist <= threshold;
   });
 
@@ -358,7 +367,9 @@ function onMapClickTrace(e) {
   resultsContainer.innerHTML = "";
 
   if (nearbyPoints.length === 0) {
-    alert("No se encontró ningún paso del vehículo dentro del radio. Intenta más cerca de la ruta.");
+    alert(
+      "No se encontró ningún paso del vehículo dentro del radio. Intenta más cerca de la ruta.",
+    );
     return;
   }
 
@@ -368,8 +379,7 @@ function onMapClickTrace(e) {
     const div = document.createElement("div");
     div.className = "trace-result";
 
-    div.innerHTML = 
-      `<div><b>${point.timestamp}</b></div>
+    div.innerHTML = `<div><b>${point.timestamp}</b></div>
       <button class="view-point" data-lat="${point.latitude}" data-lng="${point.longitude}" data-time="${point.timestamp}">Ver</button>
       <hr>`;
     fragment.appendChild(div);
@@ -394,22 +404,29 @@ function onMapClickTrace(e) {
           `<b>Momento registrado</b><br>
           Lat: ${lat.toFixed(5)}<br>
           Lng: ${lng.toFixed(5)}<br>
-          Timestamp: ${time}`
+          Timestamp: ${time}`,
         )
         .openOn(map);
 
-      const threshold = parseFloat(document.getElementById("search-radius").value) || 100;
+      const threshold =
+        parseFloat(document.getElementById("search-radius").value) || 100;
       const center = L.latLng(lat, lng);
 
-      const clickedIndex = traceHistoricalData.findIndex(p =>
-        p.latitude === lat && p.longitude === lng && p.timestamp === time
+      const clickedIndex = traceHistoricalData.findIndex(
+        (p) =>
+          p.latitude === lat && p.longitude === lng && p.timestamp === time,
       );
 
       if (clickedIndex === -1) return;
 
       let startIndex = clickedIndex;
       while (startIndex > 0) {
-        const dist = center.distanceTo(L.latLng(traceHistoricalData[startIndex].latitude, traceHistoricalData[startIndex].longitude));
+        const dist = center.distanceTo(
+          L.latLng(
+            traceHistoricalData[startIndex].latitude,
+            traceHistoricalData[startIndex].longitude,
+          ),
+        );
         if (dist > threshold) {
           startIndex++;
           break;
@@ -419,7 +436,12 @@ function onMapClickTrace(e) {
 
       let endIndex = clickedIndex;
       while (endIndex < traceHistoricalData.length) {
-        const dist = center.distanceTo(L.latLng(traceHistoricalData[endIndex].latitude, traceHistoricalData[endIndex].longitude));
+        const dist = center.distanceTo(
+          L.latLng(
+            traceHistoricalData[endIndex].latitude,
+            traceHistoricalData[endIndex].longitude,
+          ),
+        );
         if (dist > threshold) {
           endIndex--;
           break;
@@ -427,7 +449,9 @@ function onMapClickTrace(e) {
         endIndex++;
       }
 
-      const segment = traceHistoricalData.slice(startIndex, endIndex + 1).map(p => [p.latitude, p.longitude]);
+      const segment = traceHistoricalData
+        .slice(startIndex, endIndex + 1)
+        .map((p) => [p.latitude, p.longitude]);
 
       if (segment.length >= 2) {
         traceViewLine = L.polyline(segment, {
@@ -441,4 +465,6 @@ function onMapClickTrace(e) {
   });
 }
 
-document.getElementById("restore-form")?.addEventListener("click", restoreHistoricalForm);
+document
+  .getElementById("restore-form")
+  ?.addEventListener("click", restoreHistoricalForm);
