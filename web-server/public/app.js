@@ -87,12 +87,12 @@ function addPolylineClickHandler(polyline, data) {
 
     L.popup()
       .setLatLng([lat, lng])
-      .setContent(`
-        <b>Position</b><br>
+      .setContent(
+        `<b>Position</b><br>
         Latitud: ${lat.toFixed(5)}<br>
         Longitud: ${lng.toFixed(5)}<br>
-        Timestamp: ${timestamp}
-      `)
+        Timestamp: ${timestamp}`
+      )
       .openOn(map);
   });
 }
@@ -114,12 +114,12 @@ socket.on("updateData", (data) => {
 
     map.setView(latlng, 15, { animate: true });
 
-    marker.bindPopup(`
-      <strong>Current Position</strong><br>
+    marker.bindPopup(
+      `<strong>Current Position</strong><br>
       Latitude: ${data.latitude.toFixed(5)}<br>
       Longitude: ${data.longitude.toFixed(5)}<br>
-      Timestamp: ${data.timestamp}
-    `);
+      Timestamp: ${data.timestamp}`
+    );
   }
 });
 
@@ -135,6 +135,9 @@ function setActiveButton(activeId) {
 
 document.getElementById("real-time-btn").addEventListener("click", () => {
   clearSearchCircle();
+  document.getElementById("trace-results").innerHTML = "";
+  document.getElementById("trace-results").style.display = "none";
+
   isRealTime = true;
   isTrace = false;
   document.getElementById("historical-form").style.display = "none";
@@ -163,6 +166,9 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 
 document.getElementById("historical-btn").addEventListener("click", () => {
   clearSearchCircle();
+  document.getElementById("trace-results").innerHTML = "";
+  document.getElementById("trace-results").style.display = "none";
+
   isRealTime = false;
   isTrace = false;
   document.getElementById("historical-form").style.display = "block";
@@ -193,8 +199,9 @@ document.getElementById("trace-btn").addEventListener("click", () => {
     radiusValue.textContent = radiusSlider.value;
   });
 
-  document.getElementById("historical-form").style.display = "block"; // cambio necesario
+  document.getElementById("historical-form").style.display = "block";
   document.getElementById("trace-radius-control").style.display = "block";
+  document.getElementById("trace-results").style.display = "block";
 
   clearLayer(realTimePath);
   clearLayer(historicalPath);
@@ -334,11 +341,10 @@ function onMapClickTrace(e) {
     const div = document.createElement("div");
     div.className = "trace-result";
 
-    div.innerHTML = `
-      <div><b>${point.timestamp}</b></div>
+    div.innerHTML = 
+      `<div><b>${point.timestamp}</b></div>
       <button class="view-point" data-lat="${point.latitude}" data-lng="${point.longitude}" data-time="${point.timestamp}">Ver</button>
-      <hr>
-    `;
+      <hr>`;
     fragment.appendChild(div);
   });
 
@@ -353,12 +359,12 @@ function onMapClickTrace(e) {
       map.setView([lat, lng], 17);
       L.popup()
         .setLatLng([lat, lng])
-        .setContent(`
-          <b>Momento registrado</b><br>
+        .setContent(
+          `<b>Momento registrado</b><br>
           Lat: ${lat.toFixed(5)}<br>
           Lng: ${lng.toFixed(5)}<br>
-          Timestamp: ${time}
-        `)
+          Timestamp: ${time}`
+        )
         .openOn(map);
     });
   });
