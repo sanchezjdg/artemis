@@ -170,15 +170,6 @@ async function loadHistoricalData() {
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
 
-  const start = new Date(startDatetime);
-  const end = new Date(endDatetime);
-  const now = new Date();
-
-  if (start >= end || start > now || end > now) {
-    alert("Please select valid historical date/time ranges.");
-    return;
-  }
-
   try {
     const loadButton = document.getElementById("load-data");
     loadButton.disabled = true;
@@ -219,7 +210,7 @@ async function loadHistoricalData() {
     loadButton.innerText = "Load Route";
   } catch (error) {
     console.error("Error fetching historical data:", error);
-    alert("An error occurred while fetching historical data.");
+    alert("Start datetime must be before end datetime.");
     const loadButton = document.getElementById("load-data");
     loadButton.disabled = false;
     loadButton.innerText = "Load Route";
