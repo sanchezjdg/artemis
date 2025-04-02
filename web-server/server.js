@@ -34,6 +34,26 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+// Helper function to validate date inputs
+function isValidDateRange(start, end) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const now = new Date();
+
+  if (startDate >= endDate) {
+    return {
+      valid: false,
+      message: "Start datetime must be before end datetime.",
+    };
+  }
+
+  if (startDate > now || endDate > now) {
+    return { valid: false, message: "Future dates/times are not allowed." };
+  }
+
+  return { valid: true };
+}
+
 // API endpoint for historical data
 app.get("/historical", async (req, res) => {
   const { start, end } = req.query;
