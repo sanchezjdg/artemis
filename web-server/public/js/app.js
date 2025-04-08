@@ -66,9 +66,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeInfo = document.getElementById("close-info");
 
   infoToggle.addEventListener("click", () => {
-    infoPanel.style.display = "block";
+    // Si ya está visible, lo oculta. Si no, lo muestra.
+    if (infoPanel.style.display === "block") {
+      infoPanel.style.display = "none";
+    } else {
+      infoPanel.style.display = "block";
+    }
   });
-
+  
   closeInfo.addEventListener("click", () => {
     infoPanel.style.display = "none";
   });
@@ -92,6 +97,9 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
+  // Detén las actualizaciones de real-time al cambiar a histórico.
+  socket.off("updateData");
+  
   // Hide real-time controls since auto-center is specific to real-time.
   document.getElementById("real-time-controls").style.display = "none";
   // Show the historical form.
