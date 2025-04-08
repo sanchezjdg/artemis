@@ -1,35 +1,23 @@
 // utils.js
 // Utility functions shared among modules.
 
-/**
- * Pads a number with leading zeros if necessary.
- * @param {number} n - Number to pad.
- * @returns {string}
- */
 export function pad(n) {
   return n.toString().padStart(2, "0");
 }
 
-/**
- * Formats a Date object as a string in "YYYY-MM-DDTHH:MM" format.
- * @param {Date} d - The date to format.
- * @returns {string}
- */
 export function formatDate(d) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 /**
- * Adds a click handler to a polyline to show point details in a popup.
+ * Adds a click handler to a polyline to show point details.
  * @param {Object} polyline - The Leaflet polyline.
- * @param {Array} data - Array of data points with coordinates and timestamps.
+ * @param {Array} data - Array of data points.
  */
 export function addPolylineClickHandler(polyline, data) {
-  const map = polyline._map; // Use the map instance associated with the polyline.
+  const map = polyline._map;
   polyline.on("click", function (e) {
     if (data.length === 0) return;
-
-    // Determine the closest point on the polyline to the click location.
     let closestPoint = data.reduce((prev, curr) => {
       const currLat = Array.isArray(curr) ? curr[0] : curr.latitude;
       const currLng = Array.isArray(curr) ? curr[1] : curr.longitude;
@@ -40,8 +28,6 @@ export function addPolylineClickHandler(polyline, data) {
         ? curr
         : prev;
     });
-
-    // Extract latitude, longitude and timestamp.
     const lat = Array.isArray(closestPoint)
       ? closestPoint[0]
       : closestPoint.latitude;
@@ -49,8 +35,6 @@ export function addPolylineClickHandler(polyline, data) {
       ? closestPoint[1]
       : closestPoint.longitude;
     const timestamp = closestPoint.timestamp || "N/A";
-
-    // Open a popup with the point's information.
     L.popup()
       .setLatLng([lat, lng])
       .setContent(
@@ -60,5 +44,18 @@ export function addPolylineClickHandler(polyline, data) {
          Timestamp: ${timestamp}`,
       )
       .openOn(map);
+  });
+}
+
+/**
+ * Clears any red circle layers (representing search circles) from the map.
+ */
+export function clearSearchCircle() {
+  const map = window.map || null;
+  if (!map) return;
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Circle && layer.options.color === "red") {
+      map.removeLayer(layer);
+    }
   });
 }
