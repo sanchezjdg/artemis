@@ -32,43 +32,44 @@
     <div class="button-group">
       <button id="real-time-btn" class="active">Real-Time</button>
       <button id="historical-btn">Historical</button>
-      <button id="trace-btn">Trace</button>
     </div>
 
-   <!-- Real-time mode controls -->
+    <!-- Real-time mode controls -->
     <div id="real-time-controls" style="display: block;">
-    <label>
+      <label>
         <input type="checkbox" id="auto-center-toggle" checked>
         Auto-center map
-    </label>
+      </label>
     </div>
 
-
-
     <!-- Historical form -->
-    <div id="historical-form">
+    <div id="historical-form" style="display: none;">
       <div class="input-group">
         <label for="start-datetime">Start:</label>
         <input type="text" id="start-datetime">
       </div>
-
       <div class="input-group">
         <label for="end-datetime">End:</label>
         <input type="text" id="end-datetime">
       </div>
-
-      <!-- Trace radius control (solo visible en modo Trace) -->
+      <!-- Enable Trace Mode Checkbox (embedded into Historical Mode) -->
+      <div class="input-group">
+        <label>
+          <input type="checkbox" id="enable-trace-toggle">
+          Enable Trace Mode
+        </label>
+      </div>
+      <!-- Trace radius control: visible only when trace mode is enabled -->
       <div id="trace-radius-control" style="display: none; margin-top: 10px;">
-        <label for="search-radius">Radio de búsqueda: <span id="radius-value">100</span> m</label>
+        <label for="search-radius">Search Radius: <span id="radius-value">100</span> m</label>
         <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
       </div>
-
       <button id="load-data" class="load-button">Load Route</button>
     </div>
 
-    <!-- Resultados de búsqueda en modo Trace -->
+    <!-- Trace results panel -->
     <div id="trace-results" class="trace-results" style="margin-top: 10px;"></div>
-  </div> <!-- cierre correcto del panel de controles -->
+  </div> <!-- End of controls overlay -->
 
   <!-- Map Container -->
   <div id="map"></div>
@@ -79,7 +80,7 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <!-- Flatpickr JS -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <!-- Custom Client Script -->
-  <script src="app.js"></script>
+  <!-- Load application modules as ES modules -->
+  <script type="module" src="/js/app.js"></script>
 </body>
 </html>
