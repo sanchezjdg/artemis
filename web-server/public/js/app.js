@@ -40,6 +40,18 @@ flatpickr("#end-datetime", {
   maxDate: "today",
 });
 
+// Set up active button color
+
+function setActiveButton(activeId) {
+  ["real-time-btn", "historical-btn"].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.classList.remove("active");
+    }
+  });
+  document.getElementById(activeId).classList.add("active");
+}
+
 // Set up mode switching buttons.
 document.getElementById("real-time-btn").addEventListener("click", () => {
   // Show real-time controls and hide historical form.
@@ -47,6 +59,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   document.getElementById("historical-form").style.display = "none";
   // Start real-time updates.
   startRealTimeUpdates(socket);
+  setActiveButton("real-time-btn");
   // Update the mode information.
   document.querySelector(".controls .mode-info").innerText =
     "Select the mode you want to use:";
@@ -62,4 +75,5 @@ document.getElementById("historical-btn").addEventListener("click", () => {
     "Select a date range and optionally enable trace mode:";
   // Initialize historical mode events.
   initHistoricalMode();
+  setActiveButton("historical-btn");
 });
