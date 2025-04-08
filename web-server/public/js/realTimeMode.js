@@ -1,36 +1,23 @@
 // realTimeMode.js
-// Module to handle real-time updates.
+// Module to handle real-time map updates from the Socket.IO server.
 
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
 import { addPolylineClickHandler } from "./utils.js";
 
-// Global variables to track real-time data.
+// Global variables for real-time mode.
 let realTimeCoordinates = [];
 let realTimePath = null;
 
 /**
- * Returns the last real-time position as [lat, lng] if available.
- * @returns {Array|null} The last coordinate or null.
- */
-export function getLastRealTimePosition() {
-  if (realTimeCoordinates.length > 0) {
-    return [
-      realTimeCoordinates[realTimeCoordinates.length - 1].latitude,
-      realTimeCoordinates[realTimeCoordinates.length - 1].longitude,
-    ];
-  }
-  return null;
-}
-
-/**
- * Starts subscribing to real-time updates.
- * @param {Object} socket - Socket.IO instance.
+ * Starts real-time updates by listening to socket events.
+ * @param {Object} socket - The Socket.IO socket instance.
  */
 export function startRealTimeUpdates(socket) {
-  // Clear any pre-existing layers.
+  // Clear any previous historical layers.
   clearLayer(realTimePath);
   realTimeCoordinates = [];
 
+  // Create a new polyline for real-time data.
   const map = getMap();
   realTimePath = L.polyline([], {
     color: "#3b65ff",
@@ -38,32 +25,39 @@ export function startRealTimeUpdates(socket) {
     opacity: 0.8,
     lineJoin: "round",
   }).addTo(map);
+
+  // Attach click handler to show popup details.
   addPolylineClickHandler(realTimePath, realTimeCoordinates);
+
+  // Ensure the marker is added to the map.
   getMarker().addTo(map);
 
-  // Remove previous listeners to avoid duplicates.
-  socket.off("updateData");
+  // Listen for real-time data updates.
+  socket.off("updateData"); // Remove previous listeners if any.
   socket.on("updateData", (data) => {
     if (data.latitude && data.longitude) {
       const latlng = [data.latitude, data.longitude];
       const marker = getMarker();
       marker.setLatLng(latlng);
 
-      // Append new data.
+      // Append the new coordinate to the array.
       realTimeCoordinates.push({
         latitude: data.latitude,
         longitude: data.longitude,
         timestamp: data.timestamp,
       });
+
+      // Update polyline with new coordinates.
       realTimePath.setLatLngs(
         realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
       );
 
-      // Always auto center in real-time (default enabled).
+      // Auto-center if the option is checked.
       if (document.getElementById("auto-center-toggle").checked) {
         map.setView(latlng, 15, { animate: true });
       }
-      // Bind popup with current location details.
+
+      // Update marker popup with current position details.
       marker.bindPopup(
         `<strong>Current Position</strong><br>
          Latitude: ${data.latitude.toFixed(5)}<br>
