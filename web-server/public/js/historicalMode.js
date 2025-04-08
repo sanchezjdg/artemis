@@ -8,6 +8,7 @@ import { showToast } from "./toast.js";
 let historicalPath = null;
 let traceHistoricalData = [];
 let traceViewLine = null;
+let temporaryMarker = null;
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -21,6 +22,10 @@ export function initHistoricalMode() {
   document.getElementById("trace-results").innerHTML = "";
   document.getElementById("trace-results").style.display = "none";
 
+  // Hide the regular marker in historical mode
+  const marker = getMarker();
+  clearLayer(marker);
+
   // Set up the trace mode checkbox change listener.
   const enableTraceToggle = document.getElementById("enable-trace-toggle");
   enableTraceToggle.checked = false; // Reset state on each mode activation.
@@ -32,10 +37,9 @@ export function initHistoricalMode() {
       // When trace mode is enabled:
       // Show the trace radius slider.
       document.getElementById("trace-radius-control").style.display = "block";
-      // Remove historical polyline and marker as they are not needed.
+      // Remove historical polyline as it's not needed.
       clearLayer(historicalPath);
       historicalPath = null;
-      clearLayer(getMarker());
     } else {
       // When trace mode is disabled:
       // Hide the trace radius slider.
@@ -111,12 +115,6 @@ export function initHistoricalMode() {
         addPolylineClickHandler(historicalPath, data);
         // Fit the map bounds to the historical route.
         map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
-
-        // Update the marker position to the last recorded point.
-        getMarker().setLatLng([
-          data[data.length - 1].latitude,
-          data[data.length - 1].longitude,
-        ]);
       }
 
       // Store the loaded data for potential trace mode actions.
@@ -127,10 +125,9 @@ export function initHistoricalMode() {
         showToast(
           "Historical data loaded. Click on the map to display trace information.",
         );
-        // Remove any historical polyline or marker since trace mode does not require these.
+        // Remove any historical polyline since trace mode does not require these.
         clearLayer(historicalPath);
         historicalPath = null;
-        clearLayer(getMarker());
         // Set up the map click handler for trace mode.
         map.off("click");
         map.on("click", onMapClickTrace);
@@ -169,6 +166,9 @@ function onMapClickTrace(e) {
 
   // Clear any previous search circle from the map.
   clearSearchCircle();
+
+  // Clear any temporary marker if it exists
+  clearTemporaryMarker();
 
   // Create and add a search circle to the map.
   const map = getMap();
@@ -225,18 +225,22 @@ function onMapClickTrace(e) {
         traceViewLine = null;
       }
 
-      // Center the map on the clicked point and display a popup with details.
-      const map = getMap();
-      map.setView([lat, lng], 17);
-      L.popup()
-        .setLatLng([lat, lng])
-        .setContent(
+      // Clear any temporary marker if it exists
+      clearTemporaryMarker();
+
+      // Create a new temporary marker at this location
+      temporaryMarker = L.marker([lat, lng]).addTo(map);
+      temporaryMarker
+        .bindPopup(
           `<b>Recorded Moment</b><br>
-           Lat: ${lat.toFixed(5)}<br>
-           Lng: ${lng.toFixed(5)}<br>
-           Timestamp: ${time}`,
+         Lat: ${lat.toFixed(5)}<br>
+         Lng: ${lng.toFixed(5)}<br>
+         Timestamp: ${time}`,
         )
-        .openOn(map);
+        .openPopup();
+
+      // Center the map on the clicked point
+      map.setView([lat, lng], 17);
 
       // Find the index of the clicked point within the historical data.
       const clickedIndex = traceHistoricalData.findIndex(
@@ -289,4 +293,23 @@ function clearSearchCircle() {
       map.removeLayer(layer);
     }
   });
+}
+
+/**
+ * Utility function to clear the temporary marker from the map.
+ */
+function clearTemporaryMarker() {
+  if (temporaryMarker) {
+    const map = getMap();
+    map.removeLayer(temporaryMarker);
+    temporaryMarker = null;
+  }
+}
+
+/**
+ * Export the clear functions to be used externally.
+ */
+export function cleanupHistoricalMode() {
+  clearSearchCircle();
+  clearTemporaryMarker();
 }

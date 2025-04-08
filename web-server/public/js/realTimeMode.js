@@ -2,6 +2,7 @@
 // Module to handle real-time map updates from the Socket.IO server.
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
 import { addPolylineClickHandler } from "./utils.js";
+import { cleanupHistoricalMode } from "./historicalMode.js";
 
 // Global variables for real-time mode.
 let realTimeCoordinates = [];
@@ -32,16 +33,19 @@ export function startRealTimeUpdates(socket) {
   // Attach click handler to show popup details.
   addPolylineClickHandler(realTimePath, realTimeCoordinates);
 
-  // Ensure the marker is added to the map.
-  getMarker().addTo(map);
+  // Clean up any trace mode elements (circles, temporary markers)
+  cleanupHistoricalMode();
 
-  // Clear any trace mode circles and hide trace results
-  clearTraceCircles();
+  // Hide trace results
   document.getElementById("trace-results").style.display = "none";
   document.getElementById("trace-results").innerHTML = "";
 
   // Remove any map click handlers from trace mode
   map.off("click");
+
+  // Ensure the marker is visible and added to the map in real-time mode
+  const marker = getMarker();
+  marker.addTo(map);
 
   // Listen for real-time data updates.
   socket.off("updateData"); // Remove previous listeners if any.
@@ -80,19 +84,6 @@ export function startRealTimeUpdates(socket) {
          Longitude: ${data.longitude.toFixed(5)}<br>
          Timestamp: ${data.timestamp}`,
       );
-    }
-  });
-}
-
-/**
- * Utility function to clear any existing trace circles from the map.
- */
-function clearTraceCircles() {
-  const map = getMap();
-  // Iterate over map layers and remove any circles
-  map.eachLayer((layer) => {
-    if (layer instanceof L.Circle) {
-      map.removeLayer(layer);
     }
   });
 }
