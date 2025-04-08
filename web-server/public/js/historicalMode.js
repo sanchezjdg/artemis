@@ -10,6 +10,8 @@ let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;
+let currentSearchCircle = null;
+
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -195,7 +197,13 @@ const radiusValueDisplay = document.getElementById("radius-value");
     }
   });
   radiusSlider.addEventListener("input", () => {
-    radiusValueDisplay.textContent = radiusSlider.value;
+    const newRadius = parseFloat(radiusSlider.value) || 100;
+    radiusValueDisplay.textContent = newRadius;
+    
+    // Si el círculo ya existe, actualizar su radio sin tener que volver a hacer clic.
+    if (currentSearchCircle) {
+      currentSearchCircle.setRadius(newRadius);
+    }
   });
 }
 
@@ -205,6 +213,20 @@ const radiusValueDisplay = document.getElementById("radius-value");
  */
 function onMapClickTrace(e) {
   // Ensure that historical data has been loaded.
+  // Si ya existe un círculo, quítalo o actualízalo.
+if (currentSearchCircle) {
+  // Actualiza su posición y radio
+  currentSearchCircle.setLatLng(clickedLatLng);
+  currentSearchCircle.setRadius(threshold);
+} else {
+  // Sino crea uno nuevo y guarda la referencia
+  currentSearchCircle = L.circle(clickedLatLng, {
+    radius: threshold,
+    color: "red",
+    fillColor: "#f03",
+    fillOpacity: 0.2,
+  }).addTo(map);
+}
   if (!traceHistoricalData || traceHistoricalData.length === 0) {
     showToast("Historical data not loaded. Please load data first.");
     return;
@@ -338,12 +360,11 @@ function onMapClickTrace(e) {
  */
 function clearSearchCircle() {
   const map = getMap();
-  // Iterate over map layers and remove any circles with a red border.
-  map.eachLayer((layer) => {
-    if (layer instanceof L.Circle && layer.options.color === "red") {
-      map.removeLayer(layer);
-    }
-  });
+  if (currentSearchCircle) {
+    map.removeLayer(currentSearchCircle);
+    currentSearchCircle = null;
+  }
+  // Si deseas, también puedes iterar sobre el mapa para remover otros círculos, pero lo principal es limpiar la variable.
 }
 
 /**
