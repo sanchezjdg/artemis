@@ -1,11 +1,10 @@
 // app.js
-// Main entry point to initialize the application and set up mode switching.
+// Main entry point for initializing the application and setting up mode switching.
 
 // Import modules (ensure your server supports ES modules or use a bundler)
-import { initMap, getMap, getMarker } from "./mapHandler.js";
+import { initMap } from "./mapHandler.js";
 import { startRealTimeUpdates } from "./realTimeMode.js";
 import { initHistoricalMode } from "./historicalMode.js";
-import { showToast } from "./toast.js";
 import { formatDate } from "./utils.js";
 
 // Initialize socket connection using Socket.IO.
@@ -18,7 +17,7 @@ initMap();
 // Set initial visibility for the trace results area (hidden by default)
 document.getElementById("trace-results").style.display = "none";
 
-// Set up date inputs using current time.
+// Set up date inputs using the current time.
 const now = new Date();
 const startValue = formatDate(
   new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0),
@@ -41,26 +40,26 @@ flatpickr("#end-datetime", {
   maxDate: "today",
 });
 
-// Set up mode switching buttons (Real-Time and Historical).
+// Set up mode switching buttons.
 document.getElementById("real-time-btn").addEventListener("click", () => {
-  // Hide historical form elements when switching to real-time.
+  // Show real-time controls and hide historical form.
+  document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
   // Start real-time updates.
   startRealTimeUpdates(socket);
-  // Adjust UI controls.
-  document.querySelector(".button-group").style.display = "flex";
+  // Update the mode information.
   document.querySelector(".controls .mode-info").innerText =
     "Select the mode you want to use:";
-  // Reset toast and any leftover notifications.
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
-  // Stop any active real-time updates if necessary.
-  // Display the historical form.
+  // Hide real-time controls since auto-center is specific to real-time.
+  document.getElementById("real-time-controls").style.display = "none";
+  // Show the historical form.
   document.getElementById("historical-form").style.display = "block";
-  // Update mode information text.
+  // Update instructions for historical mode.
   document.querySelector(".controls .mode-info").innerText =
     "Select a date range and optionally enable trace mode:";
-  // Initialize historical mode event handlers.
+  // Initialize historical mode events.
   initHistoricalMode();
 });
