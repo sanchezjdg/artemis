@@ -1,18 +1,21 @@
 // realTimeMode.js
 // Module to handle real-time map updates from the Socket.IO server.
-
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
 import { addPolylineClickHandler } from "./utils.js";
 
 // Global variables for real-time mode.
 let realTimeCoordinates = [];
 let realTimePath = null;
+let initialLocationSet = false;
 
 /**
  * Starts real-time updates by listening to socket events.
  * @param {Object} socket - The Socket.IO socket instance.
  */
 export function startRealTimeUpdates(socket) {
+  // Reset the initial location flag
+  initialLocationSet = false;
+
   // Clear any previous historical layers.
   clearLayer(realTimePath);
   realTimeCoordinates = [];
@@ -52,8 +55,13 @@ export function startRealTimeUpdates(socket) {
         realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
       );
 
-      // Auto-center if the option is checked.
-      if (document.getElementById("auto-center-toggle").checked) {
+      // Always center map on first location received
+      if (!initialLocationSet) {
+        map.setView(latlng, 15, { animate: true });
+        initialLocationSet = true;
+      }
+      // For subsequent updates, only auto-center if the option is checked
+      else if (document.getElementById("auto-center-toggle").checked) {
         map.setView(latlng, 15, { animate: true });
       }
 
