@@ -68,6 +68,9 @@ const radiusValueDisplay = document.getElementById("radius-value");
       document.getElementById("trace-radius-control").style.display = "none";
       // Remove the click event for trace mode
       map.off("click");
+      
+      clearSearchCircle();
+      clearTemporaryMarker();
 
       // If data has been loaded, redraw the historical path
       if (dataLoaded && traceHistoricalData.length > 0) {
