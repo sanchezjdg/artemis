@@ -13,12 +13,12 @@ let initialLocationSet = false;
  * @param {Object} socket - The Socket.IO socket instance.
  */
 export function startRealTimeUpdates(socket) {
-  // Reset the initial location flag
-  initialLocationSet = false;
-
   // Clear any previous historical layers.
   clearLayer(realTimePath);
   realTimeCoordinates = [];
+
+  // Reset the initial location flag when starting real-time mode
+  initialLocationSet = false;
 
   // Create a new polyline for real-time data.
   const map = getMap();
@@ -55,12 +55,12 @@ export function startRealTimeUpdates(socket) {
         realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
       );
 
-      // Always center map on first location received
+      // Always center the map on the first location update if not already set
       if (!initialLocationSet) {
         map.setView(latlng, 15, { animate: true });
         initialLocationSet = true;
       }
-      // For subsequent updates, only auto-center if the option is checked
+      // Otherwise, auto-center if the option is checked
       else if (document.getElementById("auto-center-toggle").checked) {
         map.setView(latlng, 15, { animate: true });
       }
