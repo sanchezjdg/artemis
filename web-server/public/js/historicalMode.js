@@ -17,6 +17,9 @@ let dataLoaded = false;
 export function initHistoricalMode() {
   // Remove any pre-existing click handlers.
   const map = getMap();
+  // Update radius value display when the slider is moved
+const radiusSlider = document.getElementById("search-radius");
+const radiusValueDisplay = document.getElementById("radius-value");
   map.off("click");
 
   // Hide trace results initially.
@@ -187,6 +190,9 @@ export function initHistoricalMode() {
       loadButton.innerText = "Load Route";
       dataLoaded = false;
     }
+  });
+  radiusSlider.addEventListener("input", () => {
+    radiusValueDisplay.textContent = radiusSlider.value;
   });
 }
 
