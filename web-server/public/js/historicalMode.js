@@ -363,6 +363,12 @@ function clearTemporaryMarker() {
 export function cleanupHistoricalMode() {
   clearSearchCircle();
   clearTemporaryMarker();
-  // Reset data loaded flag when switching away from historical mode
+  // Remover la polyline histórica si existe
+  if (historicalPath) {
+    const map = getMap();
+    map.removeLayer(historicalPath);
+    historicalPath = null;
+  }
+  // Resetear el flag de datos cargados
   dataLoaded = false;
 }
