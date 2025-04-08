@@ -60,6 +60,21 @@ document.addEventListener("DOMContentLoaded", () => {
   setActiveButton("real-time-btn");
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  const infoToggle = document.getElementById("info-toggle");
+  const infoPanel = document.getElementById("info-panel");
+  const closeInfo = document.getElementById("close-info");
+
+  infoToggle.addEventListener("click", () => {
+    infoPanel.style.display = "block";
+  });
+
+  closeInfo.addEventListener("click", () => {
+    infoPanel.style.display = "none";
+  });
+});
+
+
 // Set up mode switching buttons.
 document.getElementById("real-time-btn").addEventListener("click", () => {
   // Show real-time controls and hide historical form.
@@ -88,3 +103,5 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   initHistoricalMode();
   setActiveButton("historical-btn");
 });
+
+
