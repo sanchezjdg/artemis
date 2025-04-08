@@ -5,13 +5,17 @@ import { initMap } from "./mapHandler.js";
 import { startRealTimeUpdates } from "./realTimeMode.js";
 import { initHistoricalMode } from "./historicalMode.js";
 import { formatDate } from "./utils.js";
+
 // Initialize socket connection using Socket.IO.
 const socket = io();
 console.log("Connected to Socket.IO server.");
+
 // Initialize the map.
 initMap();
+
 // Set initial visibility for the trace results area (hidden by default)
 document.getElementById("trace-results").style.display = "none";
+
 // Set up date inputs using the current time.
 const now = new Date();
 const startValue = formatDate(
@@ -20,6 +24,7 @@ const startValue = formatDate(
 const endValue = formatDate(now);
 document.getElementById("start-datetime").value = startValue;
 document.getElementById("end-datetime").value = endValue;
+
 // Initialize flatpickr date/time pickers.
 flatpickr("#start-datetime", {
   enableTime: true,
@@ -33,6 +38,7 @@ flatpickr("#end-datetime", {
   defaultDate: endValue,
   maxDate: "today",
 });
+
 // Set up active button color
 function setActiveButton(activeId) {
   ["real-time-btn", "historical-btn"].forEach((id) => {
@@ -59,6 +65,9 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   // Show real-time controls and hide historical form.
   document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
+  // Clear trace results and hide them
+  document.getElementById("trace-results").style.display = "none";
+  document.getElementById("trace-results").innerHTML = "";
   // Start real-time updates.
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
@@ -66,6 +75,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   document.querySelector(".controls .mode-info").innerText =
     "Select the mode you want to use:";
 });
+
 document.getElementById("historical-btn").addEventListener("click", () => {
   // Hide real-time controls since auto-center is specific to real-time.
   document.getElementById("real-time-controls").style.display = "none";

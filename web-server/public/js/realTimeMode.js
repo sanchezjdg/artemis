@@ -35,6 +35,14 @@ export function startRealTimeUpdates(socket) {
   // Ensure the marker is added to the map.
   getMarker().addTo(map);
 
+  // Clear any trace mode circles and hide trace results
+  clearTraceCircles();
+  document.getElementById("trace-results").style.display = "none";
+  document.getElementById("trace-results").innerHTML = "";
+
+  // Remove any map click handlers from trace mode
+  map.off("click");
+
   // Listen for real-time data updates.
   socket.off("updateData"); // Remove previous listeners if any.
   socket.on("updateData", (data) => {
@@ -72,6 +80,19 @@ export function startRealTimeUpdates(socket) {
          Longitude: ${data.longitude.toFixed(5)}<br>
          Timestamp: ${data.timestamp}`,
       );
+    }
+  });
+}
+
+/**
+ * Utility function to clear any existing trace circles from the map.
+ */
+function clearTraceCircles() {
+  const map = getMap();
+  // Iterate over map layers and remove any circles
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Circle) {
+      map.removeLayer(layer);
     }
   });
 }
