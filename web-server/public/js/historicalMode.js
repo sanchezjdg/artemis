@@ -274,19 +274,6 @@ function onMapClickTrace(e) {
         }
         endIndex++;
       }
-
-      // Extract and draw the route segment.
-      const segment = traceHistoricalData
-        .slice(startIndex, endIndex + 1)
-        .map((p) => [p.latitude, p.longitude]);
-      if (segment.length >= 2) {
-        traceViewLine = L.polyline(segment, {
-          color: "#8E00C2",
-          weight: 4,
-          opacity: 0.9,
-          lineJoin: "round",
-        }).addTo(map);
-      }
     });
   });
 }
