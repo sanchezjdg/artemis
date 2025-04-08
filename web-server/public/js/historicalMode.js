@@ -2,87 +2,79 @@
 // Module to manage historical data loading and integrated trace functionality.
 
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
-import { addPolylineClickHandler } from "./utils.js";
+import { addPolylineClickHandler, clearSearchCircle } from "./utils.js";
 import { showToast } from "./toast.js";
 
 let historicalPath = null;
 let traceHistoricalData = [];
-let traceViewLine = null;
+let traceViewMarker = null; // Global marker for trace view point
 
 /**
- * Initialize historical mode: sets up event listeners on the historical form.
+ * Initialize historical mode: sets up event listeners for the historical form.
  */
 export function initHistoricalMode() {
-  // Remove any pre-existing click handlers.
   const map = getMap();
+  // Clear any previous click handlers.
   map.off("click");
 
-  // Hide trace results initially.
+  // Clear trace results.
   document.getElementById("trace-results").innerHTML = "";
   document.getElementById("trace-results").style.display = "none";
 
-  // Set up the trace mode checkbox change listener.
+  // Set up the trace mode checkbox.
   const enableTraceToggle = document.getElementById("enable-trace-toggle");
-  enableTraceToggle.checked = false; // Reset state on each mode activation.
-  // Ensure the trace radius control is hidden initially when trace mode is off.
+  enableTraceToggle.checked = false; // Reset on each mode activation.
+  // Hide the trace radius control initially.
   document.getElementById("trace-radius-control").style.display = "none";
 
+  // Listen to changes on the trace mode checkbox.
   enableTraceToggle.addEventListener("change", () => {
     if (enableTraceToggle.checked) {
       // When trace mode is enabled:
       // Show the trace radius slider.
       document.getElementById("trace-radius-control").style.display = "block";
-      // Remove historical polyline and marker as they are not needed.
+      // Remove historical polyline and marker (as trace mode should not show these).
       clearLayer(historicalPath);
       historicalPath = null;
       clearLayer(getMarker());
     } else {
-      // When trace mode is disabled:
-      // Hide the trace radius slider.
+      // When trace mode is disabled, hide the trace radius slider and remove map click events.
       document.getElementById("trace-radius-control").style.display = "none";
-      // Remove the click event for trace mode if any.
       map.off("click");
+      // Optionally, you can reload historical data here if needed.
     }
   });
 
-  // Set up event listener for the data loading button.
+  // Set up the event listener for the "Load Route" button.
   document.getElementById("load-data").addEventListener("click", async () => {
-    // Retrieve the date range values.
+    // Retrieve and validate date range.
     const lastStartDate = document.getElementById("start-datetime").value;
     const lastEndDate = document.getElementById("end-datetime").value;
-
-    // Validate that both date fields are filled.
     if (!lastStartDate || !lastEndDate) {
       showToast("Please fill in both datetime fields.");
       return;
     }
-
-    // Create complete datetime strings.
     const startDatetime = `${lastStartDate}:00`;
     const endDatetime = `${lastEndDate}:00`;
-
     const startDateObj = new Date(startDatetime);
     const endDateObj = new Date(endDatetime);
-
-    // Validate that the start date is before the end date.
     if (startDateObj >= endDateObj) {
       showToast("Start datetime must be before end datetime.");
       return;
     }
 
     try {
-      // Indicate loading process by disabling the button.
+      // Disable the load button.
       const loadButton = document.getElementById("load-data");
       loadButton.disabled = true;
       loadButton.innerText = "Loading...";
 
-      // Fetch historical data from the server.
+      // Fetch historical route data.
       const response = await fetch(
         `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`,
       );
       const data = await response.json();
 
-      // Check if no data is returned.
       if (data.length === 0) {
         showToast("No route data found for the selected interval.");
         loadButton.disabled = false;
@@ -90,13 +82,13 @@ export function initHistoricalMode() {
         return;
       }
 
-      const map = getMap();
+      // Clear previous historical layers.
+      clearLayer(historicalPath);
+      historicalPath = null;
 
-      // If trace mode is not enabled, display the historical route.
+      // Check if trace mode is enabled.
       if (!document.getElementById("enable-trace-toggle").checked) {
-        // Clear any existing historical polyline.
-        clearLayer(historicalPath);
-        // Create a new polyline for the historical route.
+        // If not in trace mode, draw the historical route.
         historicalPath = L.polyline(
           data.map((loc) => [loc.latitude, loc.longitude]),
           {
@@ -107,35 +99,31 @@ export function initHistoricalMode() {
           },
         ).addTo(map);
 
-        // Attach a click handler to the polyline to show details.
+        // Attach a click handler to show popup details.
         addPolylineClickHandler(historicalPath, data);
-        // Fit the map bounds to the historical route.
         map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
-
-        // Update the marker position to the last recorded point.
+        // Update marker to the last point.
         getMarker().setLatLng([
           data[data.length - 1].latitude,
           data[data.length - 1].longitude,
         ]);
       }
-
-      // Store the loaded data for potential trace mode actions.
+      // Store data for trace mode.
       traceHistoricalData = data;
 
-      // Check if trace mode is enabled.
       if (document.getElementById("enable-trace-toggle").checked) {
         showToast(
           "Historical data loaded. Click on the map to display trace information.",
         );
-        // Remove any historical polyline or marker since trace mode does not require these.
+        // Remove any historical layer remnants.
         clearLayer(historicalPath);
         historicalPath = null;
         clearLayer(getMarker());
-        // Set up the map click handler for trace mode.
+        // Set the map to listen for click events.
         map.off("click");
         map.on("click", onMapClickTrace);
       } else {
-        // If trace mode is disabled, ensure that map click events for trace are turned off.
+        // Ensure trace-related click events are disabled.
         map.off("click");
       }
 
@@ -156,30 +144,26 @@ export function initHistoricalMode() {
  * @param {Object} e - The Leaflet event object.
  */
 function onMapClickTrace(e) {
-  // Ensure that historical data has been loaded.
   if (!traceHistoricalData || traceHistoricalData.length === 0) {
     showToast("Historical data not loaded. Please load data first.");
     return;
   }
-
-  // Get the search radius from the slider (or default to 100 meters).
   const radiusInput = document.getElementById("search-radius");
   const threshold = parseFloat(radiusInput.value) || 100;
   const clickedLatLng = e.latlng;
-
-  // Clear any previous search circle from the map.
+  // Clear any previous red search circles.
   clearSearchCircle();
 
-  // Create and add a search circle to the map.
+  // Create a red search circle at the clicked point.
   const map = getMap();
-  const searchCircle = L.circle(clickedLatLng, {
+  L.circle(clickedLatLng, {
     radius: threshold,
     color: "red",
     fillColor: "#f03",
     fillOpacity: 0.2,
   }).addTo(map);
 
-  // Filter data points that are within the search radius.
+  // Find nearby data points within the threshold.
   const nearbyPoints = traceHistoricalData.filter((point) => {
     const dist = clickedLatLng.distanceTo(
       L.latLng(point.latitude, point.longitude),
@@ -198,7 +182,7 @@ function onMapClickTrace(e) {
     return;
   }
 
-  // Display each nearby point as a result with a "View" button.
+  // Display trace results with a "View" button.
   const fragment = document.createDocumentFragment();
   nearbyPoints.forEach((point) => {
     const div = document.createElement("div");
@@ -212,94 +196,30 @@ function onMapClickTrace(e) {
   resultsContainer.appendChild(fragment);
   resultsContainer.style.display = "block";
 
-  // Add click handlers to each "View" button.
+  // Add click handlers for each "View" button.
   document.querySelectorAll(".view-point").forEach((btn) => {
     btn.addEventListener("click", () => {
       const lat = parseFloat(btn.dataset.lat);
       const lng = parseFloat(btn.dataset.lng);
       const time = btn.dataset.time;
-
-      // Remove previous trace view line if it exists.
-      if (traceViewLine && getMap().hasLayer(traceViewLine)) {
-        clearLayer(traceViewLine);
-        traceViewLine = null;
+      // Clear any previous trace view marker.
+      if (traceViewMarker && map.hasLayer(traceViewMarker)) {
+        map.removeLayer(traceViewMarker);
       }
-
-      // Center the map on the clicked point and display a popup with details.
-      const map = getMap();
+      // Center the map on the selected point.
       map.setView([lat, lng], 17);
-      L.popup()
-        .setLatLng([lat, lng])
-        .setContent(
-          `<b>Recorded Moment</b><br>
-           Lat: ${lat.toFixed(5)}<br>
-           Lng: ${lng.toFixed(5)}<br>
-           Timestamp: ${time}`,
-        )
-        .openOn(map);
-
-      // Find the index of the clicked point within the historical data.
-      const clickedIndex = traceHistoricalData.findIndex(
-        (p) =>
-          p.latitude === lat && p.longitude === lng && p.timestamp === time,
+      // Add a marker at the selected point.
+      traceViewMarker = L.marker([lat, lng], { id: "trace-view-marker" }).addTo(
+        map,
       );
-      if (clickedIndex === -1) return;
-
-      // Determine a segment of the route around the clicked point based on the threshold distance.
-      let startIndex = clickedIndex;
-      while (startIndex > 0) {
-        const dist = L.latLng(lat, lng).distanceTo(
-          L.latLng(
-            traceHistoricalData[startIndex].latitude,
-            traceHistoricalData[startIndex].longitude,
-          ),
-        );
-        if (dist > threshold) {
-          startIndex++;
-          break;
-        }
-        startIndex--;
-      }
-      let endIndex = clickedIndex;
-      while (endIndex < traceHistoricalData.length) {
-        const dist = L.latLng(lat, lng).distanceTo(
-          L.latLng(
-            traceHistoricalData[endIndex].latitude,
-            traceHistoricalData[endIndex].longitude,
-          ),
-        );
-        if (dist > threshold) {
-          endIndex--;
-          break;
-        }
-        endIndex++;
-      }
-
-      // Extract and draw the route segment.
-      const segment = traceHistoricalData
-        .slice(startIndex, endIndex + 1)
-        .map((p) => [p.latitude, p.longitude]);
-      if (segment.length >= 2) {
-        traceViewLine = L.polyline(segment, {
-          color: "#8E00C2",
-          weight: 4,
-          opacity: 0.9,
-          lineJoin: "round",
-        }).addTo(map);
-      }
+      traceViewMarker
+        .bindPopup(
+          `<b>Recorded Moment</b><br>
+         Lat: ${lat.toFixed(5)}<br>
+         Lng: ${lng.toFixed(5)}<br>
+         Timestamp: ${time}`,
+        )
+        .openPopup();
     });
-  });
-}
-
-/**
- * Utility function to clear any existing search circle from the map.
- */
-function clearSearchCircle() {
-  const map = getMap();
-  // Iterate over map layers and remove any circles with a red border.
-  map.eachLayer((layer) => {
-    if (layer instanceof L.Circle && layer.options.color === "red") {
-      map.removeLayer(layer);
-    }
   });
 }
