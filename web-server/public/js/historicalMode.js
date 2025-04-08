@@ -9,6 +9,7 @@ let historicalPath = null;
 let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
+let dataLoaded = false;
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -28,24 +29,61 @@ export function initHistoricalMode() {
 
   // Set up the trace mode checkbox change listener.
   const enableTraceToggle = document.getElementById("enable-trace-toggle");
-  enableTraceToggle.checked = false; // Reset state on each mode activation.
-  // Ensure the trace radius control is hidden initially when trace mode is off.
-  document.getElementById("trace-radius-control").style.display = "none";
+  // Don't reset trace toggle state, let user control it
+
+  // Ensure the trace radius control visibility matches the toggle state
+  document.getElementById("trace-radius-control").style.display =
+    enableTraceToggle.checked ? "block" : "none";
 
   enableTraceToggle.addEventListener("change", () => {
+    // Clear any temporary marker when toggling modes
+    clearTemporaryMarker();
+
     if (enableTraceToggle.checked) {
       // When trace mode is enabled:
       // Show the trace radius slider.
       document.getElementById("trace-radius-control").style.display = "block";
-      // Remove historical polyline as it's not needed.
+      // Remove historical polyline as it's not needed in trace mode
       clearLayer(historicalPath);
       historicalPath = null;
+
+      // If data has already been loaded, enable trace functionality
+      if (dataLoaded && traceHistoricalData.length > 0) {
+        showToast(
+          "Trace mode enabled. Click on the map to display trace information.",
+        );
+        map.off("click");
+        map.on("click", onMapClickTrace);
+      } else {
+        showToast(
+          "Please load route data first using the 'Load Route' button.",
+        );
+      }
     } else {
       // When trace mode is disabled:
       // Hide the trace radius slider.
       document.getElementById("trace-radius-control").style.display = "none";
-      // Remove the click event for trace mode if any.
+      // Remove the click event for trace mode
       map.off("click");
+
+      // If data has been loaded, redraw the historical path
+      if (dataLoaded && traceHistoricalData.length > 0) {
+        clearLayer(historicalPath);
+        historicalPath = L.polyline(
+          traceHistoricalData.map((loc) => [loc.latitude, loc.longitude]),
+          {
+            color: "#8E00C2",
+            weight: 4,
+            opacity: 0.8,
+            lineJoin: "round",
+          },
+        ).addTo(map);
+
+        // Attach a click handler to the polyline to show details.
+        addPolylineClickHandler(historicalPath, traceHistoricalData);
+        // Fit the map bounds to the historical route.
+        map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+      }
     }
   });
 
@@ -91,15 +129,24 @@ export function initHistoricalMode() {
         showToast("No route data found for the selected interval.");
         loadButton.disabled = false;
         loadButton.innerText = "Load Route";
+        dataLoaded = false;
         return;
       }
 
+      // Store the loaded data for both modes
+      traceHistoricalData = data;
+      dataLoaded = true;
+
       const map = getMap();
+      const enableTraceToggle = document.getElementById("enable-trace-toggle");
+
+      // Clear any existing elements
+      clearLayer(historicalPath);
+      historicalPath = null;
+      clearTemporaryMarker();
 
       // If trace mode is not enabled, display the historical route.
-      if (!document.getElementById("enable-trace-toggle").checked) {
-        // Clear any existing historical polyline.
-        clearLayer(historicalPath);
+      if (!enableTraceToggle.checked) {
         // Create a new polyline for the historical route.
         historicalPath = L.polyline(
           data.map((loc) => [loc.latitude, loc.longitude]),
@@ -117,17 +164,11 @@ export function initHistoricalMode() {
         map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
       }
 
-      // Store the loaded data for potential trace mode actions.
-      traceHistoricalData = data;
-
       // Check if trace mode is enabled.
-      if (document.getElementById("enable-trace-toggle").checked) {
+      if (enableTraceToggle.checked) {
         showToast(
           "Historical data loaded. Click on the map to display trace information.",
         );
-        // Remove any historical polyline since trace mode does not require these.
-        clearLayer(historicalPath);
-        historicalPath = null;
         // Set up the map click handler for trace mode.
         map.off("click");
         map.on("click", onMapClickTrace);
@@ -144,6 +185,7 @@ export function initHistoricalMode() {
       const loadButton = document.getElementById("load-data");
       loadButton.disabled = false;
       loadButton.innerText = "Load Route";
+      dataLoaded = false;
     }
   });
 }
@@ -312,4 +354,6 @@ function clearTemporaryMarker() {
 export function cleanupHistoricalMode() {
   clearSearchCircle();
   clearTemporaryMarker();
+  // Reset data loaded flag when switching away from historical mode
+  dataLoaded = false;
 }
