@@ -87,3 +87,21 @@ export function startRealTimeUpdates(socket) {
     }
   });
 }
+/**
+ * Stops real-time updates by removing the polyline and clearing event listeners.
+ */
+export function stopRealTimeUpdates() {
+  const map = getMap();
+  // Clear the real-time polyline if it exists.
+  if (realTimePath && map.hasLayer(realTimePath)) {
+    clearLayer(realTimePath);
+    realTimePath = null;
+  }
+  // Remove the real-time data listener from the socket.
+  if (socketRef) {
+    socketRef.off("updateData");
+    socketRef = null;
+  }
+  // Optionally, clear the coordinates array.
+  realTimeCoordinates = [];
+}

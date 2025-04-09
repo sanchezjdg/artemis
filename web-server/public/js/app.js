@@ -73,12 +73,11 @@ document.addEventListener("DOMContentLoaded", () => {
       infoPanel.style.display = "block";
     }
   });
-  
+
   closeInfo.addEventListener("click", () => {
     infoPanel.style.display = "none";
   });
 });
-
 
 // Set up mode switching buttons.
 document.getElementById("real-time-btn").addEventListener("click", () => {
@@ -99,9 +98,11 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 document.getElementById("historical-btn").addEventListener("click", () => {
   // Detén las actualizaciones de real-time al cambiar a histórico.
   socket.off("updateData");
-  
+
   // Hide real-time controls since auto-center is specific to real-time.
   document.getElementById("real-time-controls").style.display = "none";
+  // Stop Real-Time updates (clear the polyline and detach event listeners).
+  stopRealTimeUpdates();
   // Show the historical form.
   document.getElementById("historical-form").style.display = "block";
   // Update instructions for historical mode.
@@ -111,5 +112,3 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   initHistoricalMode();
   setActiveButton("historical-btn");
 });
-
-
