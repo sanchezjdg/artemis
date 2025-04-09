@@ -4,6 +4,7 @@
 import { initMap } from "./mapHandler.js";
 import { startRealTimeUpdates } from "./realTimeMode.js";
 import { initHistoricalMode } from "./historicalMode.js";
+import { clearRealTimePath } from "./realTimeMode.js";
 import { formatDate } from "./utils.js";
 
 // Initialize socket connection using Socket.IO.
@@ -96,13 +97,12 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
-  // Detén las actualizaciones de real-time al cambiar a histórico.
+  // Stop real time updates.
   socket.off("updateData");
-
+  // Clear the real-time polyline.
+  clearRealTimePath();
   // Hide real-time controls since auto-center is specific to real-time.
   document.getElementById("real-time-controls").style.display = "none";
-  // Stop Real-Time updates (clear the polyline and detach event listeners).
-  stopRealTimeUpdates();
   // Show the historical form.
   document.getElementById("historical-form").style.display = "block";
   // Update instructions for historical mode.

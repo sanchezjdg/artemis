@@ -1,5 +1,4 @@
 // realTimeMode.js
-// Module to handle real-time map updates from the Socket.IO server.
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
 import { addPolylineClickHandler } from "./utils.js";
 import { cleanupHistoricalMode } from "./historicalMode.js";
@@ -17,11 +16,8 @@ export function startRealTimeUpdates(socket) {
   // Clear any previous historical layers.
   clearLayer(realTimePath);
   realTimeCoordinates = [];
-
-  // Reset the initial location flag when starting real-time mode
   initialLocationSet = false;
 
-  // Create a new polyline for real-time data.
   const map = getMap();
   realTimePath = L.polyline([], {
     color: "#3b65ff",
@@ -30,54 +26,49 @@ export function startRealTimeUpdates(socket) {
     lineJoin: "round",
   }).addTo(map);
 
-  // Attach click handler to show popup details.
+  // Attach click handler for popup details.
   addPolylineClickHandler(realTimePath, realTimeCoordinates);
 
-  // Clean up any trace mode elements (circles, temporary markers)
+  // Clean up any trace mode elements.
   cleanupHistoricalMode();
 
   // Hide trace results
   document.getElementById("trace-results").style.display = "none";
   document.getElementById("trace-results").innerHTML = "";
 
-  // Remove any map click handlers from trace mode
+  // Remove map click handlers from trace mode.
   map.off("click");
 
-  // Ensure the marker is visible and added to the map in real-time mode
+  // Ensure marker is visible in real-time mode.
   const marker = getMarker();
   marker.addTo(map);
 
   // Listen for real-time data updates.
-  socket.off("updateData"); // Remove previous listeners if any.
+  socket.off("updateData");
   socket.on("updateData", (data) => {
     if (data.latitude && data.longitude) {
       const latlng = [data.latitude, data.longitude];
-      const marker = getMarker();
       marker.setLatLng(latlng);
 
-      // Append the new coordinate to the array.
       realTimeCoordinates.push({
         latitude: data.latitude,
         longitude: data.longitude,
         timestamp: data.timestamp,
       });
 
-      // Update polyline with new coordinates.
+      // Update polyline.
       realTimePath.setLatLngs(
         realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
       );
 
-      // Always center the map on the first location update if not already set
       if (!initialLocationSet) {
         map.setView(latlng, 15, { animate: true });
         initialLocationSet = true;
-      }
-      // Otherwise, auto-center if the option is checked
-      else if (document.getElementById("auto-center-toggle").checked) {
+      } else if (document.getElementById("auto-center-toggle").checked) {
         map.setView(latlng, 15, { animate: true });
       }
 
-      // Update marker popup with current position details.
+      // Update marker popup.
       marker.bindPopup(
         `<strong>Current Position</strong><br>
          Latitude: ${data.latitude.toFixed(5)}<br>
@@ -87,21 +78,18 @@ export function startRealTimeUpdates(socket) {
     }
   });
 }
+
 /**
- * Stops real-time updates by removing the polyline and clearing event listeners.
+ * Clears the real-time polyline from the map.
  */
-export function stopRealTimeUpdates() {
-  const map = getMap();
-  // Clear the real-time polyline if it exists.
-  if (realTimePath && map.hasLayer(realTimePath)) {
+export function clearRealTimePath() {
+  if (realTimePath) {
+    // Remove polyline from the map using helper function.
     clearLayer(realTimePath);
+    // Nullify or reset the polyline reference.
     realTimePath = null;
+    // Reset realTimeCoordinates if needed.
+    realTimeCoordinates = [];
+    initialLocationSet = false;
   }
-  // Remove the real-time data listener from the socket.
-  if (socketRef) {
-    socketRef.off("updateData");
-    socketRef = null;
-  }
-  // Optionally, clear the coordinates array.
-  realTimeCoordinates = [];
 }
