@@ -11,7 +11,9 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.set-runner.outputs.runner }}
+
+    needs: set-runner
 
     steps:
       - uses: actions/checkout@v2
@@ -45,3 +47,21 @@ jobs:
           npm install
           sudo pm2 delete web-${{ steps.env.outputs.name }} || true
           sudo pm2 start server.js --name web-${{ steps.env.outputs.name }}
+
+  set-runner:
+    runs-on: ubuntu-latest
+    outputs:
+      runner: ${{ steps.set.outputs.runner }}
+    steps:
+      - name: Detect runner based on branch
+        id: set
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          if [ "$BRANCH" = "juan" ]; then RUNNER="artemis-juan";
+          elif [ "$BRANCH" = "moixnt" ]; then RUNNER="artemis-may";
+          elif [ "$BRANCH" = "edwin" ]; then RUNNER="artemis-edwin";
+          elif [ "$BRANCH" = "jfelipe" ]; then RUNNER="artemis-felipe";
+          elif [ "$BRANCH" = "SamirUwu" ]; then RUNNER="artemis-santiago";
+          else echo "No se encontró runner para esta rama" && exit 1;
+          fi
+          echo "runner=$RUNNER" >> $GITHUB_OUTPUT
