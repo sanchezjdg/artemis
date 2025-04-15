@@ -1,68 +1,101 @@
-name: Deploy Individual Staging
+name: Deploy to Server
 
 on:
   push:
-    branches:
-      - juan
-      - moixnt
-      - edwin
-      - jfelipe
-      - SamirUwu
+    branches: [main]
 
 jobs:
   deploy:
-    runs-on: ${{ needs.set-runner.outputs.runner }}
-
-    needs: set-runner
-
+    runs-on: artemis-juan
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set environment for each user
-        id: env
-        run: |
-          BRANCH="${{ github.ref_name }}"
-          if [ "$BRANCH" = "juan" ]; then PORT=3101; NAME=juan;
-          elif [ "$BRANCH" = "moixnt" ]; then PORT=3102; NAME=may;
-          elif [ "$BRANCH" = "edwin" ]; then PORT=3103; NAME=edwin;
-          elif [ "$BRANCH" = "jfelipe" ]; then PORT=3104; NAME=felipe;
-          elif [ "$BRANCH" = "SamirUwu" ]; then PORT=3105; NAME=santiago;
-          else echo "Rama no válida para staging" && exit 1;
-          fi
-          echo "port=$PORT" >> $GITHUB_OUTPUT
-          echo "name=$NAME" >> $GITHUB_OUTPUT
-
-      - name: Setup UDP Listener (shared)
+      - name: run udp-listener
         run: |
           cd udp-listener
-          cp ~/env-variables/.env-udp-listener .env
+          cp ~/env-variables/.env-udp-listener ./.env
           npm install
           sudo pm2 restart udp-listener
 
-      - name: Setup Web Server (per collaborator)
+      - name: run web-server
         run: |
           cd web-server
-          cp ~/env-variables/.env-web-server .env
-          echo "PORT=${{ steps.env.outputs.port }}" >> .env
+          cp ~/env-variables/.env-web-server ./.env
           npm install
-          sudo pm2 delete web-${{ steps.env.outputs.name }} || true
-          sudo pm2 start server.js --name web-${{ steps.env.outputs.name }}
+          sudo pm2 restart web-server
 
-  set-runner:
-    runs-on: ubuntu-latest
-    outputs:
-      runner: ${{ steps.set.outputs.runner }}
+  deploy_s:
+    runs-on: artemis-s9
     steps:
-      - name: Detect runner based on branch
-        id: set
-        run: |
-          BRANCH="${{ github.ref_name }}"
-          if [ "$BRANCH" = "juan" ]; then RUNNER="artemis-juan";
-          elif [ "$BRANCH" = "moixnt" ]; then RUNNER="artemis-may";
-          elif [ "$BRANCH" = "edwin" ]; then RUNNER="artemis-edwin";
-          elif [ "$BRANCH" = "jfelipe" ]; then RUNNER="artemis-felipe";
-          elif [ "$BRANCH" = "SamirUwu" ]; then RUNNER="artemis-s9";
-          else echo "No se encontró runner para esta rama" && exit 1;
-          fi
-          echo "runner=$RUNNER" >> $GITHUB_OUTPUT
+      - uses: actions/checkout@v2
 
+      - name: run udp-listener
+        run: |
+          cd udp-listener
+          cp ~/env-variables/.env-udp-listener ./.env
+          npm install
+          sudo pm2 restart udp-listener
+
+      - name: run web-server
+        run: |
+          cd web-server
+          cp ~/env-variables/.env-web-server ./.env
+          npm install
+          sudo pm2 restart web-server
+
+  deploy_e:
+    runs-on: artemis-edwin
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: run udp-listener
+        run: |
+          cd udp-listener
+          cp ~/env-variables/.env-udp-listener ./.env
+          npm install
+          sudo pm2 restart udp-listener
+
+      - name: run web-server
+        run: |
+          cd web-server
+          cp ~/env-variables/.env-web-server ./.env
+          npm install
+          sudo pm2 restart web-server
+
+  deploy_m:
+    runs-on: artemis-may
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: run udp-listener
+        run: |
+          cd udp-listener
+          cp ~/env-variables/.env-udp-listener ./.env
+          npm install
+          sudo pm2 restart udp-listener
+
+      - name: run web-server
+        run: |
+          cd web-server
+          cp ~/env-variables/.env-web-server ./.env
+          npm install
+          sudo pm2 restart web-server
+
+  deploy_f:
+    runs-on: artemis-felipe
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: run udp-listener
+        run: |
+          cd udp-listener
+          cp ~/env-variables/.env-udp-listener ./.env
+          npm install
+          sudo pm2 restart udp-listener
+
+      - name: run web-server
+        run: |
+          cd web-server
+          cp ~/env-variables/.env-web-server ./.env
+          npm install
+          sudo pm2 restart web-server
