@@ -26,7 +26,7 @@ jobs:
           elif [ "$BRANCH" = "moixnt" ]; then PORT=3102; NAME=may;
           elif [ "$BRANCH" = "edwin" ]; then PORT=3103; NAME=edwin;
           elif [ "$BRANCH" = "jfelipe" ]; then PORT=3104; NAME=felipe;
-          elif [ "$BRANCH" = "SamirUwu" ]; then PORT=3105; NAME=santiago;
+          elif [ "$BRANCH" = "SamirUwu" ]; then PORT=3105; NAME=s9;
           else echo "Rama no válida para staging" && exit 1;
           fi
           echo "port=$PORT" >> $GITHUB_OUTPUT
