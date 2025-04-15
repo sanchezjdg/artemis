@@ -61,7 +61,7 @@ jobs:
           elif [ "$BRANCH" = "moixnt" ]; then RUNNER="artemis-may";
           elif [ "$BRANCH" = "edwin" ]; then RUNNER="artemis-edwin";
           elif [ "$BRANCH" = "jfelipe" ]; then RUNNER="artemis-felipe";
-          elif [ "$BRANCH" = "SamirUwu" ]; then RUNNER="artemis-santiago";
+          elif [ "$BRANCH" = "SamirUwu" ]; then RUNNER="artemis-s9";
           else echo "No se encontró runner para esta rama" && exit 1;
           fi
           echo "runner=$RUNNER" >> $GITHUB_OUTPUT
