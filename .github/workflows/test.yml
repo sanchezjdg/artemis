@@ -57,7 +57,9 @@ jobs:
           npm install
           cp ~/env-variables/.env-test .env
           
-          sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} -- ${{ steps.env.outputs.port }}
+          cd staging/${{ steps.env.outputs.name }}
+          ENV_PATH=$HOME/env-variables/.env-test sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} -- ${{ steps.env.outputs.port }}
+
         
   set-runner:
     runs-on: ubuntu-latest
