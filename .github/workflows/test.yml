@@ -41,8 +41,6 @@ jobs:
 
       - name: Setup Web Server (per collaborator)
         run: |
-      - name: Setup Web Server (per collaborator)
-        run: |
 
           rm -rf staging/${{ steps.env.outputs.name }}
           mkdir -p staging/${{ steps.env.outputs.name }}
