@@ -165,13 +165,19 @@ httpsServer.listen(443, () => {
 */
 
 //modified HTTPS setup for testing
-if (process.env.ENABLE_HTTPS === 'true' && process.env.DDNS) {
+if (process.env.ENABLE_HTTPS === "true") {
   try {
     const options = {
-      key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`, "utf8"),
-      cert: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/fullchain.pem`, "utf8"),
+      key: fs.readFileSync(
+        `/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`,
+        "utf8",
+      ),
+      cert: fs.readFileSync(
+        `/etc/letsencrypt/live/${process.env.DDNS}/fullchain.pem`,
+        "utf8",
+      ),
     };
-    
+
     const httpsServer = https.createServer(options, app);
     io.attach(httpsServer);
     const httpsPort = process.env.HTTPS_PORT || 443;
