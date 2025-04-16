@@ -1,6 +1,6 @@
 /* Custom Theme Colors */
 :root {
-    --dark-purple: #c132b5; /*#210d46*/
+    --dark-purple: #210d46;
     --gray: #a1a1a4;
     --bright-blue: #3b65ff;
     --black: #050315;
@@ -200,9 +200,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 #trace-radius-control input[type="range"] {
     width: 100%;
     margin-top: 6px;
-  }  
+}
 
-  /* Trace Results Panel */
+/* Trace Results Panel */
 #trace-results {
     margin-top: 10px;
     max-height: 180px;
@@ -211,18 +211,18 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     padding: 10px;
     border-radius: 10px;
     border: 1px solid var(--gray);
-  }
-  
-  .trace-result {
+}
+
+.trace-result {
     background: var(--black);
     padding: 8px;
     margin-bottom: 10px;
     border-radius: 8px;
     border: 1px solid var(--gray);
     font-size: 13px;
-  }
-  
-  .trace-result button {
+}
+
+.trace-result button {
     margin-top: 6px;
     background-color: var(--bright-blue);
     color: var(--white);
@@ -232,12 +232,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     font-size: 13px;
     transition: background-color 0.3s ease;
-  }
-  
-  .trace-result button:hover {
+}
+
+.trace-result button:hover {
     background-color: #2e4fd0;
-  }
-  .info-panel {
+}
+.info-panel {
     position: absolute;
     top: 0;
     left: 0;
@@ -249,9 +249,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     display: none;
     z-index: 1500;
     overflow-y: auto;
-  }
-  
-  .close-info {
+}
+
+.close-info {
     background: none;
     border: none;
     color: var(--white);
@@ -259,9 +259,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-weight: bold;
     cursor: pointer;
     float: right;
-  }
-  
-  .info-toggle {
+}
+
+.info-toggle {
     position: absolute;
     bottom: 20px;
     left: 20px;
@@ -274,6 +274,4 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     border: none;
     z-index: 2000;
     cursor: pointer;
-  }
-  
-  
+}
