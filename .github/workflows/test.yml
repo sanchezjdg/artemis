@@ -43,22 +43,19 @@ jobs:
         run: |
       - name: Setup Web Server (per collaborator)
         run: |
-          
+
           rm -rf staging/${{ steps.env.outputs.name }}
           mkdir -p staging/${{ steps.env.outputs.name }}
           cp -r web-server/* staging/${{ steps.env.outputs.name }}/
-          
-          
+
+
           cd staging/${{ steps.env.outputs.name }}
           npm install
-          cp ~/env-variables/.env-web-server .env
-          echo "ENABLE_HTTPS=false" >> .env 
-          echo "PORT=${{ steps.env.outputs.port }}" >> .env
-          
-        
+          cp ~/env-variables/.env-test .env
+
           sudo pm2 delete web-${{ steps.env.outputs.name }} || true  # Ignorar error si no existe
           sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} -- ${{ steps.env.outputs.port }}
-        
+
   set-runner:
     runs-on: ubuntu-latest
     outputs:
