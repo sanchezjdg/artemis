@@ -26,7 +26,7 @@ jobs:
           elif [ "$BRANCH" = "moixnt" ]; then PORT=3102; NAME=may;
           elif [ "$BRANCH" = "edwin" ]; then PORT=3103; NAME=edwin;
           elif [ "$BRANCH" = "jfelipe" ]; then PORT=3104; NAME=felipe;
-          elif [ "$BRANCH" = "SamirUwu" ]; then PORT=3105; NAME=santiago;
+          elif [ "$BRANCH" = "SamirUwu" ]; then PORT=3105; NAME=s9;
           else echo "Rama no válida para staging" && exit 1;
           fi
           echo "port=$PORT" >> $GITHUB_OUTPUT
@@ -41,13 +41,24 @@ jobs:
 
       - name: Setup Web Server (per collaborator)
         run: |
-          cd web-server
-          cp ~/env-variables/.env-web-server .env
-          echo "PORT=${{ steps.env.outputs.port }}" >> .env
+      - name: Setup Web Server (per collaborator)
+        run: |
+          
+          rm -rf staging/${{ steps.env.outputs.name }}
+          mkdir -p staging/${{ steps.env.outputs.name }}
+          cp -r web-server/* staging/${{ steps.env.outputs.name }}/
+          
+          
+          cd staging/${{ steps.env.outputs.name }}
           npm install
-          sudo pm2 delete web-${{ steps.env.outputs.name }} || true
-          sudo pm2 start server.js --name web-${{ steps.env.outputs.name }}
-
+          cp ~/env-variables/.env-web-server .env
+          echo "ENABLE_HTTPS=false" >> .env 
+          echo "PORT=${{ steps.env.outputs.port }}" >> .env
+          
+        
+          sudo pm2 delete web-${{ steps.env.outputs.name }} || true  # Ignorar error si no existe
+          sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} -- ${{ steps.env.outputs.port }}
+        
   set-runner:
     runs-on: ubuntu-latest
     outputs:

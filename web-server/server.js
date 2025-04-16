@@ -139,12 +139,13 @@ const POLLING_INTERVAL = 5000;
 setInterval(checkForUpdates, POLLING_INTERVAL);
 
 // Start HTTP server
-const PORT = process.env.PORT || 3000;
+const args = process.argv.slice(2); // Toma argumentos de línea de comandos
+const PORT = args[0] || process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Web server listening on port ${PORT}`);
 });
 
-// HTTPS setup
+/* HTTPS setup
 const options = {
   key: fs.readFileSync(
     `/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`,
@@ -161,6 +162,27 @@ io.attach(httpsServer);
 httpsServer.listen(443, () => {
   console.log("HTTPS running on port 443");
 });
+*/
+
+//modified HTTPS setup for testing
+if (process.env.ENABLE_HTTPS === 'true' && process.env.DDNS) {
+  try {
+    const options = {
+      key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`, "utf8"),
+      cert: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/fullchain.pem`, "utf8"),
+    };
+    
+    const httpsServer = https.createServer(options, app);
+    io.attach(httpsServer);
+    const httpsPort = process.env.HTTPS_PORT || 443;
+    httpsServer.listen(httpsPort, () => {
+      console.log(`HTTPS running on port ${httpsPort}`);
+    });
+  } catch (error) {
+    console.error("Error al iniciar HTTPS:", error.message);
+    console.log("Continuando solo con HTTP...");
+  }
+}
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
