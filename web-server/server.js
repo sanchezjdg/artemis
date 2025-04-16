@@ -5,8 +5,7 @@ const https = require("https");
 const fs = require("fs");
 const socketIO = require("socket.io");
 const mysql = require("mysql2/promise");
-const path = require("path");
-require("dotenv").config({ path: process.env.ENV_PATH || path.resolve(__dirname, ".env") });
+require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);

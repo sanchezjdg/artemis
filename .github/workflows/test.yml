@@ -43,22 +43,26 @@ jobs:
           npm install
           sudo pm2 restart udp-listener
 
+
       - name: Setup Web Server (per collaborator)
         run: |
-      - name: Setup Web Server (per collaborator)
-        run: |
-          
-          rm -rf staging/${{ steps.env.outputs.name }}
-          mkdir -p staging/${{ steps.env.outputs.name }}
-          cp -r web-server/. staging/${{ steps.env.outputs.name }}/
-          sudo pm2 delete web-${{ steps.env.outputs.name }} || true  # Ignorar error si no existe
-          
-          cd staging/${{ steps.env.outputs.name }}
-          npm install
+          NAME=${{ steps.env.outputs.name }}
+          PORT=${{ steps.env.outputs.port }}
+        
+          rm -rf staging/$NAME
+          mkdir -p staging/$NAME
+          cp -r web-server/. staging/$NAME/
+        
+          cd staging/$NAME
           cp ~/env-variables/.env-test .env
-          
-          cd staging/${{ steps.env.outputs.name }}
-          ENV_PATH=$HOME/env-variables/.env-test sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} -- ${{ steps.env.outputs.port }}
+          echo "PORT=$PORT" >> .env
+          echo "ENABLE_HTTPS=false" >> .env
+        
+          npm install
+        
+          sudo pm2 delete web-$NAME || true
+          sudo pm2 start server.js --name web-$NAME -- $PORT
+        
 
         
   set-runner:
