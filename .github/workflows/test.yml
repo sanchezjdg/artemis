@@ -50,14 +50,14 @@ jobs:
           
           
           cd staging/${{ steps.env.outputs.name }}
+          npm install
           cp ~/env-variables/.env-web-server .env
           echo "ENABLE_HTTPS=false" >> .env 
           echo "PORT=${{ steps.env.outputs.port }}" >> .env
           
-          
-          npm install
+        
           sudo pm2 delete web-${{ steps.env.outputs.name }} || true  # Ignorar error si no existe
-          sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} -- --port ${{ steps.env.outputs.port }}
+          sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} -- ${{ steps.env.outputs.port }}
         
   set-runner:
     runs-on: ubuntu-latest

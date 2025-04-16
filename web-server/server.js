@@ -139,7 +139,8 @@ const POLLING_INTERVAL = 5000;
 setInterval(checkForUpdates, POLLING_INTERVAL);
 
 // Start HTTP server
-const PORT = process.env.PORT || 3000;
+const args = process.argv.slice(2); // Toma argumentos de línea de comandos
+const PORT = args[0] || process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Web server listening on port ${PORT}`);
 });
