@@ -165,7 +165,7 @@ httpsServer.listen(443, () => {
 */
 
 //modified HTTPS setup for testing
-if (process.env.ENABLE_HTTPS === 'true' && process.env.DDNS) {
+if (process.env.ENABLE_HTTPS === 'true') {
   try {
     const options = {
       key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`, "utf8"),
