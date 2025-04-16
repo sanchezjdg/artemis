@@ -50,8 +50,8 @@ jobs:
 
 
           cd staging/${{ steps.env.outputs.name }}
-          npm install
           cp ~/env-variables/.env-test .env
+          npm install
 
           sudo pm2 delete web-${{ steps.env.outputs.name }} || true  # Ignorar error si no existe
           sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} -- ${{ steps.env.outputs.port }}
