@@ -39,7 +39,7 @@ jobs:
 
           cd staging/${{ steps.env.outputs.name }}
           npm install
-          cp ~/env-variables/.env-web-server .env-test
+          cp ~/env-variables/.env-test
           echo "PORT=${{ steps.env.outputs.port }}" >> .env-test
           echo "WEBSITE_NAME=${{ steps.env.outputs.name }}" >> .env-test
           echo "ENABLE_HTTPS=false" >> .env-test
