@@ -31,22 +31,23 @@ body {
 
 /* Controls overlay */
 .controls {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 280px; /* Reduced width */
-    background: var(--dark-purple);
-    color: var(--white);
-    padding: 12px 18px; /* Further reduced height */
-    border-radius: 12px;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-    font-size: 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--gray);
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 90%; /* Adjusted for mobile */
+  max-width: 300px;
+  background: var(--dark-purple);
+  color: var(--white);
+  padding: 10px; /* Reduced padding */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  font-size: 12px; /* Reduced font size */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--gray);
 }
 
 .controls h2 {
@@ -64,10 +65,8 @@ body {
 }
 
 .button-group {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 8px;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+  gap: 5px;
 }
 
 /* Button styles with dynamic active effect */
@@ -275,5 +274,4 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     z-index: 2000;
     cursor: pointer;
   }
-  
-  
+

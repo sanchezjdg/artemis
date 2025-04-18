@@ -363,12 +363,12 @@ function clearTemporaryMarker() {
 export function cleanupHistoricalMode() {
   clearSearchCircle();
   clearTemporaryMarker();
-  // Remover la polyline histórica si existe
+  // Remove the polyline if it exists
   if (historicalPath) {
     const map = getMap();
     map.removeLayer(historicalPath);
     historicalPath = null;
   }
-  // Resetear el flag de datos cargados
+  // Reset the flag of loaded data
   dataLoaded = false;
 }

@@ -47,15 +47,24 @@ export function startRealTimeUpdates(socket) {
             2: "#ff3b3b", // Red for second vehicle
           };
 
+          const color = vehicleColors[vehicleId] || "#3b65ff";
+
           vehicleData.set(vehicleId, {
             coordinates: [],
             path: L.polyline([], {
-              color: vehicleColors[vehicleId] || "#3b65ff",
+              color: color,
               weight: 4,
               opacity: 0.8,
               lineJoin: "round",
             }).addTo(map),
-            marker: L.marker(latlng).addTo(map)
+            marker: L.circleMarker(latlng, {
+              radius: 8,
+              fillColor: color,
+              color: "#fff",
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.8
+            }).addTo(map)
           });
         }
 

@@ -2,7 +2,6 @@
 // Module to initialize and manage the Leaflet map and shared map layers.
 
 let map; // Global map object
-let marker; // Global marker for current position
 
 /**
  * Initializes the map with default settings.
@@ -16,9 +15,6 @@ export function initMap() {
     maxZoom: 19,
     attribution: "© OpenStreetMap contributors",
   }).addTo(map);
-
-  // Initialize and add the marker to the map.
-  marker = L.marker([0, 0]).addTo(map);
 }
 
 /**
@@ -26,13 +22,6 @@ export function initMap() {
  */
 export function getMap() {
   return map;
-}
-
-/**
- * Returns the global marker instance.
- */
-export function getMarker() {
-  return marker;
 }
 
 /**
