@@ -62,3 +62,15 @@ export function addPolylineClickHandler(polyline, data) {
       .openOn(map);
   });
 }
+
+// Add a utility function to format timestamps in a user-friendly way
+export function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  return `Time: ${hours}:${minutes}:${seconds}, Date: ${year}-${month}-${day}`;
+}

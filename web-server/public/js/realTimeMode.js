@@ -1,6 +1,6 @@
 // realTimeMode.js
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
-import { addPolylineClickHandler } from "./utils.js";
+import { addPolylineClickHandler, formatTimestamp } from "./utils.js";
 import { cleanupHistoricalMode } from "./historicalMode.js";
 
 // Global variables for real-time mode.
@@ -98,13 +98,55 @@ export function startRealTimeUpdates(socket) {
           }
         }
 
-        // Update marker popup
+        // Update marker popup to use the user-friendly timestamp format
         vehicle.marker.bindPopup(
           `<strong>Vehicle ${vehicleId}</strong><br>
            Latitude: ${data.latitude.toFixed(5)}<br>
            Longitude: ${data.longitude.toFixed(5)}<br>
-           Timestamp: ${data.timestamp}`
+           ${formatTimestamp(data.timestamp)}`
         );
+      }
+    });
+  });
+
+  // Add a dropdown for vehicle selection in real-time mode
+  const vehicleSelect = document.createElement('select');
+  vehicleSelect.id = 'vehicle-select';
+  vehicleSelect.style.marginTop = '10px';
+  vehicleSelect.style.width = '100%';
+  vehicleSelect.style.padding = '5px';
+  vehicleSelect.style.borderRadius = '5px';
+  vehicleSelect.style.border = '1px solid #ccc';
+  vehicleSelect.style.backgroundColor = '#fff';
+  vehicleSelect.style.color = '#000';
+  vehicleSelect.style.fontSize = '14px';
+  vehicleSelect.style.fontWeight = 'bold';
+  vehicleSelect.style.cursor = 'pointer';
+  vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
+  document.getElementById('real-time-controls').appendChild(vehicleSelect);
+
+  // Update the real-time updates function to handle vehicle selection
+  vehicleSelect.addEventListener('change', () => {
+    const selectedVehicleId = parseInt(vehicleSelect.value, 10);
+    if (selectedVehicleId && vehicleData.has(selectedVehicleId)) {
+      const vehicle = vehicleData.get(selectedVehicleId);
+      const lastPosition = vehicle.coordinates[vehicle.coordinates.length - 1];
+      if (lastPosition) {
+        const latlng = [lastPosition.latitude, lastPosition.longitude];
+        getMap().setView(latlng, 15, { animate: true });
+      }
+    }
+  });
+
+  // Update the socket listener to populate the dropdown
+  socket.on('updateMultipleVehicles', (vehicles) => {
+    vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
+    vehicles.forEach((data) => {
+      if (data.vehicle_id && !document.querySelector(`#vehicle-select option[value="${data.vehicle_id}"]`)) {
+        const option = document.createElement('option');
+        option.value = data.vehicle_id;
+        option.textContent = `Vehicle ${data.vehicle_id}`;
+        vehicleSelect.appendChild(option);
       }
     });
   });

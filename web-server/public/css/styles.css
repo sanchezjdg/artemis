@@ -275,3 +275,36 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
   }
 
+/* Optimize the menu for mobile devices */
+@media (max-width: 768px) {
+  .controls {
+    width: 80%;
+    max-width: none;
+    padding: 5px;
+    font-size: 10px;
+  }
+
+  .controls h2 {
+    font-size: 14px;
+  }
+
+  .controls button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .input-group label {
+    font-size: 12px;
+  }
+
+  .input-group input {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .load-button {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+
