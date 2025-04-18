@@ -87,10 +87,11 @@ io.on("connection", async (socket) => {
   console.log("New client connected");
 
   try {
-    const location = await getLatestLocation();
-    if (location) {
-      socket.emit("updateData", location);
-      console.log("Sent last location data to client:", location);
+    // Get latest locations for all vehicles
+    const locations = await getLatestLocations();
+    if (locations && locations.length > 0) {
+      socket.emit("updateMultipleVehicles", locations);
+      console.log("Sent last location data for all vehicles to client:", locations);
     } else {
       console.log("No location data found");
     }
@@ -105,29 +106,49 @@ io.on("connection", async (socket) => {
 
 let lastKnownId = null;
 
-// Function to get the latest location
-async function getLatestLocation() {
+// Function to get the latest locations for all vehicles
+async function getLatestLocations() {
   try {
     const connection = await pool.getConnection();
     const [rows] = await connection.query(
-      "SELECT * FROM steinstable ORDER BY timestamp DESC LIMIT 1",
+      `SELECT t1.* 
+       FROM steinstable t1
+       INNER JOIN (
+         SELECT vehicle_id, MAX(timestamp) as max_timestamp
+         FROM steinstable
+         GROUP BY vehicle_id
+       ) t2 
+       ON t1.vehicle_id = t2.vehicle_id 
+       AND t1.timestamp = t2.max_timestamp`
     );
     connection.release();
-    return rows.length > 0 ? rows[0] : null;
+    return rows.length > 0 ? rows : [];
   } catch (error) {
-    console.error("Error fetching latest location:", error);
-    return null;
+    console.error("Error fetching latest locations:", error);
+    return [];
   }
 }
+
+// Track last known IDs for each vehicle
+let lastKnownIds = new Map();
 
 // Function to check for updates and broadcast changes
 async function checkForUpdates() {
   try {
-    const location = await getLatestLocation();
-    if (location && lastKnownId !== location.id) {
-      lastKnownId = location.id;
-      io.emit("updateData", location);
-      console.log("Broadcasting updated data:", location);
+    const locations = await getLatestLocations();
+    let hasUpdates = false;
+
+    for (const location of locations) {
+      const lastId = lastKnownIds.get(location.vehicle_id);
+      if (!lastId || lastId !== location.id) {
+        lastKnownIds.set(location.vehicle_id, location.id);
+        hasUpdates = true;
+      }
+    }
+
+    if (hasUpdates && locations.length > 0) {
+      io.emit("updateMultipleVehicles", locations);
+      console.log("Broadcasting updated data for multiple vehicles:", locations);
     }
   } catch (error) {
     console.error("Error checking for updates:", error);

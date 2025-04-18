@@ -17,8 +17,6 @@ export function initMap() {
     attribution: "© OpenStreetMap contributors",
   }).addTo(map);
 
-  // Initialize and add the marker to the map.
-  marker = L.marker([0, 0]).addTo(map);
 }
 
 /**
