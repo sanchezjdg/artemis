@@ -63,14 +63,21 @@ export function addPolylineClickHandler(polyline, data) {
   });
 }
 
-// Add a utility function to format timestamps in a user-friendly way
+// Update the formatTimestamp function to use Bogota local time
 export function formatTimestamp(timestamp) {
   const date = new Date(timestamp);
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-  const seconds = pad(date.getSeconds());
-  const year = date.getFullYear();
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
-  return `Time: ${hours}:${minutes}:${seconds}, Date: ${year}-${month}-${day}`;
+  const options = { timeZone: 'America/Bogota', hour12: false };
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    ...options,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+  const parts = formatter.formatToParts(date);
+  const time = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
+  const dateStr = `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
+  return `Time: ${time}, Date: ${dateStr}`;
 }
