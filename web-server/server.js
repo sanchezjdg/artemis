@@ -5,7 +5,7 @@ const https = require("https");
 const fs = require("fs");
 const socketIO = require("socket.io");
 const mysql = require("mysql2/promise");
-require("dotenv").config();
+require("dotenv").config({ path: process.env.ENV_PATH || ".env" });
 
 const app = express();
 const server = http.createServer(app);
@@ -165,13 +165,13 @@ httpsServer.listen(443, () => {
 */
 
 //modified HTTPS setup for testing
-if (process.env.ENABLE_HTTPS === 'true') {
+if (process.env.ENABLE_HTTPS === 'true' && process.env.DDNS) {
   try {
     const options = {
       key: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/privkey.pem`, "utf8"),
       cert: fs.readFileSync(`/etc/letsencrypt/live/${process.env.DDNS}/fullchain.pem`, "utf8"),
     };
-    
+
     const httpsServer = https.createServer(options, app);
     io.attach(httpsServer);
     const httpsPort = process.env.HTTPS_PORT || 443;
@@ -179,7 +179,7 @@ if (process.env.ENABLE_HTTPS === 'true') {
       console.log(`HTTPS running on port ${httpsPort}`);
     });
   } catch (error) {
-    console.error("Error al iniciar HTTPS:", error.message);
+    console.error("Error al iniciar HTTPS:", error);
     console.log("Continuando solo con HTTP...");
   }
 }

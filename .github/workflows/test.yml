@@ -12,12 +12,7 @@ on:
 jobs:
   deploy:
     runs-on: ${{ needs.set-runner.outputs.runner }}
-
     needs: set-runner
-
-    env:
-      ENV_PATH: $HOME/env-variables/.env-test
-
 
     steps:
       - uses: actions/checkout@v2
@@ -30,41 +25,29 @@ jobs:
           elif [ "$BRANCH" = "moixnt" ]; then PORT=3102; NAME=may;
           elif [ "$BRANCH" = "edwin" ]; then PORT=3103; NAME=edwin;
           elif [ "$BRANCH" = "jfelipe" ]; then PORT=3104; NAME=felipe;
-          elif [ "$BRANCH" = "SamirUwu" ]; then PORT=3105; NAME=s9;
-          else echo "Rama no válida para staging" && exit 1;
-          fi
+          elif [ "$BRANCH" = "SamirUwu" ]; then PORT=3105; NAME=samir;
+          else echo "Rama no válida" && exit 1; fi
+
           echo "port=$PORT" >> $GITHUB_OUTPUT
           echo "name=$NAME" >> $GITHUB_OUTPUT
 
-      - name: Setup UDP Listener (shared)
-        run: |
-          cd udp-listener
-          cp ~/env-variables/.env-udp-listener .env
-          npm install
-          sudo pm2 restart udp-listener
-
-
       - name: Setup Web Server (per collaborator)
         run: |
-          NAME=${{ steps.env.outputs.name }}
-          PORT=${{ steps.env.outputs.port }}
-        
-          rm -rf staging/$NAME
-          mkdir -p staging/$NAME
-          cp -r web-server/. staging/$NAME/
-        
-          cd staging/$NAME
-          cp ~/env-variables/.env-test .env
-          echo "PORT=$PORT" >> .env
-          echo "ENABLE_HTTPS=false" >> .env
-        
-          npm install
-        
-          sudo pm2 delete web-$NAME || true
-          sudo pm2 start server.js --name web-$NAME -- $PORT
-        
+          rm -rf staging/${{ steps.env.outputs.name }}
+          mkdir -p staging/${{ steps.env.outputs.name }}
+          cp -r web-server/. staging/${{ steps.env.outputs.name }}/
 
-        
+          cd staging/${{ steps.env.outputs.name }}
+          npm install
+          cp ~/env-variables/.env-web-server .env-test
+          echo "PORT=${{ steps.env.outputs.port }}" >> .env-test
+          echo "WEBSITE_NAME=${{ steps.env.outputs.name }}" >> .env-test
+          echo "ENABLE_HTTPS=false" >> .env-test
+          echo "ENV_PATH=.env-test" >> .env-test
+
+          sudo pm2 delete web-${{ steps.env.outputs.name }} || true
+          sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} --env ENV_PATH=.env-test
+
   set-runner:
     runs-on: ubuntu-latest
     outputs:
@@ -79,6 +62,5 @@ jobs:
           elif [ "$BRANCH" = "edwin" ]; then RUNNER="artemis-edwin";
           elif [ "$BRANCH" = "jfelipe" ]; then RUNNER="artemis-felipe";
           elif [ "$BRANCH" = "SamirUwu" ]; then RUNNER="artemis-s9";
-          else echo "No se encontró runner para esta rama" && exit 1;
-          fi
+          else echo "No se encontró runner" && exit 1; fi
           echo "runner=$RUNNER" >> $GITHUB_OUTPUT
