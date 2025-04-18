@@ -42,11 +42,6 @@ jobs:
             
           cp ~/env-variables/.env-test .env
         
-          #echo "PORT=${{ steps.env.outputs.port }}" >> .env-test
-          #echo "WEBSITE_NAME=${{ steps.env.outputs.name }}" >> .env-test
-          #echo "ENABLE_HTTPS=false" >> .env-test
-          #echo "ENV_PATH=.env-test" >> .env-test
-        
           sudo pm2 delete web-${{ steps.env.outputs.name }} || true
           sudo pm2 start server.js --name web-${{ steps.env.outputs.name }} 
 
