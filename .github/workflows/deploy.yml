@@ -25,7 +25,7 @@ jobs:
           sudo pm2 restart web-server
 
   deploy_s:
-    runs-on: artemis-s9
+    runs-on: artemis-s7
     steps:
       - uses: actions/checkout@v2
 
