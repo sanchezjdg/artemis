@@ -74,7 +74,7 @@ export function formatTimestamp(timestamp) {
     hour12: false // Use 24-hour format
   };
 
-  // 3. Create a formatter for English (US) locale with specified options
+  // Create a formatter for English (US) locale with specified options
   const formatter = new Intl.DateTimeFormat('en-US', {
     ...options, // Include the timeZone and hour12 options
     year: 'numeric',
