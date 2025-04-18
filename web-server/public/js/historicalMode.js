@@ -129,6 +129,9 @@ loadButton.addEventListener('click', async () => {
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
 
+  // Show loading feedback
+  showToast('Loading route data, please wait...');
+
   try {
     const response = await fetch(
       `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=${selectedVehicleId}`
@@ -140,8 +143,31 @@ loadButton.addEventListener('click', async () => {
       return;
     }
 
-    // Process and display the data as before
-    // ...existing code...
+    // Process and display the data
+    dataLoaded = true;
+    traceHistoricalData = data;
+
+    // Clear any existing path
+    clearLayer(historicalPath);
+
+    // Draw the new path on the map
+    historicalPath = L.polyline(
+      data.map((loc) => [loc.latitude, loc.longitude]),
+      {
+        color: '#8E00C2',
+        weight: 4,
+        opacity: 0.8,
+        lineJoin: 'round',
+      }
+    ).addTo(map);
+
+    // Attach a click handler to the polyline to show details
+    addPolylineClickHandler(historicalPath, data);
+
+    // Fit the map bounds to the new route
+    map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+
+    showToast('Route data loaded successfully.');
   } catch (error) {
     console.error('Error fetching historical data:', error);
     showToast('Error loading historical data.');
