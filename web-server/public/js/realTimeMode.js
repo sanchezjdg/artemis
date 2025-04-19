@@ -39,6 +39,18 @@ export function startRealTimeUpdates(socket) {
       if (data.latitude && data.longitude) {
         const vehicleId = data.vehicle_id;
         const latlng = [data.latitude, data.longitude];
+        
+        // Auto-center logic
+        const selected = document.getElementById("vehicle-select").value;
+        const isAutoCenterEnabled = document.getElementById("auto-center-toggle").checked;
+
+        if (
+          isAutoCenterEnabled &&
+          selected !== "all" &&
+          parseInt(selected) === vehicleId
+        ) {
+          map.setView(latlng, 15, { animate: true });
+        }
 
         // Initialize vehicle data if it doesn't exist
         if (!vehicleData.has(vehicleId)) {
@@ -88,16 +100,6 @@ export function startRealTimeUpdates(socket) {
         // Attach click handler for popup details
         addPolylineClickHandler(vehicle.path, vehicle.coordinates);
 
-        // Center map on first vehicle if auto-center is enabled
-        if (vehicleId === 1) {
-          if (!initialLocationSet) {
-            map.setView(latlng, 15, { animate: true });
-            initialLocationSet = true;
-          } else if (document.getElementById("auto-center-toggle").checked) {
-            map.setView(latlng, 15, { animate: true });
-          }
-        }
-
         // Update marker popup to use the user-friendly timestamp format
         vehicle.marker.bindPopup(
           `<strong>Vehicle ${vehicleId}</strong><br>
@@ -107,48 +109,119 @@ export function startRealTimeUpdates(socket) {
         );
       }
     });
+
+    const selected = document.getElementById("vehicle-select").value;
+    const isAutoCenterEnabled = document.getElementById("auto-center-toggle").checked;
+    const allLatLngs = [];
+
+    if (selected === "all" && isAutoCenterEnabled) {
+      vehicleData.forEach((vehicle) => {
+        const coords = vehicle.coordinates;
+        if (coords.length > 0) {
+          coords.forEach((c) => allLatLngs.push([c.latitude, c.longitude]));
+        }
+      });
+
+      if (allLatLngs.length > 0) {
+        map.fitBounds(allLatLngs, { padding: [50, 50] });
+      }
+    }
+
   });
 
-  // Add a dropdown for vehicle selection in real-time mode
-  const vehicleSelect = document.createElement('select');
-  vehicleSelect.id = 'vehicle-select';
-  vehicleSelect.style.marginTop = '10px';
-  vehicleSelect.style.width = '100%';
-  vehicleSelect.style.padding = '5px';
-  vehicleSelect.style.borderRadius = '5px';
-  vehicleSelect.style.border = '1px solid #ccc';
-  vehicleSelect.style.backgroundColor = '#fff';
-  vehicleSelect.style.color = '#000';
-  vehicleSelect.style.fontSize = '14px';
-  vehicleSelect.style.fontWeight = 'bold';
-  vehicleSelect.style.cursor = 'pointer';
-  vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
-  document.getElementById('real-time-controls').appendChild(vehicleSelect);
+  // Request latest location data immediately after entering real-time mode
+  socket.emit("requestLatest");
 
+  // Add a dropdown for vehicle selection in real-time mode
+  let vehicleSelect = document.getElementById('vehicle-select');
+  if (!vehicleSelect) {
+    vehicleSelect = document.createElement('select');
+    vehicleSelect.id = 'vehicle-select';
+    vehicleSelect.style.marginTop = '10px';
+    vehicleSelect.style.width = '100%';
+    vehicleSelect.style.padding = '5px';
+    vehicleSelect.style.borderRadius = '5px';
+    vehicleSelect.style.border = '1px solid #ccc';
+    vehicleSelect.style.backgroundColor = '#fff';
+    vehicleSelect.style.color = '#000';
+    vehicleSelect.style.fontSize = '14px';
+    vehicleSelect.style.fontWeight = 'bold';
+    vehicleSelect.style.cursor = 'pointer';
+    vehicleSelect.innerHTML = `
+    <option value="all">All Vehicles</option>
+    <option value="1">Vehicle 1</option>
+    <option value="2">Vehicle 2</option>
+    `;
+    const container = document.getElementById('real-time-controls');
+    const autoCenterToggleWrapper = document.getElementById("auto-center-toggle").parentElement;
+    
+    // Primero quitamos ambos por si ya existen
+    if (vehicleSelect.parentElement) vehicleSelect.remove();
+    if (autoCenterToggleWrapper.parentElement) autoCenterToggleWrapper.remove();
+    
+    // Insertamos el select primero, luego el checkbox
+    container.appendChild(vehicleSelect);
+    container.appendChild(autoCenterToggleWrapper);
+    
+  }
   // Update the real-time updates function to handle vehicle selection
   vehicleSelect.addEventListener('change', () => {
-    const selectedVehicleId = parseInt(vehicleSelect.value, 10);
-    if (selectedVehicleId && vehicleData.has(selectedVehicleId)) {
-      const vehicle = vehicleData.get(selectedVehicleId);
-      const lastPosition = vehicle.coordinates[vehicle.coordinates.length - 1];
-      if (lastPosition) {
-        const latlng = [lastPosition.latitude, lastPosition.longitude];
-        getMap().setView(latlng, 15, { animate: true });
+    const selected = vehicleSelect.value;
+    const autoCenterToggle = document.getElementById("auto-center-toggle");
+  
+    autoCenterToggle.parentElement.style.display = "block";
+      
+    vehicleData.forEach((vehicle, id) => {
+      const show = selected === "all" || parseInt(selected) === id;
+      if (show) {
+        vehicle.path.addTo(getMap());
+        vehicle.marker.addTo(getMap());
+      } else {
+        getMap().removeLayer(vehicle.path);
+        getMap().removeLayer(vehicle.marker);
+      }
+    });
+  
+    // Centrar mapa en el vehículo seleccionado si hay datos
+    if (selected !== "all") {
+      const selectedId = parseInt(selected);
+      if (vehicleData.has(selectedId)) {
+        const last = vehicleData.get(selectedId).coordinates.at(-1);
+        if (last) {
+          getMap().setView([last.latitude, last.longitude], 15, { animate: true });
+        }
       }
     }
   });
+  
+  vehicleSelect.value = 'all'; // selecciona "All Vehicles" por defecto
 
+  const autoCenterToggle = document.getElementById("auto-center-toggle");
+  if (autoCenterToggle) {
+    autoCenterToggle.parentElement.style.display = "block"; // asegúrate de que se muestre
+    autoCenterToggle.checked = true;
+  }
+  
   // Update the socket listener to populate the dropdown
-  socket.on('updateMultipleVehicles', (vehicles) => {
-    vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
-    vehicles.forEach((data) => {
-      if (data.vehicle_id && !document.querySelector(`#vehicle-select option[value="${data.vehicle_id}"]`)) {
-        const option = document.createElement('option');
-        option.value = data.vehicle_id;
-        option.textContent = `Vehicle ${data.vehicle_id}`;
-        vehicleSelect.appendChild(option);
-      }
-    });
+  // Ensure dropdown always includes 'All Vehicles' as the first option
+  if (!document.querySelector('#vehicle-select option[value="all"]')) {
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'All Vehicles';
+    vehicleSelect.appendChild(allOption);
+  }
+
+  // Add missing vehicle options without clearing the existing list
+  vehicles.forEach((data) => {
+    if (
+      data.vehicle_id &&
+      !document.querySelector(`#vehicle-select option[value="${data.vehicle_id}"]`)
+    ) {
+      const option = document.createElement('option');
+      option.value = data.vehicle_id;
+      option.textContent = `Vehicle ${data.vehicle_id}`;
+      vehicleSelect.appendChild(option);
+    }
   });
 }
 

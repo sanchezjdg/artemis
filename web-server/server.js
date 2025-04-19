@@ -56,14 +56,14 @@ function isValidDateRange(start, end) {
 
 // API endpoint for historical data
 app.get("/historical", async (req, res) => {
-  const { start, end } = req.query;
-  if (!start || !end) {
+  const { start, end, vehicle_id } = req.query;
+
+  if (!start || !end || !vehicle_id) {
     return res
       .status(400)
-      .json({ error: "Missing start or end datetime parameter." });
+      .json({ error: "Missing start, end or vehicle_id parameter." });
   }
 
-  // Server-side validation of the date range
   const validation = isValidDateRange(start, end);
   if (!validation.valid) {
     return res.status(400).json({ error: validation.message });
@@ -71,9 +71,12 @@ app.get("/historical", async (req, res) => {
 
   try {
     const connection = await pool.getConnection();
-    const query =
-      "SELECT * FROM steinstable WHERE timestamp BETWEEN ? AND ? ORDER BY timestamp ASC";
-    const [rows] = await connection.query(query, [start, end]);
+    const query = `
+      SELECT * FROM steinstable 
+      WHERE timestamp BETWEEN ? AND ? 
+        AND vehicle_id = ? 
+      ORDER BY timestamp ASC`;
+    const [rows] = await connection.query(query, [start, end, vehicle_id]);
     connection.release();
     res.json(rows);
   } catch (error) {
@@ -82,12 +85,13 @@ app.get("/historical", async (req, res) => {
   }
 });
 
+
 // Socket.io connection handler for real-time updates
 io.on("connection", async (socket) => {
   console.log("New client connected");
 
   try {
-    // Get latest locations for all vehicles
+    // Get latest locations for all vehicles on initial connection
     const locations = await getLatestLocations();
     if (locations && locations.length > 0) {
       socket.emit("updateMultipleVehicles", locations);
@@ -96,9 +100,25 @@ io.on("connection", async (socket) => {
       console.log("No location data found");
     }
 
+    // Listen for client-side request to fetch latest data again (e.g., on mode switch)
+    socket.on("requestLatest", async () => {
+      try {
+        const latest = await getLatestLocations();
+        if (latest && latest.length > 0) {
+          socket.emit("updateMultipleVehicles", latest);
+          console.log("Sent latest locations on client request:", latest);
+        } else {
+          console.log("No location data available to send on client request.");
+        }
+      } catch (err) {
+        console.error("Error handling 'requestLatest' event:", err);
+      }
+    });
+
     socket.on("disconnect", () => {
       console.log("Client disconnected");
     });
+
   } catch (error) {
     console.error("Error in connection handler:", error);
   }

@@ -63,37 +63,21 @@ export function addPolylineClickHandler(polyline, data) {
   });
 }
 
-// formatTimestamp function to use Bogota local time
+// Format a timestamp string by removing milliseconds and keeping only date and time
 export function formatTimestamp(timestamp) {
-  // Create a Date object from the input timestamp
-  const date = new Date(timestamp);
+  try {
+    const clean = timestamp
+      .replace("T", " ")               // "2025-04-18 19:47:57.000Z"
+      .replace(/\.\d{3}Z$/, "")       // Remove the milliseconds (e.g., ".000") and the trailing "Z" if present
+      .trim();
 
-  // Define formatting options, crucially setting the timeZone
-  const options = {
-    timeZone: 'America/Bogota', // Specifies the target time zone
-    hour12: false // Use 24-hour format
-  };
+    const [datePart, timePart] = clean.split(" ");
 
-  // Create a formatter for English (US) locale with specified options
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    ...options, // Include the timeZone and hour12 options
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+    if (!datePart || !timePart) throw new Error("Invalid format");
 
-  // Format the date into parts according to Bogota time
-  const parts = formatter.formatToParts(date);
-
-  // Extract the time components (HH:mm:ss)
-  const time = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
-
-  // Extract the date components (YYYY-MM-DD)
-  const dateStr = `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
-
-  // Return the formatted string
-  return `Time: ${time}, Date: ${dateStr}`;
+    return `Time: ${timePart}, Date: ${datePart}`;
+  } catch (err) {
+    return "Time: N/A, Date: N/A";
+  }
 }
+
