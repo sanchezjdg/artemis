@@ -68,21 +68,16 @@ export function formatTimestamp(timestamp) {
   // Create a Date object from the input timestamp
   const date = new Date(timestamp);
 
-  // Define formatting options, crucially setting the timeZone
-  const options = {
-    timeZone: 'America/Bogota', // Specifies the target time zone
-    hour12: false // Use 24-hour format
-  };
-
-  // Create a formatter for English (US) locale with specified options
+  // Create a formatter for Culombia (CO) locale with specified options
   const formatter = new Intl.DateTimeFormat('en-CO', {
-    ...options, // Include the timeZone and hour12 options
+    timeZone: 'America/Bogota',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
+    hour12: false,
   });
 
   // Format the date into parts according to Bogota time
