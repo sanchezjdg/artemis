@@ -65,26 +65,15 @@ export function addPolylineClickHandler(polyline, data) {
 
 export function formatTimestamp(timestamp) {
   try {
-    const date = new Date(timestamp); // NO le agregamos Z
+    // timestamp: "2025-04-18 19:12:13" o "2025-04-18T19:12:13"
+    const clean = timestamp.replace("T", " ");
+    const [datePart, timePart] = clean.split(" ");
 
-    // NO usamos timeZone, porque ya viene en hora Colombia
-    const formatter = new Intl.DateTimeFormat("es-CO", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
+    if (!datePart || !timePart) throw new Error("Invalid format");
 
-    const parts = formatter.formatToParts(date);
-
-    const time = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
-    const dateStr = `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
-
-    return `Time: ${time}, Date: ${dateStr}`;
+    return `Time: ${timePart}, Date: ${datePart}`;
   } catch (err) {
     return "Time: N/A, Date: N/A";
   }
 }
+
