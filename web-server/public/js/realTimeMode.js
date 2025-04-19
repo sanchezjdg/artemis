@@ -160,7 +160,6 @@ export function startRealTimeUpdates(socket) {
     const autoCenterToggle = document.getElementById("auto-center-toggle");
   
     autoCenterToggle.parentElement.style.display = "block";
-    autoCenterToggle.disabled = selected === "all";
     autoCenterToggle.checked = selected !== "all";
     
   
@@ -192,8 +191,7 @@ export function startRealTimeUpdates(socket) {
   const autoCenterToggle = document.getElementById("auto-center-toggle");
   if (autoCenterToggle) {
     autoCenterToggle.parentElement.style.display = "block"; // asegúrate de que se muestre
-    autoCenterToggle.disabled = true; // desactívalo si estamos en "all"
-    autoCenterToggle.checked = false;
+    autoCenterToggle.checked = true;
   }
   
   // Update the socket listener to populate the dropdown
