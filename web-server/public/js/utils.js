@@ -63,12 +63,11 @@ export function addPolylineClickHandler(polyline, data) {
   });
 }
 
-// formatTimestamp function to use Bogota local time
 export function formatTimestamp(timestamp) {
-  // Create a Date object from the input timestamp
+  // Crear objeto Date desde el timestamp (ya en hora local)
   const date = new Date(timestamp);
 
-  // Create a formatter for Culombia (CO) locale with specified options
+  // Usar el locale pero SIN ajustar zona horaria (ya viene en hora Colombia)
   const formatter = new Intl.DateTimeFormat('en-CO', {
     year: 'numeric',
     month: '2-digit',
@@ -79,15 +78,12 @@ export function formatTimestamp(timestamp) {
     hour12: false,
   });
 
-  // Format the date into parts according to Bogota time
+  // Extraer las partes de fecha y hora
   const parts = formatter.formatToParts(date);
 
-  // Extract the time components (HH:mm:ss)
+  // Obtener los valores formateados
   const time = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
-
-  // Extract the date components (YYYY-MM-DD)
   const dateStr = `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
 
-  // Return the formatted string
   return `Time: ${time}, Date: ${dateStr}`;
 }
