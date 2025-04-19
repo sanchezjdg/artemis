@@ -100,16 +100,6 @@ export function startRealTimeUpdates(socket) {
         // Attach click handler for popup details
         addPolylineClickHandler(vehicle.path, vehicle.coordinates);
 
-        // Center map on first vehicle if auto-center is enabled
-        if (vehicleId === 1) {
-          if (!initialLocationSet) {
-            map.setView(latlng, 15, { animate: true });
-            initialLocationSet = true;
-          } else if (document.getElementById("auto-center-toggle").checked) {
-            map.setView(latlng, 15, { animate: true });
-          }
-        }
-
         // Update marker popup to use the user-friendly timestamp format
         vehicle.marker.bindPopup(
           `<strong>Vehicle ${vehicleId}</strong><br>
@@ -148,22 +138,19 @@ export function startRealTimeUpdates(socket) {
   }
   // Update the real-time updates function to handle vehicle selection
   vehicleSelect.addEventListener('change', () => {
+    const selected = vehicleSelect.value;
     const autoCenterToggle = document.getElementById("auto-center-toggle");
-    const autoCenterContainer = document.getElementById("real-time-controls");
-
+  
     // Mostrar u ocultar el checkbox según la selección
     if (selected === "all") {
       autoCenterToggle.checked = false;
       autoCenterToggle.parentElement.style.display = "none";
     } else {
       autoCenterToggle.parentElement.style.display = "block";
-    }   
-
-    const selected = vehicleSelect.value;
+    }
   
     vehicleData.forEach((vehicle, id) => {
       const show = selected === "all" || parseInt(selected) === id;
-  
       if (show) {
         vehicle.path.addTo(getMap());
         vehicle.marker.addTo(getMap());
@@ -173,7 +160,7 @@ export function startRealTimeUpdates(socket) {
       }
     });
   
-    // Si seleccionaron un vehículo específico, centra el mapa en él
+    // Centrar mapa en el vehículo seleccionado si hay datos
     if (selected !== "all") {
       const selectedId = parseInt(selected);
       if (vehicleData.has(selectedId)) {
@@ -183,7 +170,8 @@ export function startRealTimeUpdates(socket) {
         }
       }
     }
-  });  
+  });
+  
 
   // Update the socket listener to populate the dropdown
   // Ensure dropdown always includes 'All Vehicles' as the first option
