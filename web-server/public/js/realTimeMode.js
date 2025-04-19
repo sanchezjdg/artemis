@@ -109,6 +109,9 @@ export function startRealTimeUpdates(socket) {
     });
   });
 
+  // Request latest location data immediately after entering real-time mode
+  socket.emit("requestLatest");
+
   // Add a dropdown for vehicle selection in real-time mode
   let vehicleSelect = document.getElementById('vehicle-select');
   if (!vehicleSelect) {
