@@ -75,7 +75,7 @@ export function formatTimestamp(timestamp) {
   };
 
   // Create a formatter for English (US) locale with specified options
-  const formatter = new Intl.DateTimeFormat('en-US', {
+  const formatter = new Intl.DateTimeFormat('en-CO', {
     ...options, // Include the timeZone and hour12 options
     year: 'numeric',
     month: '2-digit',
