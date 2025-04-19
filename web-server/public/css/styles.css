@@ -314,3 +314,19 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 #vehicle-select {
   margin-bottom: 6px;
 }
+
+#trace-time-slider-control {
+  display: none;
+  margin-top: 10px;
+}
+
+#trace-time-slider {
+  width: 100%;
+}
+
+#trace-timestamp-display {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 4px;
+  color: var(--white);
+}
