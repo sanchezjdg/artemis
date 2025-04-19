@@ -65,7 +65,6 @@ body {
 }
 
 .button-group {
-  justify-content: center; /* <-- Esto los centra */
   flex-wrap: wrap;
   gap: 5px;
 }
