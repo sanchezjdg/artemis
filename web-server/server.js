@@ -87,7 +87,7 @@ io.on("connection", async (socket) => {
   console.log("New client connected");
 
   try {
-    // Get latest locations for all vehicles
+    // Get latest locations for all vehicles on initial connection
     const locations = await getLatestLocations();
     if (locations && locations.length > 0) {
       socket.emit("updateMultipleVehicles", locations);
@@ -96,9 +96,25 @@ io.on("connection", async (socket) => {
       console.log("No location data found");
     }
 
+    // Listen for client-side request to fetch latest data again (e.g., on mode switch)
+    socket.on("requestLatest", async () => {
+      try {
+        const latest = await getLatestLocations();
+        if (latest && latest.length > 0) {
+          socket.emit("updateMultipleVehicles", latest);
+          console.log("Sent latest locations on client request:", latest);
+        } else {
+          console.log("No location data available to send on client request.");
+        }
+      } catch (err) {
+        console.error("Error handling 'requestLatest' event:", err);
+      }
+    });
+
     socket.on("disconnect", () => {
       console.log("Client disconnected");
     });
+
   } catch (error) {
     console.error("Error in connection handler:", error);
   }
