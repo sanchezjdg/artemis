@@ -94,21 +94,24 @@ const radiusValueDisplay = document.getElementById("radius-value");
   });
 
   // Add vehicle selection dropdown for historical mode
-const vehicleSelectHistorical = document.createElement('select');
-vehicleSelectHistorical.id = 'vehicle-select-historical';
-vehicleSelectHistorical.style.marginTop = '10px';
-vehicleSelectHistorical.style.width = '100%';
-vehicleSelectHistorical.style.padding = '5px';
-vehicleSelectHistorical.style.borderRadius = '5px';
-vehicleSelectHistorical.style.border = '1px solid #ccc';
-vehicleSelectHistorical.style.backgroundColor = '#fff';
-vehicleSelectHistorical.style.color = '#000';
-vehicleSelectHistorical.style.fontSize = '14px';
-vehicleSelectHistorical.style.fontWeight = 'bold';
-vehicleSelectHistorical.style.cursor = 'pointer';
-vehicleSelectHistorical.innerHTML = '<option value="">Select Vehicle</option><option value="1">Vehicle 1</option><option value="2">Vehicle 2</option>';
-document.getElementById('historical-form').prepend(vehicleSelectHistorical);
-
+  let vehicleSelectHistorical = document.getElementById('vehicle-select-historical');
+  if (!vehicleSelectHistorical) {
+    vehicleSelectHistorical = document.createElement('select');
+    vehicleSelectHistorical.id = 'vehicle-select-historical';
+    vehicleSelectHistorical.style.marginTop = '10px';
+    vehicleSelectHistorical.style.width = '100%';
+    vehicleSelectHistorical.style.padding = '5px';
+    vehicleSelectHistorical.style.borderRadius = '5px';
+    vehicleSelectHistorical.style.border = '1px solid #ccc';
+    vehicleSelectHistorical.style.backgroundColor = '#fff';
+    vehicleSelectHistorical.style.color = '#000';
+    vehicleSelectHistorical.style.fontSize = '14px';
+    vehicleSelectHistorical.style.fontWeight = 'bold';
+    vehicleSelectHistorical.style.cursor = 'pointer';
+    vehicleSelectHistorical.innerHTML = '<option value="">Select Vehicle</option><option value="1">Vehicle 1</option><option value="2">Vehicle 2</option>';
+    document.getElementById('historical-form').prepend(vehicleSelectHistorical);
+  }
+  
 // Update the data loading function to include vehicle selection
 const loadButton = document.getElementById('load-data');
 loadButton.addEventListener('click', async () => {

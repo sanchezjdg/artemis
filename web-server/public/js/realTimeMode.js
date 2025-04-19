@@ -110,21 +110,23 @@ export function startRealTimeUpdates(socket) {
   });
 
   // Add a dropdown for vehicle selection in real-time mode
-  const vehicleSelect = document.createElement('select');
-  vehicleSelect.id = 'vehicle-select';
-  vehicleSelect.style.marginTop = '10px';
-  vehicleSelect.style.width = '100%';
-  vehicleSelect.style.padding = '5px';
-  vehicleSelect.style.borderRadius = '5px';
-  vehicleSelect.style.border = '1px solid #ccc';
-  vehicleSelect.style.backgroundColor = '#fff';
-  vehicleSelect.style.color = '#000';
-  vehicleSelect.style.fontSize = '14px';
-  vehicleSelect.style.fontWeight = 'bold';
-  vehicleSelect.style.cursor = 'pointer';
-  vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
-  document.getElementById('real-time-controls').appendChild(vehicleSelect);
-
+  let vehicleSelect = document.getElementById('vehicle-select');
+  if (!vehicleSelect) {
+    vehicleSelect = document.createElement('select');
+    vehicleSelect.id = 'vehicle-select';
+    vehicleSelect.style.marginTop = '10px';
+    vehicleSelect.style.width = '100%';
+    vehicleSelect.style.padding = '5px';
+    vehicleSelect.style.borderRadius = '5px';
+    vehicleSelect.style.border = '1px solid #ccc';
+    vehicleSelect.style.backgroundColor = '#fff';
+    vehicleSelect.style.color = '#000';
+    vehicleSelect.style.fontSize = '14px';
+    vehicleSelect.style.fontWeight = 'bold';
+    vehicleSelect.style.cursor = 'pointer';
+    vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
+    document.getElementById('real-time-controls').appendChild(vehicleSelect);
+  }
   // Update the real-time updates function to handle vehicle selection
   vehicleSelect.addEventListener('change', () => {
     const selectedVehicleId = parseInt(vehicleSelect.value, 10);
