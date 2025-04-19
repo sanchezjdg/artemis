@@ -127,21 +127,40 @@ export function startRealTimeUpdates(socket) {
     vehicleSelect.style.fontSize = '14px';
     vehicleSelect.style.fontWeight = 'bold';
     vehicleSelect.style.cursor = 'pointer';
-    vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
+    vehicleSelect.innerHTML = `
+    <option value="all">All Vehicles</option>
+    <option value="1">Vehicle 1</option>
+    <option value="2">Vehicle 2</option>
+    `;
     document.getElementById('real-time-controls').appendChild(vehicleSelect);
   }
   // Update the real-time updates function to handle vehicle selection
   vehicleSelect.addEventListener('change', () => {
-    const selectedVehicleId = parseInt(vehicleSelect.value, 10);
-    if (selectedVehicleId && vehicleData.has(selectedVehicleId)) {
-      const vehicle = vehicleData.get(selectedVehicleId);
-      const lastPosition = vehicle.coordinates[vehicle.coordinates.length - 1];
-      if (lastPosition) {
-        const latlng = [lastPosition.latitude, lastPosition.longitude];
-        getMap().setView(latlng, 15, { animate: true });
+    const selected = vehicleSelect.value;
+  
+    vehicleData.forEach((vehicle, id) => {
+      const show = selected === "all" || parseInt(selected) === id;
+  
+      if (show) {
+        vehicle.path.addTo(getMap());
+        vehicle.marker.addTo(getMap());
+      } else {
+        getMap().removeLayer(vehicle.path);
+        getMap().removeLayer(vehicle.marker);
+      }
+    });
+  
+    // Si seleccionaron un vehículo específico, centra el mapa en él
+    if (selected !== "all") {
+      const selectedId = parseInt(selected);
+      if (vehicleData.has(selectedId)) {
+        const last = vehicleData.get(selectedId).coordinates.at(-1);
+        if (last) {
+          getMap().setView([last.latitude, last.longitude], 15, { animate: true });
+        }
       }
     }
-  });
+  });  
 
   // Update the socket listener to populate the dropdown
   socket.on('updateMultipleVehicles', (vehicles) => {
