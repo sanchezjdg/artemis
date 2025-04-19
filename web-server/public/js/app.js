@@ -42,14 +42,13 @@ flatpickr("#end-datetime", {
 
 // Set up active button color
 function setActiveButton(activeId) {
-  document.querySelectorAll(".button-group button").forEach((btn) => {
-    btn.classList.remove("active");
+  ["real-time-btn", "historical-btn"].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.classList.remove("active");
+    }
   });
-
-  const activeBtn = document.getElementById(activeId);
-  if (activeBtn) {
-    activeBtn.classList.add("active");
-  }
+  document.getElementById(activeId).classList.add("active");
 }
 
 // Default to real-time mode on page load
