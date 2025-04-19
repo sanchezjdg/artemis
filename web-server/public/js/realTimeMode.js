@@ -167,9 +167,7 @@ export function startRealTimeUpdates(socket) {
     const autoCenterToggle = document.getElementById("auto-center-toggle");
   
     autoCenterToggle.parentElement.style.display = "block";
-    autoCenterToggle.checked = selected !== "all";
-    
-  
+      
     vehicleData.forEach((vehicle, id) => {
       const show = selected === "all" || parseInt(selected) === id;
       if (show) {
