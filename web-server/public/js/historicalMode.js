@@ -263,12 +263,6 @@ function onMapClickTrace(e) {
       const lng = parseFloat(btn.dataset.lng);
       const time = btn.dataset.time;
 
-      // Remove previous trace view line if it exists.
-      if (traceViewLine && getMap().hasLayer(traceViewLine)) {
-        clearLayer(traceViewLine);
-        traceViewLine = null;
-      }
-
       // Clear any temporary marker if it exists
       clearTemporaryMarker();
 
@@ -286,42 +280,6 @@ function onMapClickTrace(e) {
       // Center the map on the clicked point
       map.setView([lat, lng], 17);
 
-      // Find the index of the clicked point within the historical data.
-      const clickedIndex = traceHistoricalData.findIndex(
-        (p) =>
-          p.latitude === lat && p.longitude === lng && p.timestamp === time,
-      );
-      if (clickedIndex === -1) return;
-
-      // Determine a segment of the route around the clicked point based on the threshold distance.
-      let startIndex = clickedIndex;
-      while (startIndex > 0) {
-        const dist = L.latLng(lat, lng).distanceTo(
-          L.latLng(
-            traceHistoricalData[startIndex].latitude,
-            traceHistoricalData[startIndex].longitude,
-          ),
-        );
-        if (dist > threshold) {
-          startIndex++;
-          break;
-        }
-        startIndex--;
-      }
-      let endIndex = clickedIndex;
-      while (endIndex < traceHistoricalData.length) {
-        const dist = L.latLng(lat, lng).distanceTo(
-          L.latLng(
-            traceHistoricalData[endIndex].latitude,
-            traceHistoricalData[endIndex].longitude,
-          ),
-        );
-        if (dist > threshold) {
-          endIndex--;
-          break;
-        }
-        endIndex++;
-      }
     });
   });
 }
@@ -353,56 +311,19 @@ function clearTemporaryMarker() {
 function showTracePointOnMap(point) {
   const { latitude: lat, longitude: lng, timestamp: time } = point;
 
-  // Eliminar línea anterior
-  if (traceViewLine && getMap().hasLayer(traceViewLine)) {
-    clearLayer(traceViewLine);
-    traceViewLine = null;
-  }
-
+  // Eliminar marcador anterior si existe
   clearTemporaryMarker();
 
-  // Crear marcador
+  // Crear marcador temporal
   temporaryMarker = L.marker([lat, lng]).addTo(getMap());
   temporaryMarker
     .bindPopup(`<b>Recorded Moment</b><br>Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}<br>Timestamp: ${time}`)
     .openPopup();
 
+  // Centrar mapa en el punto
   getMap().setView([lat, lng], 17);
-
-  // Crear línea dentro del área, como antes
-  const index = traceHistoricalData.findIndex(
-    (p) => p.latitude === lat && p.longitude === lng && p.timestamp === time
-  );
-
-  if (index === -1) return;
-
-  let startIndex = index;
-  const threshold = parseFloat(document.getElementById("search-radius").value) || 100;
-
-  while (startIndex > 0) {
-    const dist = L.latLng(lat, lng).distanceTo(L.latLng(traceHistoricalData[startIndex].latitude, traceHistoricalData[startIndex].longitude));
-    if (dist > threshold) {
-      startIndex++;
-      break;
-    }
-    startIndex--;
-  }
-
-  let endIndex = index;
-  while (endIndex < traceHistoricalData.length) {
-    const dist = L.latLng(lat, lng).distanceTo(L.latLng(traceHistoricalData[endIndex].latitude, traceHistoricalData[endIndex].longitude));
-    if (dist > threshold) {
-      endIndex--;
-      break;
-    }
-    endIndex++;
-  }
-
-  traceViewLine = L.polyline(
-    traceHistoricalData.slice(startIndex, endIndex + 1).map(p => [p.latitude, p.longitude]),
-    { color: "#AA00FF", weight: 4 }
-  ).addTo(getMap());
 }
+
 
 
 /**
