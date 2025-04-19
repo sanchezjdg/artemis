@@ -65,15 +65,12 @@ export function addPolylineClickHandler(polyline, data) {
 
 export function formatTimestamp(timestamp) {
   try {
-    // Si ya tiene "Z" o "+hh:mm", no le agregues nada
-    const isUTC = /Z$|[+-]\d\d:\d\d$/.test(timestamp);
-    const safeTimestamp = isUTC ? timestamp : timestamp + "Z";
+    // Interpretar el timestamp como UTC
+    const dateUtc = new Date(timestamp + "Z");
 
-    const date = new Date(safeTimestamp);
-
-    if (isNaN(date.getTime())) throw new Error("Invalid date");
-
+    // Convertir a hora local de Colombia
     const formatter = new Intl.DateTimeFormat("es-CO", {
+      timeZone: "America/Bogota",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -83,7 +80,7 @@ export function formatTimestamp(timestamp) {
       hour12: false,
     });
 
-    const parts = formatter.formatToParts(date);
+    const parts = formatter.formatToParts(dateUtc);
 
     const time = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
     const dateStr = `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
