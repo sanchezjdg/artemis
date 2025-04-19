@@ -64,17 +64,9 @@ export function addPolylineClickHandler(polyline, data) {
 }
 
 export function formatTimestamp(timestamp) {
-  // Parsear como si fuera UTC, aunque no tenga la "Z"
-  const [datePart, timePart] = timestamp.split("T");
-  const [year, month, day] = datePart.split("-").map(Number);
-  const [hour, minute, second] = timePart.split(":").map(Number);
+  const date = new Date(timestamp);
 
-  // Crear fecha en UTC
-  const date = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
-
-  // Formatear en hora Colombia
   const formatter = new Intl.DateTimeFormat("es-CO", {
-    timeZone: "America/Bogota",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
