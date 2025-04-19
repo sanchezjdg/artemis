@@ -163,16 +163,25 @@ export function startRealTimeUpdates(socket) {
   });  
 
   // Update the socket listener to populate the dropdown
-  socket.on('updateMultipleVehicles', (vehicles) => {
-    vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
-    vehicles.forEach((data) => {
-      if (data.vehicle_id && !document.querySelector(`#vehicle-select option[value="${data.vehicle_id}"]`)) {
-        const option = document.createElement('option');
-        option.value = data.vehicle_id;
-        option.textContent = `Vehicle ${data.vehicle_id}`;
-        vehicleSelect.appendChild(option);
-      }
-    });
+  // Ensure dropdown always includes 'All Vehicles' as the first option
+  if (!document.querySelector('#vehicle-select option[value="all"]')) {
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'All Vehicles';
+    vehicleSelect.appendChild(allOption);
+  }
+
+  // Add missing vehicle options without clearing the existing list
+  vehicles.forEach((data) => {
+    if (
+      data.vehicle_id &&
+      !document.querySelector(`#vehicle-select option[value="${data.vehicle_id}"]`)
+    ) {
+      const option = document.createElement('option');
+      option.value = data.vehicle_id;
+      option.textContent = `Vehicle ${data.vehicle_id}`;
+      vehicleSelect.appendChild(option);
+    }
   });
 }
 
