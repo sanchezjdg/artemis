@@ -74,7 +74,6 @@ export function formatTimestamp(timestamp) {
     if (isNaN(date.getTime())) throw new Error("Invalid date");
 
     const formatter = new Intl.DateTimeFormat("es-CO", {
-      timeZone: "America/Bogota",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
