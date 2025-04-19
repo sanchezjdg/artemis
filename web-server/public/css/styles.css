@@ -65,9 +65,12 @@ body {
 }
 
 .button-group {
-  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+  display: flex;
+  justify-content: center; /* <-- Esto los centra */
+  flex-wrap: wrap;
   gap: 5px;
 }
+
 
 /* Button styles with dynamic active effect */
 .controls button {
