@@ -1,6 +1,6 @@
 // realTimeMode.js
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
-import { addPolylineClickHandler, formatTimestamp } from "./utils.js";
+import { addPolylineClickHandler} from "./utils.js";
 import { cleanupHistoricalMode } from "./historicalMode.js";
 
 // Global variables for real-time mode.
@@ -103,7 +103,7 @@ export function startRealTimeUpdates(socket) {
           `<strong>Vehicle ${vehicleId}</strong><br>
            Latitude: ${data.latitude.toFixed(5)}<br>
            Longitude: ${data.longitude.toFixed(5)}<br>
-           ${formatTimestamp(data.timestamp)}`
+           Timestamp: ${(data.timestamp)}`
         );
       }
     });
