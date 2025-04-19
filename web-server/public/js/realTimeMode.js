@@ -109,6 +109,23 @@ export function startRealTimeUpdates(socket) {
         );
       }
     });
+
+    const selected = document.getElementById("vehicle-select").value;
+    const allLatLngs = [];
+
+    if (selected === "all") {
+      vehicleData.forEach((vehicle) => {
+        const coords = vehicle.coordinates;
+        if (coords.length > 0) {
+          coords.forEach((c) => allLatLngs.push([c.latitude, c.longitude]));
+        }
+      });
+
+      if (allLatLngs.length > 0) {
+        map.fitBounds(allLatLngs, { padding: [50, 50] });
+      }
+    }
+
   });
 
   // Request latest location data immediately after entering real-time mode
@@ -172,6 +189,15 @@ export function startRealTimeUpdates(socket) {
     }
   });
   
+  vehicleSelect.value = 'all'; // selecciona "All Vehicles" por defecto
+
+  // Oculta el checkbox al cargar si está en "all"
+  const autoCenterToggle = document.getElementById("auto-center-toggle");
+  if (autoCenterToggle && vehicleSelect.value === "all") {
+    autoCenterToggle.checked = false;
+    autoCenterToggle.parentElement.style.display = "none";
+  }
+
 
   // Update the socket listener to populate the dropdown
   // Ensure dropdown always includes 'All Vehicles' as the first option
