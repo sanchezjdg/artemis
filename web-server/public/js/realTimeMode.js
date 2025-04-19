@@ -1,11 +1,10 @@
 // realTimeMode.js
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
-import { addPolylineClickHandler } from "./utils.js";
+import { addPolylineClickHandler, formatTimestamp } from "./utils.js";
 import { cleanupHistoricalMode } from "./historicalMode.js";
 
 // Global variables for real-time mode.
-let realTimeCoordinates = [];
-let realTimePath = null;
+let vehicleData = new Map(); // Map to store data for each vehicle
 let initialLocationSet = false;
 
 /**
@@ -13,21 +12,15 @@ let initialLocationSet = false;
  * @param {Object} socket - The Socket.IO socket instance.
  */
 export function startRealTimeUpdates(socket) {
-  // Clear any previous historical layers.
-  clearLayer(realTimePath);
-  realTimeCoordinates = [];
+  // Clear any previous data
+  vehicleData.forEach((vehicle) => {
+    clearLayer(vehicle.path);
+    clearLayer(vehicle.marker);
+  });
+  vehicleData.clear();
   initialLocationSet = false;
 
   const map = getMap();
-  realTimePath = L.polyline([], {
-    color: "#3b65ff",
-    weight: 4,
-    opacity: 0.8,
-    lineJoin: "round",
-  }).addTo(map);
-
-  // Attach click handler for popup details.
-  addPolylineClickHandler(realTimePath, realTimeCoordinates);
 
   // Clean up any trace mode elements.
   cleanupHistoricalMode();
@@ -39,57 +32,136 @@ export function startRealTimeUpdates(socket) {
   // Remove map click handlers from trace mode.
   map.off("click");
 
-  // Ensure marker is visible in real-time mode.
-  const marker = getMarker();
-  marker.addTo(map);
+  // Listen for real-time data updates for multiple vehicles
+  socket.off("updateMultipleVehicles");
+  socket.on("updateMultipleVehicles", (vehicles) => {
+    vehicles.forEach((data) => {
+      if (data.latitude && data.longitude) {
+        const vehicleId = data.vehicle_id;
+        const latlng = [data.latitude, data.longitude];
 
-  // Listen for real-time data updates.
-  socket.off("updateData");
-  socket.on("updateData", (data) => {
-    if (data.latitude && data.longitude) {
-      const latlng = [data.latitude, data.longitude];
-      marker.setLatLng(latlng);
+        // Initialize vehicle data if it doesn't exist
+        if (!vehicleData.has(vehicleId)) {
+          const vehicleColors = {
+            1: "#3b65ff", // Blue for first vehicle
+            2: "#ff3b3b", // Red for second vehicle
+          };
 
-      realTimeCoordinates.push({
-        latitude: data.latitude,
-        longitude: data.longitude,
-        timestamp: data.timestamp,
-      });
+          const color = vehicleColors[vehicleId] || "#3b65ff";
 
-      // Update polyline.
-      realTimePath.setLatLngs(
-        realTimeCoordinates.map((coord) => [coord.latitude, coord.longitude]),
-      );
+          vehicleData.set(vehicleId, {
+            coordinates: [],
+            path: L.polyline([], {
+              color: color,
+              weight: 4,
+              opacity: 0.8,
+              lineJoin: "round",
+            }).addTo(map),
+            marker: L.circleMarker(latlng, {
+              radius: 8,
+              fillColor: color,
+              color: "#fff",
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.8
+            }).addTo(map)
+          });
+        }
 
-      if (!initialLocationSet) {
-        map.setView(latlng, 15, { animate: true });
-        initialLocationSet = true;
-      } else if (document.getElementById("auto-center-toggle").checked) {
-        map.setView(latlng, 15, { animate: true });
+        const vehicle = vehicleData.get(vehicleId);
+
+        // Update marker position
+        vehicle.marker.setLatLng(latlng);
+
+        // Update coordinates history
+        vehicle.coordinates.push({
+          latitude: data.latitude,
+          longitude: data.longitude,
+          timestamp: data.timestamp,
+        });
+
+        // Update polyline
+        vehicle.path.setLatLngs(
+          vehicle.coordinates.map((coord) => [coord.latitude, coord.longitude])
+        );
+
+        // Attach click handler for popup details
+        addPolylineClickHandler(vehicle.path, vehicle.coordinates);
+
+        // Center map on first vehicle if auto-center is enabled
+        if (vehicleId === 1) {
+          if (!initialLocationSet) {
+            map.setView(latlng, 15, { animate: true });
+            initialLocationSet = true;
+          } else if (document.getElementById("auto-center-toggle").checked) {
+            map.setView(latlng, 15, { animate: true });
+          }
+        }
+
+        // Update marker popup to use the user-friendly timestamp format
+        vehicle.marker.bindPopup(
+          `<strong>Vehicle ${vehicleId}</strong><br>
+           Latitude: ${data.latitude.toFixed(5)}<br>
+           Longitude: ${data.longitude.toFixed(5)}<br>
+           ${formatTimestamp(data.timestamp)}`
+        );
       }
+    });
+  });
 
-      // Update marker popup.
-      marker.bindPopup(
-        `<strong>Current Position</strong><br>
-         Latitude: ${data.latitude.toFixed(5)}<br>
-         Longitude: ${data.longitude.toFixed(5)}<br>
-         Timestamp: ${data.timestamp}`,
-      );
+  // Add a dropdown for vehicle selection in real-time mode
+  const vehicleSelect = document.createElement('select');
+  vehicleSelect.id = 'vehicle-select';
+  vehicleSelect.style.marginTop = '10px';
+  vehicleSelect.style.width = '100%';
+  vehicleSelect.style.padding = '5px';
+  vehicleSelect.style.borderRadius = '5px';
+  vehicleSelect.style.border = '1px solid #ccc';
+  vehicleSelect.style.backgroundColor = '#fff';
+  vehicleSelect.style.color = '#000';
+  vehicleSelect.style.fontSize = '14px';
+  vehicleSelect.style.fontWeight = 'bold';
+  vehicleSelect.style.cursor = 'pointer';
+  vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
+  document.getElementById('real-time-controls').appendChild(vehicleSelect);
+
+  // Update the real-time updates function to handle vehicle selection
+  vehicleSelect.addEventListener('change', () => {
+    const selectedVehicleId = parseInt(vehicleSelect.value, 10);
+    if (selectedVehicleId && vehicleData.has(selectedVehicleId)) {
+      const vehicle = vehicleData.get(selectedVehicleId);
+      const lastPosition = vehicle.coordinates[vehicle.coordinates.length - 1];
+      if (lastPosition) {
+        const latlng = [lastPosition.latitude, lastPosition.longitude];
+        getMap().setView(latlng, 15, { animate: true });
+      }
     }
+  });
+
+  // Update the socket listener to populate the dropdown
+  socket.on('updateMultipleVehicles', (vehicles) => {
+    vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
+    vehicles.forEach((data) => {
+      if (data.vehicle_id && !document.querySelector(`#vehicle-select option[value="${data.vehicle_id}"]`)) {
+        const option = document.createElement('option');
+        option.value = data.vehicle_id;
+        option.textContent = `Vehicle ${data.vehicle_id}`;
+        vehicleSelect.appendChild(option);
+      }
+    });
   });
 }
 
 /**
- * Clears the real-time polyline from the map.
+ * Clears all real-time vehicle paths and markers from the map.
  */
 export function clearRealTimePath() {
-  if (realTimePath) {
-    // Remove polyline from the map using helper function.
-    clearLayer(realTimePath);
-    // Nullify or reset the polyline reference.
-    realTimePath = null;
-    // Reset realTimeCoordinates if needed.
-    realTimeCoordinates = [];
-    initialLocationSet = false;
-  }
+  // Clear all vehicle paths and markers
+  vehicleData.forEach((vehicle) => {
+    clearLayer(vehicle.path);
+    clearLayer(vehicle.marker);
+  });
+  // Clear the vehicle data map
+  vehicleData.clear();
+  initialLocationSet = false;
 }
