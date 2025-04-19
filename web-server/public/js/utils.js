@@ -70,7 +70,6 @@ export function formatTimestamp(timestamp) {
 
   // Create a formatter for Culombia (CO) locale with specified options
   const formatter = new Intl.DateTimeFormat('en-CO', {
-    timeZone: 'America/Bogota',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
