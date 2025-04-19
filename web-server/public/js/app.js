@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeInfo = document.getElementById("close-info");
 
   infoToggle.addEventListener("click", () => {
-    // Si ya está visible, lo oculta. Si no, lo muestra.
+    // If already visible, hide it. Otherwise, show it.
     if (infoPanel.style.display === "block") {
       infoPanel.style.display = "none";
     } else {
