@@ -65,8 +65,12 @@ export function addPolylineClickHandler(polyline, data) {
 
 export function formatTimestamp(timestamp) {
   try {
-    // timestamp: "2025-04-18 19:12:13" o "2025-04-18T19:12:13"
-    const clean = timestamp.replace("T", " ");
+    // Remplazar "T" por espacio, quitar milisegundos y la Z si existe
+    const clean = timestamp
+      .replace("T", " ")               // "2025-04-18 19:47:57.000Z"
+      .replace(/\.\d{3}Z$/, "")       // quita ".000Z"
+      .trim();
+
     const [datePart, timePart] = clean.split(" ");
 
     if (!datePart || !timePart) throw new Error("Invalid format");
