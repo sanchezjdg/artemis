@@ -56,14 +56,14 @@ function isValidDateRange(start, end) {
 
 // API endpoint for historical data
 app.get("/historical", async (req, res) => {
-  const { start, end } = req.query;
-  if (!start || !end) {
+  const { start, end, vehicle_id } = req.query;
+
+  if (!start || !end || !vehicle_id) {
     return res
       .status(400)
-      .json({ error: "Missing start or end datetime parameter." });
+      .json({ error: "Missing start, end or vehicle_id parameter." });
   }
 
-  // Server-side validation of the date range
   const validation = isValidDateRange(start, end);
   if (!validation.valid) {
     return res.status(400).json({ error: validation.message });
@@ -71,9 +71,12 @@ app.get("/historical", async (req, res) => {
 
   try {
     const connection = await pool.getConnection();
-    const query =
-      "SELECT * FROM steinstable WHERE timestamp BETWEEN ? AND ? ORDER BY timestamp ASC";
-    const [rows] = await connection.query(query, [start, end]);
+    const query = `
+      SELECT * FROM steinstable 
+      WHERE timestamp BETWEEN ? AND ? 
+        AND vehicle_id = ? 
+      ORDER BY timestamp ASC`;
+    const [rows] = await connection.query(query, [start, end, vehicle_id]);
     connection.release();
     res.json(rows);
   } catch (error) {
@@ -81,6 +84,7 @@ app.get("/historical", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // Socket.io connection handler for real-time updates
 io.on("connection", async (socket) => {
