@@ -64,22 +64,29 @@ export function addPolylineClickHandler(polyline, data) {
 }
 
 export function formatTimestamp(timestamp) {
-  const date = new Date(timestamp);
+  try {
+    // Asegura que se interprete como UTC, incluso si no tiene "Z"
+    const utcDate = new Date(timestamp + "Z"); // fuerza a UTC
 
-  const formatter = new Intl.DateTimeFormat("es-CO", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
+    // Formatea en hora colombiana (UTC-5)
+    const formatter = new Intl.DateTimeFormat("es-CO", {
+      timeZone: "America/Bogota",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
 
-  const parts = formatter.formatToParts(date);
+    const parts = formatter.formatToParts(utcDate);
 
-  const timeStr = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
-  const dateStr = `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
+    const time = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
+    const dateStr = `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
 
-  return `Time: ${timeStr}, Date: ${dateStr}`;
+    return `Time: ${time}, Date: ${dateStr}`;
+  } catch (err) {
+    return "Time: N/A, Date: N/A";
+  }
 }
