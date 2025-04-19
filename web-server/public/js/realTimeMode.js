@@ -158,13 +158,10 @@ export function startRealTimeUpdates(socket) {
     const selected = vehicleSelect.value;
     const autoCenterToggle = document.getElementById("auto-center-toggle");
   
-    // Mostrar u ocultar el checkbox según la selección
-    if (selected === "all") {
-      autoCenterToggle.checked = false;
-      autoCenterToggle.parentElement.style.display = "none";
-    } else {
-      autoCenterToggle.parentElement.style.display = "block";
-    }
+    autoCenterToggle.parentElement.style.display = "block";
+    autoCenterToggle.disabled = selected === "all";
+    autoCenterToggle.checked = selected !== "all";
+    
   
     vehicleData.forEach((vehicle, id) => {
       const show = selected === "all" || parseInt(selected) === id;
@@ -191,14 +188,13 @@ export function startRealTimeUpdates(socket) {
   
   vehicleSelect.value = 'all'; // selecciona "All Vehicles" por defecto
 
-  // Oculta el checkbox al cargar si está en "all"
   const autoCenterToggle = document.getElementById("auto-center-toggle");
-  if (autoCenterToggle && vehicleSelect.value === "all") {
+  if (autoCenterToggle) {
+    autoCenterToggle.parentElement.style.display = "block"; // asegúrate de que se muestre
+    autoCenterToggle.disabled = true; // desactívalo si estamos en "all"
     autoCenterToggle.checked = false;
-    autoCenterToggle.parentElement.style.display = "none";
   }
-
-
+  
   // Update the socket listener to populate the dropdown
   // Ensure dropdown always includes 'All Vehicles' as the first option
   if (!document.querySelector('#vehicle-select option[value="all"]')) {
