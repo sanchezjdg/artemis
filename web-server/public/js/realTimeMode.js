@@ -152,7 +152,17 @@ export function startRealTimeUpdates(socket) {
     <option value="1">Vehicle 1</option>
     <option value="2">Vehicle 2</option>
     `;
-    document.getElementById('real-time-controls').appendChild(vehicleSelect);
+    const container = document.getElementById('real-time-controls');
+    const autoCenterToggleWrapper = document.getElementById("auto-center-toggle").parentElement;
+    
+    // Primero quitamos ambos por si ya existen
+    if (vehicleSelect.parentElement) vehicleSelect.remove();
+    if (autoCenterToggleWrapper.parentElement) autoCenterToggleWrapper.remove();
+    
+    // Insertamos el select primero, luego el checkbox
+    container.appendChild(vehicleSelect);
+    container.appendChild(autoCenterToggleWrapper);
+    
   }
   // Update the real-time updates function to handle vehicle selection
   vehicleSelect.addEventListener('change', () => {
