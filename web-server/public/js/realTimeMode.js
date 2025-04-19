@@ -39,6 +39,18 @@ export function startRealTimeUpdates(socket) {
       if (data.latitude && data.longitude) {
         const vehicleId = data.vehicle_id;
         const latlng = [data.latitude, data.longitude];
+        
+        // Auto-center logic
+        const selected = document.getElementById("vehicle-select").value;
+        const isAutoCenterEnabled = document.getElementById("auto-center-toggle").checked;
+
+        if (
+          isAutoCenterEnabled &&
+          selected !== "all" &&
+          parseInt(selected) === vehicleId
+        ) {
+          map.setView(latlng, 15, { animate: true });
+        }
 
         // Initialize vehicle data if it doesn't exist
         if (!vehicleData.has(vehicleId)) {
@@ -136,6 +148,17 @@ export function startRealTimeUpdates(socket) {
   }
   // Update the real-time updates function to handle vehicle selection
   vehicleSelect.addEventListener('change', () => {
+    const autoCenterToggle = document.getElementById("auto-center-toggle");
+    const autoCenterContainer = document.getElementById("real-time-controls");
+
+    // Mostrar u ocultar el checkbox según la selección
+    if (selected === "all") {
+      autoCenterToggle.checked = false;
+      autoCenterToggle.parentElement.style.display = "none";
+    } else {
+      autoCenterToggle.parentElement.style.display = "block";
+    }   
+
     const selected = vehicleSelect.value;
   
     vehicleData.forEach((vehicle, id) => {
