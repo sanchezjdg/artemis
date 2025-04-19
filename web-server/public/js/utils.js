@@ -64,26 +64,30 @@ export function addPolylineClickHandler(polyline, data) {
 }
 
 export function formatTimestamp(timestamp) {
-  // Crear objeto Date desde el timestamp (ya en hora local)
-  const date = new Date(timestamp);
+  // Parsear como si fuera UTC, aunque no tenga la "Z"
+  const [datePart, timePart] = timestamp.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hour, minute, second] = timePart.split(":").map(Number);
 
-  // Usar el locale pero SIN ajustar zona horaria (ya viene en hora Colombia)
-  const formatter = new Intl.DateTimeFormat('en-CO', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+  // Crear fecha en UTC
+  const date = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+
+  // Formatear en hora Colombia
+  const formatter = new Intl.DateTimeFormat("es-CO", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
     hour12: false,
   });
 
-  // Extraer las partes de fecha y hora
   const parts = formatter.formatToParts(date);
 
-  // Obtener los valores formateados
-  const time = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
+  const timeStr = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
   const dateStr = `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
 
-  return `Time: ${time}, Date: ${dateStr}`;
+  return `Time: ${timeStr}, Date: ${dateStr}`;
 }
