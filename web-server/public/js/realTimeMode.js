@@ -176,6 +176,8 @@ export function startRealTimeUpdates(socket) {
   });
 }
 
+vehicleSelect.value = "all";
+
 /**
  * Clears all real-time vehicle paths and markers from the map.
  */
