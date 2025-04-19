@@ -111,9 +111,10 @@ export function startRealTimeUpdates(socket) {
     });
 
     const selected = document.getElementById("vehicle-select").value;
+    const isAutoCenterEnabled = document.getElementById("auto-center-toggle").checked;
     const allLatLngs = [];
 
-    if (selected === "all") {
+    if (selected === "all" && isAutoCenterEnabled) {
       vehicleData.forEach((vehicle) => {
         const coords = vehicle.coordinates;
         if (coords.length > 0) {
