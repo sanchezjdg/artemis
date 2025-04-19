@@ -213,22 +213,13 @@ function onMapClickTrace(e) {
     fillOpacity: 0.2,
   }).addTo(map);
 
-  // Habilitar edición con Leaflet.PM
-  searchCircle.pm.enable({
-    allowSelfIntersection: false,
+  // Filter data points that are within the search radius.
+  const nearbyPoints = traceHistoricalData.filter((point) => {
+    const dist = clickedLatLng.distanceTo(
+      L.latLng(point.latitude, point.longitude),
+    );
+    return dist <= threshold;
   });
-
-  // Actualizar búsqueda al cambiar el radio
-  searchCircle.on("pm:edit", () => {
-    const newRadius = searchCircle.getRadius();
-    document.getElementById("search-radius").value = newRadius.toFixed(0);
-    radiusValueDisplay.textContent = newRadius.toFixed(0);
-    runTraceSearch(clickedLatLng, newRadius); // 👈 Esta función hace el filtro de puntos
-    runTraceSearch(searchCircle.getLatLng(), searchCircle.getRadius());
-  });
-
-  runTraceSearch(clickedLatLng, threshold);
-
 
   // Clear previous trace results.
   const resultsContainer = document.getElementById("trace-results");
@@ -288,7 +279,7 @@ function onMapClickTrace(e) {
 
       // Center the map on the clicked point
       map.setView([lat, lng], 17);
-
+      
     });
   });
 }
@@ -305,43 +296,6 @@ function clearSearchCircle() {
     }
   });
 }
-
-function runTraceSearch(center, radius) {
-  const resultsContainer = document.getElementById("trace-results");
-  resultsContainer.innerHTML = "";
-
-  // Buscar puntos dentro del radio
-  const nearbyPoints = traceHistoricalData.filter((point) => {
-    const dist = center.distanceTo(L.latLng(point.latitude, point.longitude));
-    return dist <= radius;
-  });
-
-  // Si no hay puntos detectados
-  if (nearbyPoints.length === 0) {
-    showToast("No vehicle pass detected within the radius.");
-    document.getElementById("trace-time-slider-control").style.display = "none";
-    return;
-  }
-
-  // Mostrar los puntos con el slider
-  window.traceSliderPoints = nearbyPoints;
-  const slider = document.getElementById("trace-time-slider");
-  const timestampDisplay = document.getElementById("trace-timestamp-display");
-
-  slider.max = nearbyPoints.length - 1;
-  slider.value = 0;
-
-  slider.oninput = () => {
-    const point = nearbyPoints[slider.value];
-    timestampDisplay.innerText = point.timestamp;
-    showTracePointOnMap(point);
-  };
-
-  document.getElementById("trace-time-slider-control").style.display = "block";
-  timestampDisplay.innerText = nearbyPoints[0].timestamp;
-  showTracePointOnMap(nearbyPoints[0]);
-}
-
 
 /**
  * Utility function to clear the temporary marker from the map.
