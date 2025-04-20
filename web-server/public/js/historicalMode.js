@@ -233,18 +233,28 @@ function onMapClickTrace(e) {
   }
 
   // Display each nearby point as a result with a "View" button.
-  const fragment = document.createDocumentFragment();
-  nearbyPoints.forEach((point) => {
-    const div = document.createElement("div");
-    div.className = "trace-result";
-    div.innerHTML = `
-      <div><b>${point.timestamp}</b></div>
-      <button class="view-point" data-lat="${point.latitude}" data-lng="${point.longitude}" data-time="${point.timestamp}">View</button>
-      <hr>`;
-    fragment.appendChild(div);
-  });
-  resultsContainer.appendChild(fragment);
-  resultsContainer.style.display = "block";
+  // Guardar puntos cercanos para navegación por slider
+  window.traceSliderPoints = nearbyPoints;
+  const slider = document.getElementById("trace-time-slider");
+  const sliderControl = document.getElementById("trace-time-slider-control");
+  const timestampDisplay = document.getElementById("trace-timestamp-display");
+
+  slider.max = nearbyPoints.length - 1;
+  slider.value = 0;
+  sliderControl.style.display = "block";
+  resultsContainer.style.display = "none"; // Ocultamos lista anterior
+  timestampDisplay.innerText = nearbyPoints[0].timestamp;
+
+  // Mostrar el primer punto en el mapa inmediatamente
+  showTracePointOnMap(nearbyPoints[0]);
+
+  // Al mover el slider, actualizar el punto mostrado
+  slider.oninput = () => {
+    const point = nearbyPoints[slider.value];
+    timestampDisplay.innerText = point.timestamp;
+    showTracePointOnMap(point);
+  };
+
 
   // Add click handlers to each "View" button.
   document.querySelectorAll(".view-point").forEach((btn) => {
@@ -252,12 +262,6 @@ function onMapClickTrace(e) {
       const lat = parseFloat(btn.dataset.lat);
       const lng = parseFloat(btn.dataset.lng);
       const time = btn.dataset.time;
-
-      // Remove previous trace view line if it exists.
-      if (traceViewLine && getMap().hasLayer(traceViewLine)) {
-        clearLayer(traceViewLine);
-        traceViewLine = null;
-      }
 
       // Clear any temporary marker if it exists
       clearTemporaryMarker();
@@ -275,43 +279,6 @@ function onMapClickTrace(e) {
 
       // Center the map on the clicked point
       map.setView([lat, lng], 17);
-
-      // Find the index of the clicked point within the historical data.
-      const clickedIndex = traceHistoricalData.findIndex(
-        (p) =>
-          p.latitude === lat && p.longitude === lng && p.timestamp === time,
-      );
-      if (clickedIndex === -1) return;
-
-      // Determine a segment of the route around the clicked point based on the threshold distance.
-      let startIndex = clickedIndex;
-      while (startIndex > 0) {
-        const dist = L.latLng(lat, lng).distanceTo(
-          L.latLng(
-            traceHistoricalData[startIndex].latitude,
-            traceHistoricalData[startIndex].longitude,
-          ),
-        );
-        if (dist > threshold) {
-          startIndex++;
-          break;
-        }
-        startIndex--;
-      }
-      let endIndex = clickedIndex;
-      while (endIndex < traceHistoricalData.length) {
-        const dist = L.latLng(lat, lng).distanceTo(
-          L.latLng(
-            traceHistoricalData[endIndex].latitude,
-            traceHistoricalData[endIndex].longitude,
-          ),
-        );
-        if (dist > threshold) {
-          endIndex--;
-          break;
-        }
-        endIndex++;
-      }
     });
   });
 }
@@ -339,6 +306,24 @@ function clearTemporaryMarker() {
     temporaryMarker = null;
   }
 }
+
+function showTracePointOnMap(point) {
+  const { latitude: lat, longitude: lng, timestamp: time } = point;
+
+  // Eliminar marcador anterior si existe
+  clearTemporaryMarker();
+
+  // Crear marcador temporal
+  temporaryMarker = L.marker([lat, lng]).addTo(getMap());
+  temporaryMarker
+    .bindPopup(`<b>Recorded Moment</b><br>Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}<br>Timestamp: ${time}`)
+    .openPopup();
+
+  // Centrar mapa en el punto
+  getMap().setView([lat, lng], 17);
+}
+
+
 
 /**
  * Export the clear functions to be used externally.
