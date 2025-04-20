@@ -10,6 +10,9 @@ let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;
+let searchCircle = null;
+let resizeHandle = null;
+
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -192,22 +195,6 @@ function onMapClickTrace(e) {
   const threshold = parseFloat(radiusInput.value) || 100;
   const clickedLatLng = e.latlng;
 
-  let searchCircle = null;
-  let resizeHandle = null;
-
-  // Clear any previous search circle from the map.
-  function clearSearchCircle() {
-    const map = getMap();
-    if (searchCircle) {
-      map.removeLayer(searchCircle);
-      searchCircle = null;
-    }
-    if (resizeHandle) {
-      map.removeLayer(resizeHandle);
-      resizeHandle = null;
-    }
-  }
-  
 
   // Clear any temporary marker if it exists
   clearTemporaryMarker();
@@ -293,13 +280,16 @@ function onMapClickTrace(e) {
  */
 function clearSearchCircle() {
   const map = getMap();
-  // Iterate over map layers and remove any circles with a red border.
-  map.eachLayer((layer) => {
-    if (layer instanceof L.Circle && layer.options.color === "red") {
-      map.removeLayer(layer);
-    }
-  });
+  if (searchCircle) {
+    map.removeLayer(searchCircle);
+    searchCircle = null;
+  }
+  if (resizeHandle) {
+    map.removeLayer(resizeHandle);
+    resizeHandle = null;
+  }
 }
+
 
 /**
  * Utility function to clear the temporary marker from the map.
@@ -316,7 +306,6 @@ function clearTemporaryMarker() {
 function drawInteractiveCircle(center, initialRadius = 200) {
   const map = getMap();
 
-  // Crear el círculo
   searchCircle = L.circle(center, {
     radius: initialRadius,
     color: "red",
@@ -324,16 +313,19 @@ function drawInteractiveCircle(center, initialRadius = 200) {
     fillOpacity: 0.2,
   }).addTo(map);
 
-  // Calcular posición del handle (al este del centro)
-  const offset = L.latLng(center.lat, center.lng + 0.002); // ajustar para precisión
+  // Usamos GeometryUtil para posicionar el handle en el borde este
+  const handleLatLng = L.GeometryUtil.destination(center, 90, initialRadius);
 
-  // Crear un marcador draggable en el borde para ajustar el radio
-  resizeHandle = L.marker(offset, { draggable: true }).addTo(map);
+  resizeHandle = L.marker(handleLatLng, { draggable: true }).addTo(map);
 
   resizeHandle.on("drag", (e) => {
     const newPos = e.target.getLatLng();
     const newRadius = center.distanceTo(newPos);
     searchCircle.setRadius(newRadius);
+
+    // Reposicionar el handle para mantenerlo sobre el borde actualizado
+    const newEdge = L.GeometryUtil.destination(center, 90, newRadius);
+    resizeHandle.setLatLng(newEdge);
   });
 }
 
