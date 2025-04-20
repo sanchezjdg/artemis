@@ -60,6 +60,11 @@
           Enable Trace Mode
         </label>
       </div>
+      <!-- Trace radius control: will be shown only when trace mode is enabled -->
+      <div id="trace-radius-control" style="display: none; margin-top: 10px;">
+        <label for="search-radius">Search Radius: <span id="radius-value">100</span> m</label>
+        <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
+      </div>
       <button id="load-data" class="load-button">Load Route</button>
     </div>
 
@@ -115,8 +120,6 @@
   <script src="/socket.io/socket.io.js"></script>
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <!-- GeometryUtil (necesario para el handle dinámico) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.geometryutil/0.10.0/leaflet.geometryutil.min.js"></script>
   <!-- Flatpickr JS -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <!-- Load application modules as ES modules -->

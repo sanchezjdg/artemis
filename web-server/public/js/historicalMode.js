@@ -10,9 +10,6 @@ let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;
-let searchCircle = null;
-let resizeHandle = null;
-
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -20,8 +17,10 @@ let resizeHandle = null;
 export function initHistoricalMode() {
   // Remove any pre-existing click handlers.
   const map = getMap();
+  // Update radius value display when the slider is moved
+const radiusSlider = document.getElementById("search-radius");
+const radiusValueDisplay = document.getElementById("radius-value");
   map.off("click");
-  document.getElementById("trace-radius-control").style.display = "none";
 
   // Hide trace results initially.
   document.getElementById("trace-results").innerHTML = "";
@@ -177,6 +176,10 @@ loadButton.addEventListener('click', async () => {
     showToast('Error loading historical data.');
   }
 });
+
+  radiusSlider.addEventListener("input", () => {
+    radiusValueDisplay.textContent = radiusSlider.value;
+  });
 }
 
 /**
@@ -195,14 +198,20 @@ function onMapClickTrace(e) {
   const threshold = parseFloat(radiusInput.value) || 100;
   const clickedLatLng = e.latlng;
 
+  // Clear any previous search circle from the map.
+  clearSearchCircle();
 
   // Clear any temporary marker if it exists
   clearTemporaryMarker();
 
   // Create and add a search circle to the map.
   const map = getMap();
-  drawInteractiveCircle(clickedLatLng, 200); // 200m por defecto
-
+  const searchCircle = L.circle(clickedLatLng, {
+    radius: threshold,
+    color: "red",
+    fillColor: "#f03",
+    fillOpacity: 0.2,
+  }).addTo(map);
 
   // Filter data points that are within the search radius.
   const nearbyPoints = traceHistoricalData.filter((point) => {
@@ -270,7 +279,6 @@ function onMapClickTrace(e) {
 
       // Center the map on the clicked point
       map.setView([lat, lng], 17);
-      
     });
   });
 }
@@ -280,16 +288,13 @@ function onMapClickTrace(e) {
  */
 function clearSearchCircle() {
   const map = getMap();
-  if (searchCircle) {
-    map.removeLayer(searchCircle);
-    searchCircle = null;
-  }
-  if (resizeHandle) {
-    map.removeLayer(resizeHandle);
-    resizeHandle = null;
-  }
+  // Iterate over map layers and remove any circles with a red border.
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Circle && layer.options.color === "red") {
+      map.removeLayer(layer);
+    }
+  });
 }
-
 
 /**
  * Utility function to clear the temporary marker from the map.
@@ -300,33 +305,6 @@ function clearTemporaryMarker() {
     map.removeLayer(temporaryMarker);
     temporaryMarker = null;
   }
-}
-
-
-function drawInteractiveCircle(center, initialRadius = 200) {
-  const map = getMap();
-
-  searchCircle = L.circle(center, {
-    radius: initialRadius,
-    color: "red",
-    fillColor: "#f03",
-    fillOpacity: 0.2,
-  }).addTo(map);
-
-  // Usamos GeometryUtil para posicionar el handle en el borde este
-  const handleLatLng = L.GeometryUtil.destination(center, 90, initialRadius);
-
-  resizeHandle = L.marker(handleLatLng, { draggable: true }).addTo(map);
-
-  resizeHandle.on("drag", (e) => {
-    const newPos = e.target.getLatLng();
-    const newRadius = center.distanceTo(newPos);
-    searchCircle.setRadius(newRadius);
-
-    // Reposicionar el handle para mantenerlo sobre el borde actualizado
-    const newEdge = L.GeometryUtil.destination(center, 90, newRadius);
-    resizeHandle.setLatLng(newEdge);
-  });
 }
 
 function showTracePointOnMap(point) {
