@@ -3,5 +3,6 @@ CREATE TABLE steinstable (
     latitude FLOAT NOT NULL,
     longitude FLOAT NOT NULL,
     timestamp DATETIME NOT NULL,
-    vehicle_id INT NOT NULL DEFAULT 1
+    vehicle_id INT NOT NULL DEFAULT 1,
+    rpm INT
 );
