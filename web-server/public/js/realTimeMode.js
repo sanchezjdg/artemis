@@ -105,6 +105,7 @@ export function startRealTimeUpdates(socket) {
           `<strong>Vehicle ${vehicleId}</strong><br>
            Latitude: ${data.latitude.toFixed(5)}<br>
            Longitude: ${data.longitude.toFixed(5)}<br>
+            RPM: ${data.rpm !== null ? data.rpm : 'No data'}<br>
            ${formatTimestamp(data.timestamp)}`
         );
       }
