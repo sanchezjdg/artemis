@@ -271,9 +271,10 @@ function onMapClickTrace(e) {
       temporaryMarker
         .bindPopup(
           `<b>Recorded Moment</b><br>
-         Lat: ${lat.toFixed(5)}<br>
-         Lng: ${lng.toFixed(5)}<br>
-         Timestamp: ${time}`,
+          Lat: ${lat.toFixed(5)}<br>
+          Lng: ${lng.toFixed(5)}<br>
+          RPM: ${point.rpm !== null ? point.rpm : 'No data'}<br>
+          Timestamp: ${time}`
         )
         .openPopup();
 
