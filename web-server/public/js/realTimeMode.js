@@ -239,3 +239,7 @@ export function clearRealTimePath() {
   vehicleData.clear();
   initialLocationSet = false;
 }
+
+export function stopRealTimeUpdates(socket) {
+  socket.off("updateMultipleVehicles");
+}
