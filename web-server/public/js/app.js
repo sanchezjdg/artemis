@@ -6,6 +6,7 @@ import { startRealTimeUpdates } from "./realTimeMode.js";
 import { initHistoricalMode } from "./historicalMode.js";
 import { clearRealTimePath } from "./realTimeMode.js";
 import { formatDate } from "./utils.js";
+import { stopRealTimeUpdates } from "./realTimeMode.js";
 
 // Initialize socket connection using Socket.IO.
 const socket = io();
@@ -99,6 +100,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 document.getElementById("historical-btn").addEventListener("click", () => {
   // Stop real time updates.
   socket.off("updateData");
+  stopRealTimeUpdates(socket);   
   // Clear the real-time polyline.
   clearRealTimePath();
   // Hide real-time controls since auto-center is specific to real-time.
