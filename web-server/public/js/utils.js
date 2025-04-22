@@ -51,13 +51,18 @@ export function addPolylineClickHandler(polyline, data) {
     const timestamp = closestPoint.timestamp || "N/A";
 
     // Open a popup with the point's information.
+    const rpm = closestPoint.rpm !== undefined && closestPoint.rpm !== null
+    ? closestPoint.rpm
+    : "No data";
+  
     L.popup()
       .setLatLng([lat, lng])
       .setContent(
         `<b>Position</b><br>
-         Latitude: ${lat.toFixed(5)}<br>
-         Longitude: ${lng.toFixed(5)}<br>
-         Timestamp: ${timestamp}`,
+        Latitude: ${lat.toFixed(5)}<br>
+        Longitude: ${lng.toFixed(5)}<br>
+        RPM: ${rpm}<br>
+        Timestamp: ${timestamp}`,
       )
       .openOn(map);
   });
