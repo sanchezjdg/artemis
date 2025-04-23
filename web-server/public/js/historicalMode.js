@@ -154,15 +154,21 @@ loadButton.addEventListener('click', async () => {
     clearLayer(historicalPath);
 
     // Draw the new path on the map
-    historicalPath = L.polyline(
-      data.map((loc) => [loc.latitude, loc.longitude]),
-      {
-        color: '#8E00C2',
-        weight: 4,
-        opacity: 0.8,
-        lineJoin: 'round',
-      }
-    ).addTo(map);
+    if (!document.getElementById("enable-trace-toggle").checked) {
+      historicalPath = L.polyline(
+        data.map((loc) => [loc.latitude, loc.longitude]),
+        {
+          color: '#8E00C2',
+          weight: 4,
+          opacity: 0.8,
+          lineJoin: 'round',
+        }
+      ).addTo(map);
+    
+      addPolylineClickHandler(historicalPath, data);
+    
+      map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+    }
 
     // Attach a click handler to the polyline to show details
     addPolylineClickHandler(historicalPath, data);
