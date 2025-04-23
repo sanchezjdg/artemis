@@ -50,8 +50,11 @@ function setActiveButton(activeId) {
     }
   });
   const activeBtn = document.getElementById(activeId);
-  void activeBtn.offsetWidth;
-  document.getElementById(activeId).classList.add("active");
+  if (activeBtn) {
+    // Forzar reflow para asegurar cambio visual
+    void activeBtn.offsetWidth;
+    activeBtn.classList.add("active");
+  }
 }
 
 // Default to real-time mode on page load
@@ -93,6 +96,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   document.getElementById("trace-results").innerHTML = "";
   // Start real-time updates.
   startRealTimeUpdates(socket);
+  // Marcar botón como activo (¡después de la inicialización!)
   setActiveButton("real-time-btn");
   // Update the mode information.
   document.querySelector(".controls .mode-info").innerText =
