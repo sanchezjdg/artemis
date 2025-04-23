@@ -49,6 +49,8 @@ function setActiveButton(activeId) {
       btn.classList.remove("active");
     }
   });
+  const activeBtn = document.getElementById(activeId);
+  void activeBtn.offsetWidth;
   document.getElementById(activeId).classList.add("active");
 }
 
