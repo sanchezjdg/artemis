@@ -4,6 +4,7 @@ const dgram = require("dgram");
 const mysql = require("mysql2");
 const config = require("./config");
 
+// Create UDP socket
 const server = dgram.createSocket("udp4");
 
 // Create a MySQL connection pool
@@ -17,7 +18,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Log a message to confirm the pool is created
 console.log("MySQL connection pool created.");
 
 // Handle incoming UDP messages
@@ -25,84 +25,89 @@ server.on("message", (msg, rinfo) => {
   console.log(`Received message from ${rinfo.address}:${rinfo.port}`);
   console.log("Message content:", msg.toString());
 
-  const message = msg.toString();
-  // Split into lines and build the data object
-  const lines = message.split("\n");
+  const lines = msg.toString().split("\n");
   let data = {
-    // Default vehicle_id is 1 if not specified and rpm gets initialized
-    vehicle_id: 1,
-    rpm: null, 
+    vehicle_id: 1, // default vehicle ID
+    rpm: null      // default rpm
   };
 
   lines.forEach((line) => {
-    // Split only on the first colon
-    const index = line.indexOf(":");
-    if (index === -1) return;
-    const key = line.substring(0, index).trim();
-    const value = line.substring(index + 1).trim();
+    const idx = line.indexOf(":");
+    if (idx === -1) return;
+    const key = line.substring(0, idx).trim().toLowerCase();
+    const value = line.substring(idx + 1).trim();
 
-    if (key.toLowerCase().includes("latitud"))
+    if (key.includes("latitud")) {
       data.latitude = parseFloat(value);
-    if (key.toLowerCase().includes("longitud"))
+    }
+    if (key.includes("longitud")) {
       data.longitude = parseFloat(value);
-    if (key.toLowerCase().includes("tiempo")) {
-      // Convert "HH:mm:ss - dd-MM-yyyy" to "yyyy-MM-dd HH:mm:ss"
+    }
+    if (key.includes("tiempo")) {
       data.timestamp = parseTimestamp(value);
     }
-    // Parse vehicle ID if present
-    if (
-      key.toLowerCase().includes("vehiculo") ||
-      key.toLowerCase().includes("vehicle")
-    ) {
-      data.vehicle_id = parseInt(value) || 1;
+    if (key.includes("vehiculo") || key.includes("vehicle")) {
+      data.vehicle_id = parseInt(value, 10) || 1;
     }
-    if (key === "rpm") {                               // <-- parse RPM
+    if (key === "rpm") {
       const parsed = parseInt(value, 10);
       data.rpm = Number.isNaN(parsed) ? null : parsed;
     }
   });
 
-  const query = `INSERT INTO steinstable (latitude, longitude, timestamp, vehicle_id, rpm) VALUES (?, ?, ?, ?, ?)`;
+  // Insert into database, including rpm
+  const query = `
+    INSERT INTO steinstable
+      (latitude, longitude, timestamp, vehicle_id, rpm)
+    VALUES (?, ?, ?, ?, ?)
+  `;
 
-  // Use the pool to execute the query
   pool.query(
     query,
-    [data.latitude, data.longitude, data.timestamp, data.vehicle_id, data.rpm],
+    [
+      data.latitude,
+      data.longitude,
+      data.timestamp,
+      data.vehicle_id,
+      data.rpm
+    ],
     (err, results) => {
       if (err) {
         console.error("DB Insert Error:", err);
       } else {
         console.log("Inserted:", data);
       }
-    },
+    }
   );
 });
 
-// Helper function to parse the timestamp string
+/**
+ * Helper function to parse timestamp from format "HH:mm:ss - dd-MM-yyyy"
+ * to MySQL DATETIME format "yyyy-MM-dd HH:mm:ss".
+ */
 function parseTimestamp(rawValue) {
-  // Expected format: "HH:mm:ss - dd-MM-yyyy"
   const parts = rawValue.split(" - ");
   if (parts.length !== 2) {
     return rawValue;
   }
-  const timePart = parts[0].trim(); // e.g., "12:21:02"
-  const datePart = parts[1].trim(); // e.g., "09-03-2025"
-  const dateParts = datePart.split("-"); // e.g., ["09", "03", "2025"]
+  const timePart = parts[0].trim();
+  const datePart = parts[1].trim();
+  const dateParts = datePart.split("-");
   if (dateParts.length !== 3) {
     return rawValue;
   }
   const [dd, MM, yyyy] = dateParts;
-  return `${yyyy}-${MM}-${dd} ${timePart}`; // MySQL DATETIME format: "yyyy-MM-dd HH:mm:ss"
+  return `${yyyy}-${MM}-${dd} ${timePart}`;
 }
 
-// Bind the UDP listener to the port specified in the config on all interfaces
+// Bind the UDP listener
 server.bind(config.udp.port, "0.0.0.0", () => {
   console.log(
-    `UDP Listener bound on port ${config.udp.port} on all interfaces`,
+    `UDP Listener bound on port ${config.udp.port} on all interfaces`
   );
 });
 
-// Add error handling for the UDP server
+// Error handling for the UDP server
 server.on("error", (err) => {
   console.error("UDP Server encountered an error:", err);
   server.close();
