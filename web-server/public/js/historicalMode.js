@@ -154,15 +154,21 @@ loadButton.addEventListener('click', async () => {
     clearLayer(historicalPath);
 
     // Draw the new path on the map
-    historicalPath = L.polyline(
-      data.map((loc) => [loc.latitude, loc.longitude]),
-      {
-        color: '#8E00C2',
-        weight: 4,
-        opacity: 0.8,
-        lineJoin: 'round',
-      }
-    ).addTo(map);
+    if (!document.getElementById("enable-trace-toggle").checked) {
+      historicalPath = L.polyline(
+        data.map((loc) => [loc.latitude, loc.longitude]),
+        {
+          color: '#8E00C2',
+          weight: 4,
+          opacity: 0.8,
+          lineJoin: 'round',
+        }
+      ).addTo(map);
+    
+      addPolylineClickHandler(historicalPath, data);
+    
+      map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+    }
 
     // Attach a click handler to the polyline to show details
     addPolylineClickHandler(historicalPath, data);
@@ -332,12 +338,26 @@ function showTracePointOnMap(point) {
 export function cleanupHistoricalMode() {
   clearSearchCircle();
   clearTemporaryMarker();
+
   // Remove the polyline if it exists
   if (historicalPath) {
     const map = getMap();
     map.removeLayer(historicalPath);
     historicalPath = null;
   }
-  // Reset the flag of loaded data
+
+  // Reset data loaded state
   dataLoaded = false;
+
+  // Ocultar y resetear el slider de tiempo
+  const sliderControl = document.getElementById("trace-time-slider-control");
+  const slider = document.getElementById("trace-time-slider");
+  const timestampDisplay = document.getElementById("trace-timestamp-display");
+
+  if (sliderControl) sliderControl.style.display = "none";
+  if (slider) {
+    slider.value = 0;
+    slider.max = 0;
+  }
+  if (timestampDisplay) timestampDisplay.innerText = "";
 }
