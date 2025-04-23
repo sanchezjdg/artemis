@@ -54,30 +54,73 @@ function setActiveButton(activeId) {
 
 // Default to real-time mode on page load
 document.addEventListener("DOMContentLoaded", () => {
-  // Show real-time controls and hide historical form.
+  // Inicializar mapa
+  initMap();
+
+  // Setear fecha/hora
+  const now = new Date();
+  const startValue = formatDate(
+    new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0),
+  );
+  const endValue = formatDate(now);
+  document.getElementById("start-datetime").value = startValue;
+  document.getElementById("end-datetime").value = endValue;
+
+  flatpickr("#start-datetime", {
+    enableTime: true,
+    dateFormat: "Y-m-d\\TH:i",
+    defaultDate: startValue,
+    maxDate: "today",
+  });
+  flatpickr("#end-datetime", {
+    enableTime: true,
+    dateFormat: "Y-m-d\\TH:i",
+    defaultDate: endValue,
+    maxDate: "today",
+  });
+
+  // Iniciar en modo real-time
   document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
-  // Start real-time updates automatically
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
-});
 
-document.addEventListener("DOMContentLoaded", () => {
+  // Botón info
   const infoToggle = document.getElementById("info-toggle");
   const infoPanel = document.getElementById("info-panel");
   const closeInfo = document.getElementById("close-info");
 
   infoToggle.addEventListener("click", () => {
-    // If already visible, hide it. Otherwise, show it.
-    if (infoPanel.style.display === "block") {
-      infoPanel.style.display = "none";
-    } else {
-      infoPanel.style.display = "block";
-    }
+    infoPanel.style.display = infoPanel.style.display === "block" ? "none" : "block";
   });
 
   closeInfo.addEventListener("click", () => {
     infoPanel.style.display = "none";
+  });
+
+  // Botón modo real-time
+  document.getElementById("real-time-btn").addEventListener("click", () => {
+    document.getElementById("real-time-controls").style.display = "block";
+    document.getElementById("historical-form").style.display = "none";
+    document.getElementById("trace-results").style.display = "none";
+    document.getElementById("trace-results").innerHTML = "";
+    startRealTimeUpdates(socket);
+    setActiveButton("real-time-btn");
+    document.querySelector(".controls .mode-info").innerText =
+      "Select the mode you want to use:";
+  });
+
+  // Botón modo histórico
+  document.getElementById("historical-btn").addEventListener("click", () => {
+    socket.off("updateData");
+    stopRealTimeUpdates(socket);
+    clearRealTimePath();
+    document.getElementById("real-time-controls").style.display = "none";
+    document.getElementById("historical-form").style.display = "block";
+    document.querySelector(".controls .mode-info").innerText =
+      "Select a date range and optionally enable trace mode:";
+    initHistoricalMode();
+    setActiveButton("historical-btn");
   });
 });
 
