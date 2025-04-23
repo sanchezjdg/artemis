@@ -332,12 +332,26 @@ function showTracePointOnMap(point) {
 export function cleanupHistoricalMode() {
   clearSearchCircle();
   clearTemporaryMarker();
+
   // Remove the polyline if it exists
   if (historicalPath) {
     const map = getMap();
     map.removeLayer(historicalPath);
     historicalPath = null;
   }
-  // Reset the flag of loaded data
+
+  // Reset data loaded state
   dataLoaded = false;
+
+  // Ocultar y resetear el slider de tiempo
+  const sliderControl = document.getElementById("trace-time-slider-control");
+  const slider = document.getElementById("trace-time-slider");
+  const timestampDisplay = document.getElementById("trace-timestamp-display");
+
+  if (sliderControl) sliderControl.style.display = "none";
+  if (slider) {
+    slider.value = 0;
+    slider.max = 0;
+  }
+  if (timestampDisplay) timestampDisplay.innerText = "";
 }
