@@ -84,16 +84,15 @@ body {
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-button.real-time {
-  background: var(--bright-blue);
-  color: var(--white);
+#real-time-btn {
+    background: var(--bright-blue);
+    color: var(--white);
 }
 
-button.historical {
-  background: var(--gray);
-  color: var(--black);
+#historical-btn {
+    background: var(--gray);
+    color: var(--black);
 }
-
 
 .controls button:hover {
     transform: translateY(-2px);
