@@ -29,8 +29,9 @@ server.on("message", (msg, rinfo) => {
   // Split into lines and build the data object
   const lines = message.split("\n");
   let data = {
-    // Default vehicle_id is 1 if not specified
+    // Default vehicle_id is 1 if not specified and rpm gets initialized
     vehicle_id: 1,
+    rpm: null, 
   };
 
   lines.forEach((line) => {
@@ -55,14 +56,18 @@ server.on("message", (msg, rinfo) => {
     ) {
       data.vehicle_id = parseInt(value) || 1;
     }
+    if (key === "rpm") {                               // <-- parse RPM
+      const parsed = parseInt(value, 10);
+      data.rpm = Number.isNaN(parsed) ? null : parsed;
+    }
   });
 
-  const query = `INSERT INTO steinstable (latitude, longitude, timestamp, vehicle_id) VALUES (?, ?, ?, ?)`;
+  const query = `INSERT INTO steinstable (latitude, longitude, timestamp, vehicle_id, rpm) VALUES (?, ?, ?, ?, ?)`;
 
   // Use the pool to execute the query
   pool.query(
     query,
-    [data.latitude, data.longitude, data.timestamp, data.vehicle_id],
+    [data.latitude, data.longitude, data.timestamp, data.vehicle_id, data.rpm],
     (err, results) => {
       if (err) {
         console.error("DB Insert Error:", err);
