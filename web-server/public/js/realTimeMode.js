@@ -42,7 +42,7 @@ export function startRealTimeUpdates(socket) {
 
         // Update the fixed panel with the latest vehicle information
         const rpm = data.rpm !== null ? data.rpm : "No data";
-        updateFixedPanel(data.latitude, data.longitude, rpm, formatTimestamp(data.timestamp));
+        updateFixedPanel(vehicleId, data.latitude, data.longitude, rpm, formatTimestamp(data.timestamp));
 
         // Auto-center logic
         const selected = document.getElementById("vehicle-select").value;

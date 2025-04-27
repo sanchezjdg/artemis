@@ -20,26 +20,6 @@ export function formatDate(d) {
 }
 
 /**
- * Updates a fixed panel with vehicle information.
- * @param {number} lat - Latitude of the vehicle.
- * @param {number} lng - Longitude of the vehicle.
- * @param {number|string} rpm - RPM of the vehicle.
- * @param {string} timestamp - Timestamp of the data.
- */
-export function updateFixedPanel(lat, lng, rpm, timestamp) {
-  const panel = document.getElementById('fixed-info-panel');
-  if (panel) {
-    panel.innerHTML = `
-      <b>Vehicle Information</b><br>
-      Latitude: ${lat.toFixed(5)}<br>
-      Longitude: ${lng.toFixed(5)}<br>
-      RPM: ${rpm}<br>
-      Timestamp: ${timestamp}
-    `;
-  }
-}
-
-/**
  * Adds a click handler to a polyline to show point details in a popup.
  * @param {Object} polyline - The Leaflet polyline.
  * @param {Array} data - Array of data points with coordinates and timestamps.
@@ -61,7 +41,7 @@ export function addPolylineClickHandler(polyline, data) {
         : prev;
     });
 
-    // Extract latitude, longitude, and timestamp.
+    // Extract latitude, longitude and timestamp.
     const lat = Array.isArray(closestPoint)
       ? closestPoint[0]
       : closestPoint.latitude;
@@ -70,15 +50,11 @@ export function addPolylineClickHandler(polyline, data) {
       : closestPoint.longitude;
     const timestamp = closestPoint.timestamp || "N/A";
 
-    // Extract RPM data
-    const rpm = closestPoint.rpm !== undefined && closestPoint.rpm !== null
-      ? closestPoint.rpm
-      : "No data";
-
-    // Update the fixed panel
-    updateFixedPanel(lat, lng, rpm, timestamp);
-
     // Open a popup with the point's information.
+    const rpm = closestPoint.rpm !== undefined && closestPoint.rpm !== null
+    ? closestPoint.rpm
+    : "No data";
+  
     L.popup()
       .setLatLng([lat, lng])
       .setContent(
@@ -86,7 +62,7 @@ export function addPolylineClickHandler(polyline, data) {
         Latitude: ${lat.toFixed(5)}<br>
         Longitude: ${lng.toFixed(5)}<br>
         RPM: ${rpm}<br>
-        Timestamp: ${timestamp}`
+        Timestamp: ${timestamp}`,
       )
       .openOn(map);
   });
@@ -107,6 +83,21 @@ export function formatTimestamp(timestamp) {
     return `Time: ${timePart}, Date: ${datePart}`;
   } catch (err) {
     return "Time: N/A, Date: N/A";
+  }
+}
+
+export function updateFixedPanel(vehicleId, latitude, longitude, rpm, timestamp) {
+  const panel = document.getElementById("fixed-info-panel");
+  const vehicleInfo = document.getElementById(`vehicle-${vehicleId}-info`);
+
+  if (vehicleInfo) {
+    vehicleInfo.innerHTML = `
+      <b>Vehicle ${vehicleId}:</b><br>
+      Latitude: ${latitude.toFixed(5)}<br>
+      Longitude: ${longitude.toFixed(5)}<br>
+      RPM: ${rpm}<br>
+      Timestamp: ${timestamp}<br>
+    `;
   }
 }
 
