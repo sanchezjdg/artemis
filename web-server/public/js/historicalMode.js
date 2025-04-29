@@ -47,8 +47,16 @@ const radiusValueDisplay = document.getElementById("radius-value");
       // Show the trace radius slider.
       document.getElementById("trace-radius-control").style.display = "block";
       // Remove historical polyline as it's not needed in trace mode
-      clearLayer(historicalPath);
-      historicalPath = null;
+      if (historicalPath) {
+        if (Array.isArray(historicalPath)) {
+          historicalPath.forEach(path => {
+            if (path) clearLayer(path);
+          });
+        } else {
+          clearLayer(historicalPath);
+        }
+        historicalPath = null;
+      }
 
       // If data has already been loaded, enable trace functionality
       if (dataLoaded && traceHistoricalData.length > 0) {
@@ -72,23 +80,57 @@ const radiusValueDisplay = document.getElementById("radius-value");
       clearSearchCircle();
       clearTemporaryMarker();
 
-      // If data has been loaded, redraw the historical path
+      // If data has been loaded, redraw the historical paths with original colors
       if (dataLoaded && traceHistoricalData.length > 0) {
-        clearLayer(historicalPath);
-        historicalPath = L.polyline(
-          traceHistoricalData.map((loc) => [loc.latitude, loc.longitude]),
-          {
-            color: "#8E00C2",
-            weight: 4,
-            opacity: 0.8,
-            lineJoin: "round",
-          },
-        ).addTo(map);
+        const vehicleColors = {
+          1: "#3b65ff", // Blue for first vehicle
+          2: "#ff3b3b", // Red for second vehicle
+        };
 
-        // Attach a click handler to the polyline to show details.
-        addPolylineClickHandler(historicalPath, traceHistoricalData);
-        // Fit the map bounds to the historical route.
-        map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+        // Clear any existing paths first
+        if (historicalPath) {
+          if (Array.isArray(historicalPath)) {
+            historicalPath.forEach(path => {
+              if (path) clearLayer(path);
+            });
+          } else {
+            clearLayer(historicalPath);
+          }
+          historicalPath = null;
+        }
+        historicalPath = [];
+
+        // Group data by vehicle
+        const vehicleData = {};
+        traceHistoricalData.forEach(point => {
+          if (!vehicleData[point.vehicle_id]) {
+            vehicleData[point.vehicle_id] = [];
+          }
+          vehicleData[point.vehicle_id].push(point);
+        });
+
+        // Create paths for each vehicle
+        Object.entries(vehicleData).forEach(([vehicleId, data]) => {
+          const path = L.polyline(
+            data.map((loc) => [loc.latitude, loc.longitude]),
+            {
+              color: vehicleColors[vehicleId],
+              weight: 4,
+              opacity: 0.8,
+              lineJoin: 'round',
+            }
+          ).addTo(map);
+          
+          addPolylineClickHandler(path, data);
+          historicalPath.push(path);
+        });
+
+        // Fit the map bounds to include all paths
+        const bounds = L.latLngBounds([]);
+        traceHistoricalData.forEach(point => {
+          bounds.extend([point.latitude, point.longitude]);
+        });
+        map.fitBounds(bounds, { padding: [50, 50] });
       }
     }
   });
@@ -145,10 +187,13 @@ loadButton.addEventListener('click', async () => {
     // Clear any existing paths
     if (historicalPath) {
       if (Array.isArray(historicalPath)) {
-        historicalPath.forEach(path => clearLayer(path));
+        historicalPath.forEach(path => {
+          if (path) clearLayer(path);
+        });
       } else {
         clearLayer(historicalPath);
       }
+      historicalPath = null;
     }
     historicalPath = [];
 
@@ -209,7 +254,7 @@ loadButton.addEventListener('click', async () => {
       const path = L.polyline(
         data.map((loc) => [loc.latitude, loc.longitude]),
         {
-          color: vehicleColors[selectedVehicleId], // Use the same color scheme as multi-vehicle view
+          color: vehicleColors[selectedVehicleId],
           weight: 4,
           opacity: 0.8,
           lineJoin: 'round',
