@@ -42,10 +42,22 @@ const radiusValueDisplay = document.getElementById("radius-value");
   enableTraceToggle.addEventListener("change", () => {
     const map = getMap();
     map.off("click"); // First remove any existing click handlers
-    
+
     // Clean up everything when switching modes
     clearTemporaryMarker();
-    cleanupHistoricalMode();
+    clearSearchCircle();
+    
+    // Clear historical paths
+    if (historicalPath) {
+      if (Array.isArray(historicalPath)) {
+        historicalPath.forEach(path => {
+          if (path) clearLayer(path);
+        });
+      } else {
+        clearLayer(historicalPath);
+      }
+      historicalPath = null;
+    }
     
     if (enableTraceToggle.checked) {
       // When trace mode is enabled:
