@@ -10,6 +10,7 @@ let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;
+let searchCircle = null; // Add global variable to track search circle
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -63,6 +64,11 @@ const radiusValueDisplay = document.getElementById("radius-value");
       }
       // If data has already been loaded, enable trace functionality
       if (dataLoaded && traceHistoricalData.length > 0) {
+        // Clear any existing search circle when enabling trace mode
+        if (searchCircle) {
+          map.removeLayer(searchCircle);
+          searchCircle = null;
+        }
         showToast(
           "Trace mode enabled. Click on the map to display trace information.",
         );
@@ -328,7 +334,7 @@ function onMapClickTrace(e) {
 
   // Create and add a search circle to the map.
   const map = getMap();
-  const searchCircle = L.circle(clickedLatLng, {
+  searchCircle = L.circle(clickedLatLng, {
     radius: threshold,
     color: "red",
     fillColor: "#f03",
@@ -417,6 +423,9 @@ function clearSearchCircle() {
       map.removeLayer(layer);
     }
   });
+
+  // Clear the global searchCircle variable
+  searchCircle = null;
 }
 
 /**
@@ -452,7 +461,11 @@ function showTracePointOnMap(point) {
  * Export the clear functions to be used externally.
  */
 export function cleanupHistoricalMode() {
-  clearSearchCircle();
+  if (searchCircle) {
+    const map = getMap();
+    map.removeLayer(searchCircle);
+    searchCircle = null;
+  }
   clearTemporaryMarker();
 
   // Remove all polylines if they exist
