@@ -61,17 +61,11 @@ const radiusValueDisplay = document.getElementById("radius-value");
         }
         historicalPath = null;
       }
-      // Add the click handler for trace mode immediately if data is loaded
-      if (dataLoaded && traceHistoricalData.length > 0) {
-        map.on("click", onMapClickTrace);
-      }
-
       // If data has already been loaded, enable trace functionality
       if (dataLoaded && traceHistoricalData.length > 0) {
         showToast(
           "Trace mode enabled. Click on the map to display trace information.",
         );
-        map.off("click");
         map.on("click", onMapClickTrace);
       } else {
         showToast(
