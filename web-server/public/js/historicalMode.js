@@ -39,6 +39,9 @@ const radiusValueDisplay = document.getElementById("radius-value");
     enableTraceToggle.checked ? "block" : "none";
 
   enableTraceToggle.addEventListener("change", () => {
+    const map = getMap();
+    map.off("click"); // First remove any existing click handlers
+    
     // Clean up everything when switching modes
     clearTemporaryMarker();
     cleanupHistoricalMode();
