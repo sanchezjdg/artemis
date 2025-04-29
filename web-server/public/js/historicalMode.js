@@ -108,7 +108,7 @@ const radiusValueDisplay = document.getElementById("radius-value");
     vehicleSelectHistorical.style.fontSize = '14px';
     vehicleSelectHistorical.style.fontWeight = 'bold';
     vehicleSelectHistorical.style.cursor = 'pointer';
-    vehicleSelectHistorical.innerHTML = '<option value="">Select Vehicle</option><option value="1">Vehicle 1</option><option value="2">Vehicle 2</option>';
+    vehicleSelectHistorical.innerHTML = '<option value="">Select Vehicle</option><option value="1">Vehicle 1</option><option value="2">Vehicle 2</option><option value="both">Both Vehicles</option>';
     document.getElementById('historical-form').prepend(vehicleSelectHistorical);
   }
   
@@ -136,45 +136,98 @@ loadButton.addEventListener('click', async () => {
   showToast('Loading route data, please wait...');
 
   try {
-    const response = await fetch(
-      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=${selectedVehicleId}`
-    );
-    const data = await response.json();
+    let allData = [];
+    const vehicleColors = {
+      1: "#3b65ff", // Blue for first vehicle
+      2: "#ff3b3b", // Red for second vehicle
+    };
 
-    if (data.length === 0) {
-      showToast('No route data found for the selected interval and vehicle.');
-      return;
+    // Clear any existing paths
+    if (Array.isArray(historicalPath)) {
+      historicalPath.forEach(path => clearLayer(path));
+    } else {
+      clearLayer(historicalPath);
     }
+    historicalPath = [];
 
-    // Process and display the data
-    dataLoaded = true;
-    traceHistoricalData = data;
+    // Function to fetch data for a specific vehicle
+    const fetchVehicleData = async (vehicleId) => {
+      const response = await fetch(
+        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=${vehicleId}`
+      );
+      const data = await response.json();
+      if (data.length > 0) {
+        data.forEach(point => point.vehicle_id = vehicleId);
+        return data;
+      }
+      return [];
+    };
 
-    // Clear any existing path
-    clearLayer(historicalPath);
+    if (selectedVehicleId === 'both') {
+      // Fetch data for both vehicles
+      const [vehicle1Data, vehicle2Data] = await Promise.all([
+        fetchVehicleData(1),
+        fetchVehicleData(2)
+      ]);
+      
+      allData = [...vehicle1Data, ...vehicle2Data];
 
-    // Draw the new path on the map
-    if (!document.getElementById("enable-trace-toggle").checked) {
-      historicalPath = L.polyline(
+      if (allData.length === 0) {
+        showToast('No route data found for either vehicle in the selected interval.');
+        return;
+      }
+
+      // Process and display data for each vehicle
+      for (const vehicleId of [1, 2]) {
+        const vehicleData = allData.filter(point => point.vehicle_id === vehicleId);
+        if (vehicleData.length > 0) {
+          const path = L.polyline(
+            vehicleData.map((loc) => [loc.latitude, loc.longitude]),
+            {
+              color: vehicleColors[vehicleId],
+              weight: 4,
+              opacity: 0.8,
+              lineJoin: 'round',
+            }
+          ).addTo(map);
+          
+          addPolylineClickHandler(path, vehicleData);
+          historicalPath.push(path);
+        }
+      }
+    } else {
+      // Single vehicle mode
+      const data = await fetchVehicleData(parseInt(selectedVehicleId));
+      if (data.length === 0) {
+        showToast('No route data found for the selected interval and vehicle.');
+        return;
+      }
+      allData = data;
+
+      const path = L.polyline(
         data.map((loc) => [loc.latitude, loc.longitude]),
         {
-          color: '#8E00C2',
+          color: vehicleColors[selectedVehicleId],
           weight: 4,
           opacity: 0.8,
           lineJoin: 'round',
         }
       ).addTo(map);
-    
-      addPolylineClickHandler(historicalPath, data);
-    
-      map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+      
+      addPolylineClickHandler(path, data);
+      historicalPath = [path];
     }
 
-    // Attach a click handler to the polyline to show details
-    addPolylineClickHandler(historicalPath, data);
+    // Process and store all data for trace mode
+    dataLoaded = true;
+    traceHistoricalData = allData;
 
-    // Fit the map bounds to the new route
-    map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+    // Calculate bounds considering all paths
+    const bounds = L.latLngBounds([]);
+    traceHistoricalData.forEach(point => {
+      bounds.extend([point.latitude, point.longitude]);
+    });
+    map.fitBounds(bounds, { padding: [50, 50] });
 
     showToast('Route data loaded successfully.');
   } catch (error) {
@@ -339,10 +392,16 @@ export function cleanupHistoricalMode() {
   clearSearchCircle();
   clearTemporaryMarker();
 
-  // Remove the polyline if it exists
+  // Remove all polylines if they exist
   if (historicalPath) {
     const map = getMap();
-    map.removeLayer(historicalPath);
+    if (Array.isArray(historicalPath)) {
+      historicalPath.forEach(path => {
+        if (path) map.removeLayer(path);
+      });
+    } else {
+      map.removeLayer(historicalPath);
+    }
     historicalPath = null;
   }
 
