@@ -143,10 +143,12 @@ loadButton.addEventListener('click', async () => {
     };
 
     // Clear any existing paths
-    if (Array.isArray(historicalPath)) {
-      historicalPath.forEach(path => clearLayer(path));
-    } else {
-      clearLayer(historicalPath);
+    if (historicalPath) {
+      if (Array.isArray(historicalPath)) {
+        historicalPath.forEach(path => clearLayer(path));
+      } else {
+        clearLayer(historicalPath);
+      }
     }
     historicalPath = [];
 
@@ -207,7 +209,7 @@ loadButton.addEventListener('click', async () => {
       const path = L.polyline(
         data.map((loc) => [loc.latitude, loc.longitude]),
         {
-          color: vehicleColors[selectedVehicleId],
+          color: vehicleColors[selectedVehicleId], // Use the same color scheme as multi-vehicle view
           weight: 4,
           opacity: 0.8,
           lineJoin: 'round',
@@ -376,7 +378,7 @@ function showTracePointOnMap(point) {
   // Crear marcador temporal
   temporaryMarker = L.marker([lat, lng]).addTo(getMap());
   temporaryMarker
-    .bindPopup(`<b>Recorded Moment</b><br>Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}<br>Timestamp: ${time}`)
+    .bindPopup(`<b>Vehicle ${point.vehicle_id}</b><br>Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}<br>RPM: ${point.rpm !== null ? point.rpm : 'No data'}<br>Timestamp: ${time}`)
     .openPopup();
 
   // Centrar mapa en el punto
