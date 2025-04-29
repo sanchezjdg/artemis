@@ -39,9 +39,10 @@ const radiusValueDisplay = document.getElementById("radius-value");
     enableTraceToggle.checked ? "block" : "none";
 
   enableTraceToggle.addEventListener("change", () => {
-    // Clear any temporary marker when toggling modes
+    // Clean up everything when switching modes
     clearTemporaryMarker();
-
+    cleanupHistoricalMode();
+    
     if (enableTraceToggle.checked) {
       // When trace mode is enabled:
       // Show the trace radius slider.
@@ -153,6 +154,20 @@ const radiusValueDisplay = document.getElementById("radius-value");
     vehicleSelectHistorical.innerHTML = '<option value="">Select Vehicle</option><option value="1">Vehicle 1</option><option value="2">Vehicle 2</option><option value="both">Both Vehicles</option>';
     document.getElementById('historical-form').prepend(vehicleSelectHistorical);
   }
+
+  // Add change event listener to clear paths when switching vehicles
+  vehicleSelectHistorical.addEventListener('change', () => {
+    if (historicalPath) {
+      if (Array.isArray(historicalPath)) {
+        historicalPath.forEach(path => {
+          if (path) clearLayer(path);
+        });
+      } else {
+        clearLayer(historicalPath);
+      }
+      historicalPath = null;
+    }
+  });
   
 // Update the data loading function to include vehicle selection
 const loadButton = document.getElementById('load-data');
