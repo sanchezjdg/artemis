@@ -251,16 +251,30 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     display: none;
     z-index: 1500;
     overflow-y: auto;
+    border-right: 1px solid #444;
   }
   
   .close-info {
     background: none;
     border: none;
     color: var(--white);
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
     float: right;
+  }
+
+  .info-panel p {
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .info-panel b {
+    color: var(--info-accent);
+  }
+  
+  details[open] summary {
+    margin-bottom: 0.5rem;
   }
   
   .info-toggle {
@@ -276,6 +290,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     border: none;
     z-index: 2000;
     cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: background 0.3s ease;
+  }
+
+  .info-toggle:hover {
+    background: #5b7dff;
   }
 
 /* Optimize the menu for mobile devices */
