@@ -86,7 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Set up mode switching buttons.
 document.getElementById("real-time-btn").addEventListener("click", () => {
-  getMap().closePopup();        
   cleanupHeatmapMode(); // Limpia el heatmap si estaba activo
   // Show real-time controls and hide historical form.
   document.getElementById("real-time-controls").style.display = "block";
@@ -122,6 +121,5 @@ document.getElementById("historical-btn").addEventListener("click", () => {
 });
 
 document.getElementById("heatmap-tab").addEventListener("click", () => {
-  getMap().closePopup();        
   initHeatmapMode(traceHistoricalData);
 });
