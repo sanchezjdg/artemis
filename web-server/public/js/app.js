@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("historical-form").style.display = "none";
   // Start real-time updates automatically
   startRealTimeUpdates(socket);
-  setActiveButton("real-time-btn");
+  //setActiveButton("real-time-btn");
 });
 
 document.addEventListener("DOMContentLoaded", () => {
