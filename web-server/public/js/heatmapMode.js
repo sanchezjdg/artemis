@@ -4,7 +4,19 @@ let heatLayer = null;
 
 export function initHeatmapMode(traceHistoricalData) {
   const map = getMap();
-  
+ 
+    // 🧽 Oculta todos los elementos del modo histórico
+    document.getElementById("historical-form").style.display = "none";
+    const traceSlider = document.getElementById("trace-time-slider-control");
+    if (traceSlider) traceSlider.style.display = "none";
+    const radiusControl = document.getElementById("trace-radius-control");
+    if (radiusControl) radiusControl.style.display = "none";
+    const traceResults = document.getElementById("trace-results");
+    if (traceResults) {
+      traceResults.style.display = "none";
+      traceResults.innerHTML = "";
+    }
+
   map.eachLayer((layer) => {
     if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
       map.removeLayer(layer);
