@@ -77,22 +77,38 @@ const radiusValueDisplay = document.getElementById("radius-value");
 
       // If data has been loaded, redraw the historical path
       if (dataLoaded && traceHistoricalData.length > 0) {
-        clearLayer(historicalPath);
-        historicalPath = L.polyline(
-          traceHistoricalData.map((loc) => [loc.latitude, loc.longitude]),
-          {
-            color: "#8E00C2",
+        map.eachLayer((layer) => {
+          if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+            map.removeLayer(layer);
+          }
+        });
+      
+        const vehicleGroups = {};
+      
+        traceHistoricalData.forEach((point) => {
+          const id = point.vehicle_id || "unknown";
+          if (!vehicleGroups[id]) vehicleGroups[id] = [];
+          vehicleGroups[id].push(point);
+        });
+      
+        const colorMap = {
+          1: "#0078FF", // Azul
+          2: "#FF5733", // Rojo/Naranja
+        };
+      
+        Object.entries(vehicleGroups).forEach(([id, points]) => {
+          const polyline = L.polyline(points.map(p => [p.latitude, p.longitude]), {
+            color: colorMap[id] || "#8E00C2",
             weight: 4,
             opacity: 0.8,
             lineJoin: "round",
-          },
-        ).addTo(map);
-
-        // Attach a click handler to the polyline to show details.
-        addPolylineClickHandler(historicalPath, traceHistoricalData);
-        // Fit the map bounds to the historical route.
-        map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
-      }
+          }).addTo(map);
+          addPolylineClickHandler(polyline, points);
+        });
+      
+        const allPoints = traceHistoricalData.map(p => [p.latitude, p.longitude]);
+        map.fitBounds(L.latLngBounds(allPoints), { padding: [50, 50] });
+      }      
     }
   });
 
@@ -366,6 +382,14 @@ export function cleanupHistoricalMode() {
     map.removeLayer(historicalPath);
     historicalPath = null;
   }
+
+  // Limpiar cualquier polilínea residual
+  const map = getMap();
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+      map.removeLayer(layer);
+    }
+  });
 
   // Reset data loaded state
   dataLoaded = false;
