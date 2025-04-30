@@ -4,6 +4,7 @@
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
 import { addPolylineClickHandler } from "./utils.js";
 import { showToast } from "./toast.js";
+import { updateFixedPanel } from "./utils.js";
 
 let historicalPath = null;
 let traceHistoricalData = [];
@@ -46,9 +47,12 @@ const radiusValueDisplay = document.getElementById("radius-value");
       // When trace mode is enabled:
       // Show the trace radius slider.
       document.getElementById("trace-radius-control").style.display = "block";
-      // Remove historical polyline as it's not needed in trace mode
-      clearLayer(historicalPath);
-      historicalPath = null;
+      // Eliminar cualquier polilínea visible de ambos vehículos al activar trace
+      map.eachLayer(layer => {
+        if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+          map.removeLayer(layer);
+        }
+      });
 
       // If data has already been loaded, enable trace functionality
       if (dataLoaded && traceHistoricalData.length > 0) {
@@ -74,26 +78,41 @@ const radiusValueDisplay = document.getElementById("radius-value");
 
       // If data has been loaded, redraw the historical path
       if (dataLoaded && traceHistoricalData.length > 0) {
-        clearLayer(historicalPath);
-        historicalPath = L.polyline(
-          traceHistoricalData.map((loc) => [loc.latitude, loc.longitude]),
-          {
-            color: "#8E00C2",
+        map.eachLayer((layer) => {
+          if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+            map.removeLayer(layer);
+          }
+        });
+      
+        const vehicleGroups = {};
+      
+        traceHistoricalData.forEach((point) => {
+          const id = point.vehicle_id || "unknown";
+          if (!vehicleGroups[id]) vehicleGroups[id] = [];
+          vehicleGroups[id].push(point);
+        });
+      
+        const colorMap = {
+          1: "#0078FF", // Azul
+          2: "#FF5733", // Rojo/Naranja
+        };
+      
+        Object.entries(vehicleGroups).forEach(([id, points]) => {
+          const polyline = L.polyline(points.map(p => [p.latitude, p.longitude]), {
+            color: colorMap[id] || "#8E00C2",
             weight: 4,
             opacity: 0.8,
             lineJoin: "round",
-          },
-        ).addTo(map);
-
-        // Attach a click handler to the polyline to show details.
-        addPolylineClickHandler(historicalPath, traceHistoricalData);
-        // Fit the map bounds to the historical route.
-        map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
-      }
+          }).addTo(map);
+          addPolylineClickHandler(polyline, points);
+        });
+      
+        const allPoints = traceHistoricalData.map(p => [p.latitude, p.longitude]);
+        map.fitBounds(L.latLngBounds(allPoints), { padding: [50, 50] });
+      }      
     }
   });
 
-  // Add vehicle selection dropdown for historical mode
   let vehicleSelectHistorical = document.getElementById('vehicle-select-historical');
   if (!vehicleSelectHistorical) {
     vehicleSelectHistorical = document.createElement('select');
@@ -108,19 +127,18 @@ const radiusValueDisplay = document.getElementById("radius-value");
     vehicleSelectHistorical.style.fontSize = '14px';
     vehicleSelectHistorical.style.fontWeight = 'bold';
     vehicleSelectHistorical.style.cursor = 'pointer';
-    vehicleSelectHistorical.innerHTML = '<option value="">Select Vehicle</option><option value="1">Vehicle 1</option><option value="2">Vehicle 2</option>';
+    vehicleSelectHistorical.innerHTML = `
+      <option value="all">All Vehicles</option>
+      <option value="1">Vehicle 1</option>
+      <option value="2">Vehicle 2</option>
+    `;
     document.getElementById('historical-form').prepend(vehicleSelectHistorical);
   }
   
 // Update the data loading function to include vehicle selection
 const loadButton = document.getElementById('load-data');
 loadButton.addEventListener('click', async () => {
-  const selectedVehicleId = vehicleSelectHistorical.value;
-  if (!selectedVehicleId) {
-    showToast('Please select a vehicle.');
-    return;
-  }
-
+  const selectedVehicle = vehicleSelectHistorical.value;
   const lastStartDate = document.getElementById('start-datetime').value;
   const lastEndDate = document.getElementById('end-datetime').value;
 
@@ -132,60 +150,78 @@ loadButton.addEventListener('click', async () => {
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
 
-  // Show loading feedback
-  showToast('Loading route data, please wait...');
+  showToast('Loading route data...');
 
   try {
-    const response = await fetch(
-      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=${selectedVehicleId}`
-    );
-    const data = await response.json();
+    let data1 = [], data2 = [];
 
-    if (data.length === 0) {
-      showToast('No route data found for the selected interval and vehicle.');
+    if (selectedVehicle === '1' || selectedVehicle === 'all') {
+      data1 = await fetch(
+        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`
+      ).then(res => res.json());
+    }
+
+    if (selectedVehicle === '2' || selectedVehicle === 'all') {
+      data2 = await fetch(
+        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`
+      ).then(res => res.json());
+    }
+
+    if (data1.length === 0 && data2.length === 0) {
+      showToast('No route data found for the selected vehicle(s).');
       return;
     }
 
-    // Process and display the data
     dataLoaded = true;
-    traceHistoricalData = data;
-
-    // Clear any existing path
+    traceHistoricalData = [...data1.map(p => ({ ...p, vehicle_id: 1 })), ...data2.map(p => ({ ...p, vehicle_id: 2 }))];
     clearLayer(historicalPath);
 
-    // Draw the new path on the map
+    const map = getMap();
+
     if (!document.getElementById("enable-trace-toggle").checked) {
-      historicalPath = L.polyline(
-        data.map((loc) => [loc.latitude, loc.longitude]),
-        {
-          color: '#8E00C2',
-          weight: 4,
-          opacity: 0.8,
-          lineJoin: 'round',
-        }
-      ).addTo(map);
-    
-      addPolylineClickHandler(historicalPath, data);
-    
-      map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+      if (data1.length > 0) {
+        const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
+          color: '#0078FF', weight: 4, opacity: 0.8, lineJoin: 'round'
+        }).addTo(map);
+        addPolylineClickHandler(polyline1, data1);
+      }
+
+      if (data2.length > 0) {
+        const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
+          color: '#FF5733', weight: 4, opacity: 0.8, lineJoin: 'round'
+        }).addTo(map);
+        addPolylineClickHandler(polyline2, data2);
+      }
+
+      const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
+      map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
     }
 
-    // Attach a click handler to the polyline to show details
-    addPolylineClickHandler(historicalPath, data);
+    showToast('Route data loaded.');
 
-    // Fit the map bounds to the new route
-    map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+    // Reactivar trace si ya estaba encendido antes de cargar
+    const traceToggle = document.getElementById("enable-trace-toggle");
+    if (traceToggle.checked) {
+      getMap().off("click", onMapClickTrace); // Elimina handler duplicado si existía
+      const event = new Event("change");
+      traceToggle.dispatchEvent(event);
+    }    
 
-    showToast('Route data loaded successfully.');
-  } catch (error) {
-    console.error('Error fetching historical data:', error);
-    showToast('Error loading historical data.');
+  } catch (err) {
+    console.error('Error loading data:', err);
+    showToast('Error loading route data.');
   }
 });
 
   radiusSlider.addEventListener("input", () => {
     radiusValueDisplay.textContent = radiusSlider.value;
   });
+
+  // Si trace toggle ya estaba activo, volver a ejecutar su lógica como si hubiera sido cambiado manualmente
+  if (enableTraceToggle.checked) {
+    const event = new Event("change");
+    enableTraceToggle.dispatchEvent(event);
+  }
 }
 
 /**
@@ -315,22 +351,42 @@ function clearTemporaryMarker() {
 }
 
 function showTracePointOnMap(point) {
-  const { latitude: lat, longitude: lng, timestamp: time } = point;
+  const { latitude: lat, longitude: lng, timestamp: time, vehicle_id, rpm } = point;
 
-  // Eliminar marcador anterior si existe
   clearTemporaryMarker();
 
-  // Crear marcador temporal
-  temporaryMarker = L.marker([lat, lng]).addTo(getMap());
+  // Asignar color según el ID del vehículo
+  const colorMap = {
+    1: "#3b65ff", // Azul
+    2: "#ff3b3b", // Rojo/Naranja
+  };
+  const fillColor = colorMap[vehicle_id] || "#666";
+
+  // Crear marcador tipo círculo con color por vehículo
+  temporaryMarker = L.circleMarker([lat, lng], {
+    radius: 8,
+    fillColor: fillColor,
+    color: "#fff",
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.8,
+  }).addTo(getMap());
+
   temporaryMarker
-    .bindPopup(`<b>Recorded Moment</b><br>Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}<br>Timestamp: ${time}`)
+    .bindPopup(
+      `<b>Vehicle ${vehicle_id}</b><br>
+       Lat: ${lat.toFixed(5)}<br>
+       Lng: ${lng.toFixed(5)}<br>
+       RPM: ${rpm !== null ? rpm : "No data"}<br>
+       Timestamp: ${time}`
+    )
     .openPopup();
 
-  // Centrar mapa en el punto
   getMap().setView([lat, lng], 17);
+
+  // 🟢 Actualiza el panel fijo en la esquina
+  updateFixedPanel(vehicle_id, lat, lng, rpm, time);
 }
-
-
 
 /**
  * Export the clear functions to be used externally.
@@ -345,6 +401,14 @@ export function cleanupHistoricalMode() {
     map.removeLayer(historicalPath);
     historicalPath = null;
   }
+
+  // Limpiar cualquier polilínea residual
+  const map = getMap();
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+      map.removeLayer(layer);
+    }
+  });
 
   // Reset data loaded state
   dataLoaded = false;
