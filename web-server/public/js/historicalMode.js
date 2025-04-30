@@ -179,6 +179,13 @@ loadButton.addEventListener('click', async () => {
     const map = getMap();
 
     if (!document.getElementById("enable-trace-toggle").checked) {
+      // Limpiar todas las polilíneas anteriores
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+          map.removeLayer(layer);
+        }
+      });
+
       if (data1.length > 0) {
         const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
           color: '#0078FF', weight: 4, opacity: 0.8, lineJoin: 'round'
