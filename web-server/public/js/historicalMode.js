@@ -93,10 +93,32 @@ const radiusValueDisplay = document.getElementById("radius-value");
     }
   });
 
-
+  let vehicleSelectHistorical = document.getElementById('vehicle-select-historical');
+  if (!vehicleSelectHistorical) {
+    vehicleSelectHistorical = document.createElement('select');
+    vehicleSelectHistorical.id = 'vehicle-select-historical';
+    vehicleSelectHistorical.style.marginTop = '10px';
+    vehicleSelectHistorical.style.width = '100%';
+    vehicleSelectHistorical.style.padding = '5px';
+    vehicleSelectHistorical.style.borderRadius = '5px';
+    vehicleSelectHistorical.style.border = '1px solid #ccc';
+    vehicleSelectHistorical.style.backgroundColor = '#fff';
+    vehicleSelectHistorical.style.color = '#000';
+    vehicleSelectHistorical.style.fontSize = '14px';
+    vehicleSelectHistorical.style.fontWeight = 'bold';
+    vehicleSelectHistorical.style.cursor = 'pointer';
+    vehicleSelectHistorical.innerHTML = `
+      <option value="all">All Vehicles</option>
+      <option value="1">Vehicle 1</option>
+      <option value="2">Vehicle 2</option>
+    `;
+    document.getElementById('historical-form').prepend(vehicleSelectHistorical);
+  }
+  
 // Update the data loading function to include vehicle selection
 const loadButton = document.getElementById('load-data');
 loadButton.addEventListener('click', async () => {
+  const selectedVehicle = vehicleSelectHistorical.value;
   const lastStartDate = document.getElementById('start-datetime').value;
   const lastEndDate = document.getElementById('end-datetime').value;
 
@@ -108,64 +130,57 @@ loadButton.addEventListener('click', async () => {
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
 
-  showToast('Loading route data for both vehicles...');
+  showToast('Loading route data...');
 
   try {
-    const [data1, data2] = await Promise.all([
-      fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`).then(res => res.json()),
-      fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`).then(res => res.json())
-    ]);
+    let data1 = [], data2 = [];
+
+    if (selectedVehicle === '1' || selectedVehicle === 'all') {
+      data1 = await fetch(
+        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`
+      ).then(res => res.json());
+    }
+
+    if (selectedVehicle === '2' || selectedVehicle === 'all') {
+      data2 = await fetch(
+        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`
+      ).then(res => res.json());
+    }
 
     if (data1.length === 0 && data2.length === 0) {
-      showToast('No route data found for either vehicle.');
+      showToast('No route data found for the selected vehicle(s).');
       return;
     }
 
     dataLoaded = true;
     traceHistoricalData = [...data1.map(p => ({ ...p, vehicle_id: 1 })), ...data2.map(p => ({ ...p, vehicle_id: 2 }))];
-
     clearLayer(historicalPath);
 
     const map = getMap();
 
     if (!document.getElementById("enable-trace-toggle").checked) {
-      // Vehicle 1 - Azul
       if (data1.length > 0) {
-        const polyline1 = L.polyline(
-          data1.map((loc) => [loc.latitude, loc.longitude]),
-          {
-            color: '#0078FF',
-            weight: 4,
-            opacity: 0.8,
-            lineJoin: 'round',
-          }
-        ).addTo(map);
+        const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
+          color: '#0078FF', weight: 4, opacity: 0.8, lineJoin: 'round'
+        }).addTo(map);
         addPolylineClickHandler(polyline1, data1);
       }
 
-      // Vehicle 2 - Naranja
       if (data2.length > 0) {
-        const polyline2 = L.polyline(
-          data2.map((loc) => [loc.latitude, loc.longitude]),
-          {
-            color: '#FF5733',
-            weight: 4,
-            opacity: 0.8,
-            lineJoin: 'round',
-          }
-        ).addTo(map);
+        const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
+          color: '#FF5733', weight: 4, opacity: 0.8, lineJoin: 'round'
+        }).addTo(map);
         addPolylineClickHandler(polyline2, data2);
       }
 
-      // Ajustar vista del mapa para ambos
-      const allPoints = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
-      map.fitBounds(L.latLngBounds(allPoints), { padding: [50, 50] });
+      const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
+      map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
     }
 
-    showToast('Routes for both vehicles loaded.');
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    showToast('Error loading data for both vehicles.');
+    showToast('Route data loaded.');
+  } catch (err) {
+    console.error('Error loading data:', err);
+    showToast('Error loading route data.');
   }
 });
 
