@@ -11,6 +11,7 @@ export let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;
+let searchCircle = null; // Add global variable to track search circle
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -40,9 +41,25 @@ const radiusValueDisplay = document.getElementById("radius-value");
     enableTraceToggle.checked ? "block" : "none";
 
   enableTraceToggle.addEventListener("change", () => {
-    // Clear any temporary marker when toggling modes
-    clearTemporaryMarker();
+    const map = getMap();
+    map.off("click"); // First remove any existing click handlers
 
+    // Clean up everything when switching modes
+    clearTemporaryMarker();
+    clearSearchCircle();
+    
+    // Clear historical paths
+    if (historicalPath) {
+      if (Array.isArray(historicalPath)) {
+        historicalPath.forEach(path => {
+          if (path) clearLayer(path);
+        });
+      } else {
+        clearLayer(historicalPath);
+      }
+      historicalPath = null;
+    }
+    
     if (enableTraceToggle.checked) {
       // When trace mode is enabled:
       // Show the trace radius slider.
@@ -56,10 +73,14 @@ const radiusValueDisplay = document.getElementById("radius-value");
 
       // If data has already been loaded, enable trace functionality
       if (dataLoaded && traceHistoricalData.length > 0) {
+        // Clear any existing search circle when enabling trace mode
+        if (searchCircle) {
+          map.removeLayer(searchCircle);
+          searchCircle = null;
+        }
         showToast(
           "Trace mode enabled. Click on the map to display trace information.",
         );
-        map.off("click");
         map.on("click", onMapClickTrace);
       } else {
         showToast(
@@ -76,7 +97,7 @@ const radiusValueDisplay = document.getElementById("radius-value");
       clearSearchCircle();
       clearTemporaryMarker();
 
-      // If data has been loaded, redraw the historical path
+      // If data has been loaded, redraw the historical paths with original colors
       if (dataLoaded && traceHistoricalData.length > 0) {
         map.eachLayer((layer) => {
           if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
@@ -134,6 +155,20 @@ const radiusValueDisplay = document.getElementById("radius-value");
     `;
     document.getElementById('historical-form').prepend(vehicleSelectHistorical);
   }
+
+  // Add change event listener to clear paths when switching vehicles
+  vehicleSelectHistorical.addEventListener('change', () => {
+    if (historicalPath) {
+      if (Array.isArray(historicalPath)) {
+        historicalPath.forEach(path => {
+          if (path) clearLayer(path);
+        });
+      } else {
+        clearLayer(historicalPath);
+      }
+      historicalPath = null;
+    }
+  });
   
 // Update the data loading function to include vehicle selection
 const loadButton = document.getElementById('load-data');
@@ -255,7 +290,7 @@ function onMapClickTrace(e) {
 
   // Create and add a search circle to the map.
   const map = getMap();
-  const searchCircle = L.circle(clickedLatLng, {
+  searchCircle = L.circle(clickedLatLng, {
     radius: threshold,
     color: "red",
     fillColor: "#f03",
@@ -344,6 +379,9 @@ function clearSearchCircle() {
       map.removeLayer(layer);
     }
   });
+
+  // Clear the global searchCircle variable
+  searchCircle = null;
 }
 
 /**
@@ -399,13 +437,23 @@ function showTracePointOnMap(point) {
  * Export the clear functions to be used externally.
  */
 export function cleanupHistoricalMode() {
-  clearSearchCircle();
+  if (searchCircle) {
+    const map = getMap();
+    map.removeLayer(searchCircle);
+    searchCircle = null;
+  }
   clearTemporaryMarker();
 
-  // Remove the polyline if it exists
+  // Remove all polylines if they exist
   if (historicalPath) {
     const map = getMap();
-    map.removeLayer(historicalPath);
+    if (Array.isArray(historicalPath)) {
+      historicalPath.forEach(path => {
+        if (path) map.removeLayer(path);
+      });
+    } else {
+      map.removeLayer(historicalPath);
+    }
     historicalPath = null;
   }
 

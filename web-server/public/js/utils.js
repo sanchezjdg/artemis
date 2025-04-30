@@ -58,7 +58,7 @@ export function addPolylineClickHandler(polyline, data) {
     L.popup()
       .setLatLng([lat, lng])
       .setContent(
-        `<b>Position</b><br>
+        `<b>Vehicle ${closestPoint.vehicle_id}</b><br>
         Latitude: ${lat.toFixed(5)}<br>
         Longitude: ${lng.toFixed(5)}<br>
         RPM: ${rpm}<br>
