@@ -93,34 +93,10 @@ const radiusValueDisplay = document.getElementById("radius-value");
     }
   });
 
-  // Add vehicle selection dropdown for historical mode
-  let vehicleSelectHistorical = document.getElementById('vehicle-select-historical');
-  if (!vehicleSelectHistorical) {
-    vehicleSelectHistorical = document.createElement('select');
-    vehicleSelectHistorical.id = 'vehicle-select-historical';
-    vehicleSelectHistorical.style.marginTop = '10px';
-    vehicleSelectHistorical.style.width = '100%';
-    vehicleSelectHistorical.style.padding = '5px';
-    vehicleSelectHistorical.style.borderRadius = '5px';
-    vehicleSelectHistorical.style.border = '1px solid #ccc';
-    vehicleSelectHistorical.style.backgroundColor = '#fff';
-    vehicleSelectHistorical.style.color = '#000';
-    vehicleSelectHistorical.style.fontSize = '14px';
-    vehicleSelectHistorical.style.fontWeight = 'bold';
-    vehicleSelectHistorical.style.cursor = 'pointer';
-    vehicleSelectHistorical.innerHTML = '<option value="">Select Vehicle</option><option value="1">Vehicle 1</option><option value="2">Vehicle 2</option>';
-    document.getElementById('historical-form').prepend(vehicleSelectHistorical);
-  }
-  
+
 // Update the data loading function to include vehicle selection
 const loadButton = document.getElementById('load-data');
 loadButton.addEventListener('click', async () => {
-  const selectedVehicleId = vehicleSelectHistorical.value;
-  if (!selectedVehicleId) {
-    showToast('Please select a vehicle.');
-    return;
-  }
-
   const lastStartDate = document.getElementById('start-datetime').value;
   const lastEndDate = document.getElementById('end-datetime').value;
 
@@ -132,54 +108,64 @@ loadButton.addEventListener('click', async () => {
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
 
-  // Show loading feedback
-  showToast('Loading route data, please wait...');
+  showToast('Loading route data for both vehicles...');
 
   try {
-    const response = await fetch(
-      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=${selectedVehicleId}`
-    );
-    const data = await response.json();
+    const [data1, data2] = await Promise.all([
+      fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`).then(res => res.json()),
+      fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`).then(res => res.json())
+    ]);
 
-    if (data.length === 0) {
-      showToast('No route data found for the selected interval and vehicle.');
+    if (data1.length === 0 && data2.length === 0) {
+      showToast('No route data found for either vehicle.');
       return;
     }
 
-    // Process and display the data
     dataLoaded = true;
-    traceHistoricalData = data;
+    traceHistoricalData = [...data1.map(p => ({ ...p, vehicle_id: 1 })), ...data2.map(p => ({ ...p, vehicle_id: 2 }))];
 
-    // Clear any existing path
     clearLayer(historicalPath);
 
-    // Draw the new path on the map
+    const map = getMap();
+
     if (!document.getElementById("enable-trace-toggle").checked) {
-      historicalPath = L.polyline(
-        data.map((loc) => [loc.latitude, loc.longitude]),
-        {
-          color: '#8E00C2',
-          weight: 4,
-          opacity: 0.8,
-          lineJoin: 'round',
-        }
-      ).addTo(map);
-    
-      addPolylineClickHandler(historicalPath, data);
-    
-      map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
+      // Vehicle 1 - Azul
+      if (data1.length > 0) {
+        const polyline1 = L.polyline(
+          data1.map((loc) => [loc.latitude, loc.longitude]),
+          {
+            color: '#0078FF',
+            weight: 4,
+            opacity: 0.8,
+            lineJoin: 'round',
+          }
+        ).addTo(map);
+        addPolylineClickHandler(polyline1, data1);
+      }
+
+      // Vehicle 2 - Naranja
+      if (data2.length > 0) {
+        const polyline2 = L.polyline(
+          data2.map((loc) => [loc.latitude, loc.longitude]),
+          {
+            color: '#FF5733',
+            weight: 4,
+            opacity: 0.8,
+            lineJoin: 'round',
+          }
+        ).addTo(map);
+        addPolylineClickHandler(polyline2, data2);
+      }
+
+      // Ajustar vista del mapa para ambos
+      const allPoints = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
+      map.fitBounds(L.latLngBounds(allPoints), { padding: [50, 50] });
     }
 
-    // Attach a click handler to the polyline to show details
-    addPolylineClickHandler(historicalPath, data);
-
-    // Fit the map bounds to the new route
-    map.fitBounds(historicalPath.getBounds(), { padding: [50, 50] });
-
-    showToast('Route data loaded successfully.');
+    showToast('Routes for both vehicles loaded.');
   } catch (error) {
-    console.error('Error fetching historical data:', error);
-    showToast('Error loading historical data.');
+    console.error('Error fetching data:', error);
+    showToast('Error loading data for both vehicles.');
   }
 });
 
@@ -315,20 +301,42 @@ function clearTemporaryMarker() {
 }
 
 function showTracePointOnMap(point) {
-  const { latitude: lat, longitude: lng, timestamp: time } = point;
+  const {
+    latitude: lat,
+    longitude: lng,
+    timestamp: time,
+    vehicle_id,
+    rpm
+  } = point;
 
-  // Eliminar marcador anterior si existe
   clearTemporaryMarker();
 
-  // Crear marcador temporal
-  temporaryMarker = L.marker([lat, lng]).addTo(getMap());
+  // Crear marcador con color según el vehículo
+  const iconColor = vehicle_id === 2 ? 'orange' : 'blue';
+  const customIcon = L.icon({
+    iconUrl: `marker-icon-${iconColor}.png`, // Usa íconos distintos si los tienes, o usa default
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'marker-shadow.png',
+    shadowSize: [41, 41],
+  });
+
+  temporaryMarker = L.marker([lat, lng], { icon: customIcon }).addTo(getMap());
+
   temporaryMarker
-    .bindPopup(`<b>Recorded Moment</b><br>Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}<br>Timestamp: ${time}`)
+    .bindPopup(
+      `<b>Vehicle ${vehicle_id}</b><br>
+       Lat: ${lat.toFixed(5)}<br>
+       Lng: ${lng.toFixed(5)}<br>
+       RPM: ${rpm !== null ? rpm : 'No data'}<br>
+       Timestamp: ${time}`
+    )
     .openPopup();
 
-  // Centrar mapa en el punto
   getMap().setView([lat, lng], 17);
 }
+
 
 
 
