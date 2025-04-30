@@ -179,16 +179,23 @@ loadButton.addEventListener('click', async () => {
     const map = getMap();
 
     if (!document.getElementById("enable-trace-toggle").checked) {
+      // Limpiar todas las polilíneas anteriores
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+          map.removeLayer(layer);
+        }
+      });
+
       if (data1.length > 0) {
         const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
-          color: '#0078FF', weight: 4, opacity: 0.8, lineJoin: 'round'
+          color: '#3b65ff', weight: 4, opacity: 0.8, lineJoin: 'round'
         }).addTo(map);
         addPolylineClickHandler(polyline1, data1);
       }
 
       if (data2.length > 0) {
         const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
-          color: '#FF5733', weight: 4, opacity: 0.8, lineJoin: 'round'
+          color: '#ff3b3b', weight: 4, opacity: 0.8, lineJoin: 'round'
         }).addTo(map);
         addPolylineClickHandler(polyline2, data2);
       }
