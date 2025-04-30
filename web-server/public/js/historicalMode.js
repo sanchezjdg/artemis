@@ -200,11 +200,14 @@ loadButton.addEventListener('click', async () => {
 
     // Reactivar trace si ya estaba encendido antes de cargar
     const traceToggle = document.getElementById("enable-trace-toggle");
+    const map = getMap();
+    map.off("click", onMapClickTrace); // Evita duplicados
+    
     if (traceToggle.checked) {
       const event = new Event("change");
       traceToggle.dispatchEvent(event);
     }
-
+    
   } catch (err) {
     console.error('Error loading data:', err);
     showToast('Error loading route data.');
