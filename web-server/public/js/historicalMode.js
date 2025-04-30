@@ -206,6 +206,12 @@ loadButton.addEventListener('click', async () => {
   radiusSlider.addEventListener("input", () => {
     radiusValueDisplay.textContent = radiusSlider.value;
   });
+
+  // Si trace toggle ya estaba activo, volver a ejecutar su lógica como si hubiera sido cambiado manualmente
+  if (enableTraceToggle.checked) {
+    const event = new Event("change");
+    enableTraceToggle.dispatchEvent(event);
+  }
 }
 
 /**
