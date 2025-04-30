@@ -7,7 +7,7 @@ import { showToast } from "./toast.js";
 import { updateFixedPanel } from "./utils.js";
 
 let historicalPath = null;
-let traceHistoricalData = [];
+export let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;

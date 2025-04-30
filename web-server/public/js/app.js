@@ -7,6 +7,9 @@ import { initHistoricalMode } from "./historicalMode.js";
 import { clearRealTimePath } from "./realTimeMode.js";
 import { formatDate } from "./utils.js";
 import { stopRealTimeUpdates } from "./realTimeMode.js";
+import { traceHistoricalData } from './historicalMode.js';
+import { initHeatmapMode } from './heatmapMode.js';
+
 
 // Initialize socket connection using Socket.IO.
 const socket = io();
@@ -59,7 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("historical-form").style.display = "none";
   // Start real-time updates automatically
   startRealTimeUpdates(socket);
-  //setActiveButton("real-time-btn");
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -113,4 +115,8 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   // Initialize historical mode events.
   initHistoricalMode();
   setActiveButton("historical-btn");
+});
+
+document.getElementById("heatmap-tab").addEventListener("click", () => {
+  initHeatmapMode(traceHistoricalData);
 });
