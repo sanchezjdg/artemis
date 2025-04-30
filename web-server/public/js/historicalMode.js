@@ -4,6 +4,7 @@
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
 import { addPolylineClickHandler } from "./utils.js";
 import { showToast } from "./toast.js";
+import { updateFixedPanel } from "./utils.js";
 
 let historicalPath = null;
 let traceHistoricalData = [];

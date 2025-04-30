@@ -2,6 +2,7 @@
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
 import { addPolylineClickHandler, formatTimestamp } from "./utils.js";
 import { cleanupHistoricalMode } from "./historicalMode.js";
+import { updateFixedPanel } from "./utils.js";
 
 // Global variables for real-time mode.
 let vehicleData = new Map(); // Map to store data for each vehicle
