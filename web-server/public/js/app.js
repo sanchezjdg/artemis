@@ -7,6 +7,10 @@ import { initHistoricalMode } from "./historicalMode.js";
 import { clearRealTimePath } from "./realTimeMode.js";
 import { formatDate } from "./utils.js";
 import { stopRealTimeUpdates } from "./realTimeMode.js";
+import { traceHistoricalData } from './historicalMode.js';
+import { initHeatmapMode } from './heatmapMode.js';
+import { cleanupHeatmapMode } from './heatmapMode.js';
+
 
 // Initialize socket connection using Socket.IO.
 const socket = io();
@@ -59,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("historical-form").style.display = "none";
   // Start real-time updates automatically
   startRealTimeUpdates(socket);
-  setActiveButton("real-time-btn");
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -83,6 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Set up mode switching buttons.
 document.getElementById("real-time-btn").addEventListener("click", () => {
+  getMap().closePopup();        
+  cleanupHeatmapMode(); // Limpia el heatmap si estaba activo
   // Show real-time controls and hide historical form.
   document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
@@ -98,6 +103,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
+  cleanupHeatmapMode(); // Limpia el heatmap si estaba activo
   // Stop real time updates.
   socket.off("updateData");
   stopRealTimeUpdates(socket);   
@@ -113,4 +119,9 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   // Initialize historical mode events.
   initHistoricalMode();
   setActiveButton("historical-btn");
+});
+
+document.getElementById("heatmap-tab").addEventListener("click", () => {
+  getMap().closePopup();        
+  initHeatmapMode(traceHistoricalData);
 });
