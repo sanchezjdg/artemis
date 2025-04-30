@@ -197,6 +197,16 @@ loadButton.addEventListener('click', async () => {
     }
 
     showToast('Route data loaded.');
+
+    showToast('Route data loaded.');
+
+    // Reactivar trace si ya estaba encendido antes de cargar
+    const traceToggle = document.getElementById("enable-trace-toggle");
+    if (traceToggle.checked) {
+      const event = new Event("change");
+      traceToggle.dispatchEvent(event);
+    }
+
   } catch (err) {
     console.error('Error loading data:', err);
     showToast('Error loading route data.');
