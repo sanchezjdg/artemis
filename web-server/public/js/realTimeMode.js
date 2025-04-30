@@ -1,6 +1,6 @@
 // realTimeMode.js
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
-import { addPolylineClickHandler, formatTimestamp, updateFixedPanel } from "./utils.js";
+import { addPolylineClickHandler, formatTimestamp } from "./utils.js";
 import { cleanupHistoricalMode } from "./historicalMode.js";
 import { updateFixedPanel } from "./utils.js";
 
@@ -40,11 +40,7 @@ export function startRealTimeUpdates(socket) {
       if (data.latitude && data.longitude) {
         const vehicleId = data.vehicle_id;
         const latlng = [data.latitude, data.longitude];
-
-        // Update the fixed panel with the latest vehicle information
-        const rpm = data.rpm !== null ? data.rpm : "No data";
-        updateFixedPanel(vehicleId, data.latitude, data.longitude, rpm, formatTimestamp(data.timestamp));
-
+        
         // Auto-center logic
         const selected = document.getElementById("vehicle-select").value;
         const isAutoCenterEnabled = document.getElementById("auto-center-toggle").checked;
