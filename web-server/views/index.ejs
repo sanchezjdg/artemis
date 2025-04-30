@@ -124,5 +124,24 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <!-- Load application modules as ES modules -->
   <script type="module" src="/js/app.js"></script>
+
+  <div id="fixed-info-panel" style="
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 250px;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 1000;
+  max-height: 40%;
+  overflow-y: auto;
+">
+  <div id="vehicle-1-info"></div>
+  <hr style="border-color: rgba(255,255,255,0.2)">
+  <div id="vehicle-2-info"></div>
+</div>
 </body>
 </html>

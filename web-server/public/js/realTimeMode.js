@@ -97,6 +97,8 @@ export function startRealTimeUpdates(socket) {
           vehicle.coordinates.map((coord) => [coord.latitude, coord.longitude])
         );
 
+        // Actualizar panel fijo en esquina
+        updateFixedPanel(vehicleId, data.latitude, data.longitude, data.rpm, formatTimestamp(data.timestamp));
         // Attach click handler for popup details
         addPolylineClickHandler(vehicle.path, vehicle.coordinates);
 

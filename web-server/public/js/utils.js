@@ -86,3 +86,17 @@ export function formatTimestamp(timestamp) {
   }
 }
 
+export function updateFixedPanel(vehicleId, latitude, longitude, rpm, timestamp) {
+  const panel = document.getElementById("fixed-info-panel");
+  const vehicleInfo = document.getElementById(`vehicle-${vehicleId}-info`);
+
+  if (vehicleInfo) {
+    vehicleInfo.innerHTML = `
+      <b>Vehicle ${vehicleId}:</b><br>
+      Latitude: ${latitude.toFixed(5)}<br>
+      Longitude: ${longitude.toFixed(5)}<br>
+      RPM: ${rpm !== null ? rpm : "No data"}<br>
+      Timestamp: ${timestamp}<br>
+    `;
+  }
+}

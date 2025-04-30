@@ -382,6 +382,9 @@ function showTracePointOnMap(point) {
     .openPopup();
 
   getMap().setView([lat, lng], 17);
+
+  // 🟢 Actualiza el panel fijo en la esquina
+  updateFixedPanel(vehicle_id, lat, lng, rpm, time);
 }
 
 /**
