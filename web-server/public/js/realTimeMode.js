@@ -1,7 +1,8 @@
 // realTimeMode.js
 import { getMap, getMarker, clearLayer } from "./mapHandler.js";
-import { addPolylineClickHandler, formatTimestamp, updateFixedPanel } from "./utils.js";
+import { addPolylineClickHandler, formatTimestamp } from "./utils.js";
 import { cleanupHistoricalMode } from "./historicalMode.js";
+import { updateFixedPanel } from "./utils.js";
 
 // Global variables for real-time mode.
 let vehicleData = new Map(); // Map to store data for each vehicle
@@ -39,11 +40,7 @@ export function startRealTimeUpdates(socket) {
       if (data.latitude && data.longitude) {
         const vehicleId = data.vehicle_id;
         const latlng = [data.latitude, data.longitude];
-
-        // Update the fixed panel with the latest vehicle information
-        const rpm = data.rpm !== null ? data.rpm : "No data";
-        updateFixedPanel(vehicleId, data.latitude, data.longitude, rpm, formatTimestamp(data.timestamp));
-
+        
         // Auto-center logic
         const selected = document.getElementById("vehicle-select").value;
         const isAutoCenterEnabled = document.getElementById("auto-center-toggle").checked;
@@ -101,6 +98,8 @@ export function startRealTimeUpdates(socket) {
           vehicle.coordinates.map((coord) => [coord.latitude, coord.longitude])
         );
 
+        // Actualizar panel fijo en esquina
+        updateFixedPanel(vehicleId, data.latitude, data.longitude, data.rpm, formatTimestamp(data.timestamp));
         // Attach click handler for popup details
         addPolylineClickHandler(vehicle.path, vehicle.coordinates);
 

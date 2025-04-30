@@ -95,9 +95,8 @@ export function updateFixedPanel(vehicleId, latitude, longitude, rpm, timestamp)
       <b>Vehicle ${vehicleId}:</b><br>
       Latitude: ${latitude.toFixed(5)}<br>
       Longitude: ${longitude.toFixed(5)}<br>
-      RPM: ${rpm}<br>
+      RPM: ${rpm !== null ? rpm : "No data"}<br>
       Timestamp: ${timestamp}<br>
     `;
   }
 }
-
