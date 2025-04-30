@@ -46,9 +46,12 @@ const radiusValueDisplay = document.getElementById("radius-value");
       // When trace mode is enabled:
       // Show the trace radius slider.
       document.getElementById("trace-radius-control").style.display = "block";
-      // Remove historical polyline as it's not needed in trace mode
-      clearLayer(historicalPath);
-      historicalPath = null;
+      // Eliminar cualquier polilínea visible de ambos vehículos al activar trace
+      map.eachLayer(layer => {
+        if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+          map.removeLayer(layer);
+        }
+      });
 
       // If data has already been loaded, enable trace functionality
       if (dataLoaded && traceHistoricalData.length > 0) {
@@ -316,44 +319,39 @@ function clearTemporaryMarker() {
 }
 
 function showTracePointOnMap(point) {
-  const {
-    latitude: lat,
-    longitude: lng,
-    timestamp: time,
-    vehicle_id,
-    rpm
-  } = point;
+  const { latitude: lat, longitude: lng, timestamp: time, vehicle_id, rpm } = point;
 
   clearTemporaryMarker();
 
-  // Crear marcador con color según el vehículo
-  const iconColor = vehicle_id === 2 ? 'orange' : 'blue';
-  const customIcon = L.icon({
-    iconUrl: `marker-icon-${iconColor}.png`, // Usa íconos distintos si los tienes, o usa default
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowUrl: 'marker-shadow.png',
-    shadowSize: [41, 41],
-  });
+  // Asignar color según el ID del vehículo
+  const colorMap = {
+    1: "#3b65ff", // Azul
+    2: "#ff3b3b", // Rojo/Naranja
+  };
+  const fillColor = colorMap[vehicle_id] || "#666";
 
-  temporaryMarker = L.marker([lat, lng], { icon: customIcon }).addTo(getMap());
+  // Crear marcador tipo círculo con color por vehículo
+  temporaryMarker = L.circleMarker([lat, lng], {
+    radius: 8,
+    fillColor: fillColor,
+    color: "#fff",
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.8,
+  }).addTo(getMap());
 
   temporaryMarker
     .bindPopup(
       `<b>Vehicle ${vehicle_id}</b><br>
        Lat: ${lat.toFixed(5)}<br>
        Lng: ${lng.toFixed(5)}<br>
-       RPM: ${rpm !== null ? rpm : 'No data'}<br>
+       RPM: ${rpm !== null ? rpm : "No data"}<br>
        Timestamp: ${time}`
     )
     .openPopup();
 
   getMap().setView([lat, lng], 17);
 }
-
-
-
 
 /**
  * Export the clear functions to be used externally.
