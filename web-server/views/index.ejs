@@ -84,35 +84,44 @@
   <!-- Panel de información -->
 <div id="info-panel" class="info-panel">
   <button id="close-info" class="close-info">X</button>
-  <h3>Guía de la Aplicación</h3>
+  <h3>🛈 Guía rápida</h3>
   <p>
-    Esta aplicación te permite ver por dónde ha pasado un <strong>vehículo</strong> que tiene un rastreador GPS instalado.
+    <strong>¿Qué hace esta app?</strong><br>
+    Te permite ver la <strong>ruta</strong> que ha seguido un vehículo y la <strong>velocidad</strong> a la que se movía, ya sea en tiempo real o en el pasado.
   </p>
 
-  <p>
-    <strong>Modo Real-Time (Tiempo Real):</strong><br>
-    Muestra en el mapa la ubicación actual del vehículo en vivo. Si el vehículo está en movimiento, verás por dónde va pasando en tiempo real.
-  </p>
+  <strong>Modos disponibles</strong>
+  <details open>
+    <summary>🕓 Tiempo Real</summary>
+    <p>
+      Muestra la ubicación actual del vehículo y su velocidad en vivo. 
+      Si se está moviendo, verás por dónde va pasando.
+    </p>
+  </details>
 
-  <p>
-    <strong>Modo Historical (Histórico):</strong><br>
-    Permite ver por dónde se movió el vehículo en el pasado. Solo tienes que seleccionar una fecha y hora de inicio, y una de fin. Luego presiona el botón <strong>"Load Route"</strong> para ver la ruta que hizo el vehículo durante ese tiempo.
-  </p>
+  <details open>
+    <summary>📆 Histórico</summary>
+    <p>
+      Visualiza la ruta y velocidad que tuvo el vehículo en un periodo específico. 
+      Solo selecciona la fecha y hora de inicio y fin, y presiona <strong>Load Route</strong>.
+    </p>
+  </details>
 
-  <p>
-    <strong>Habilitar Trace Mode (Búsqueda por cercanía):</strong><br>
-    Esta opción se activa dentro del modo histórico. Sirve para verificar si el vehículo pasó cerca de un lugar específico. Por ejemplo, puedes saber si estuvo a menos de cierta distancia de una casa o de un punto de interés.
-  </p>
-
-  <p>
-    <strong>Radio de búsqueda:</strong><br>
-    Puedes mover la barra para ajustar qué tan cerca debe haber estado el vehículo para considerarlo como "detectado". Por ejemplo, 100 metros significa que se busca si el vehículo estuvo en un radio de 100 metros o menos del punto seleccionado.
-  </p>
+  <details open>
+    <summary>📍 Trace Mode (Búsqueda por cercanía)</summary>
+    <p>
+      Funciona dentro del modo Histórico. Sirve para verificar si el vehículo pasó cerca de un lugar 
+      (por ejemplo, tu casa o un punto de interés).
+    </p>
+    <p>
+      <em>Puedes ajustar el <strong>radio de búsqueda</strong> (por defecto: 100 metros) con la barra deslizante.</em>
+    </p>
+  </details>
 </div>
 
 
 <!-- Botón flotante "i" -->
-<button id="info-toggle" class="info-toggle" style="background-color: #7500FA; color: white;">i</button>
+<button id="info-toggle" class="info-toggle" style="background-color: #7500FA; color: white;">?</button>
 
   <!-- Toast container is dynamically added by toast.js if needed -->
 
