@@ -28,10 +28,15 @@ export function initHeatmapMode(traceHistoricalData) {
 
   // Elimina polilíneas anteriores
   map.eachLayer((layer) => {
-    if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+    if (
+      layer instanceof L.Polyline ||
+      layer instanceof L.Marker ||
+      layer instanceof L.CircleMarker
+    ) {
       map.removeLayer(layer);
     }
   });
+  
 
   // Limpia capas anteriores
   if (heatLayer) {
