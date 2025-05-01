@@ -9,7 +9,6 @@ import { formatDate } from "./utils.js";
 import { stopRealTimeUpdates } from "./realTimeMode.js";
 import { traceHistoricalData } from './historicalMode.js';
 import { initHeatmapMode, cleanupHeatmapMode } from './heatmapMode.js';
-import { historicalPolylines } from './historicalMode.js';
 
 
 // Initialize socket connection using Socket.IO.
@@ -126,7 +125,7 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   stopRealTimeUpdates(socket);   
   // Clear the real-time polyline.
   clearRealTimePath();
-  document.getElementById("heatmap-form").style.display = "none"; 
+  document.getElementById("heatmap-form").style.display = "none";  // <- esto también
   // Hide real-time controls since auto-center is specific to real-time.
   document.getElementById("real-time-controls").style.display = "none";
   // Show the historical form.
@@ -151,17 +150,6 @@ document.getElementById("heatmap-tab").addEventListener("click", () => {
 
   // Detener modo en tiempo real si está activo
   stopRealTimeUpdates(socket);
-
-  const map = getMap();
-  map.eachLayer(layer => {
-    if (
-      layer instanceof L.Polyline ||
-      layer instanceof L.Marker ||
-      layer instanceof L.CircleMarker
-    ) {
-      map.removeLayer(layer);
-    }
-  });
 
   // Limpiar heatmap anterior si existe
   cleanupHeatmapMode();

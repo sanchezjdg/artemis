@@ -11,7 +11,6 @@ export let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;
-export let historicalPolylines = []; // <-- NUEVO
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -192,15 +191,13 @@ loadButton.addEventListener('click', async () => {
           color: '#3b65ff', weight: 4, opacity: 0.8, lineJoin: 'round'
         }).addTo(map);
         addPolylineClickHandler(polyline1, data1);
-        historicalPolylines.push(polyline1); // GUÁRDALO
       }
-      
+
       if (data2.length > 0) {
         const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
           color: '#ff3b3b', weight: 4, opacity: 0.8, lineJoin: 'round'
         }).addTo(map);
         addPolylineClickHandler(polyline2, data2);
-        historicalPolylines.push(polyline1); // GUÁRDALO
       }
 
       const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
@@ -255,9 +252,6 @@ function onMapClickTrace(e) {
 
   // Clear any temporary marker if it exists
   clearTemporaryMarker();
-  // 🔥 Eliminar polilíneas almacenadas explícitamente
-  historicalPolylines.forEach(p => map.removeLayer(p));
-  historicalPolylines = []; // Vaciar el arreglo
 
   // Create and add a search circle to the map.
   const map = getMap();
