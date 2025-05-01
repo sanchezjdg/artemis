@@ -8,8 +8,8 @@ import { clearRealTimePath } from "./realTimeMode.js";
 import { formatDate } from "./utils.js";
 import { stopRealTimeUpdates } from "./realTimeMode.js";
 import { traceHistoricalData } from './historicalMode.js';
-import { initHeatmapMode } from './heatmapMode.js';
 import { cleanupHeatmapMode } from './heatmapMode.js';
+import { initHeatmapMode, cleanupHeatmapMode } from './heatmapMode.js';
 
 
 // Initialize socket connection using Socket.IO.
@@ -42,6 +42,19 @@ flatpickr("#end-datetime", {
   enableTime: true,
   dateFormat: "Y-m-d\\TH:i",
   defaultDate: endValue,
+  maxDate: "today",
+});
+
+// 🟣 Heatmap flatpickrs
+flatpickr("#heatmap-start", {
+  enableTime: true,
+  dateFormat: "Y-m-d\\TH:i",
+  maxDate: "today",
+});
+
+flatpickr("#heatmap-end", {
+  enableTime: true,
+  dateFormat: "Y-m-d\\TH:i",
   maxDate: "today",
 });
 
@@ -122,4 +135,45 @@ document.getElementById("historical-btn").addEventListener("click", () => {
 
 document.getElementById("heatmap-tab").addEventListener("click", () => {
   initHeatmapMode(traceHistoricalData);
+});
+
+document.getElementById('load-heatmap').addEventListener('click', async () => {
+  const start = document.getElementById('heatmap-start').value;
+  const end = document.getElementById('heatmap-end').value;
+  const vehicleId = document.getElementById('heatmap-vehicle').value;
+
+  if (!start || !end) {
+    alert('Por favor completa las fechas de inicio y fin.');
+    return;
+  }
+
+  const startDatetime = `${start}:00`;
+  const endDatetime = `${end}:00`;
+
+  try {
+    const data1 = vehicleId === '1' || vehicleId === 'all'
+      ? await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`).then(res => res.json())
+      : [];
+
+    const data2 = vehicleId === '2' || vehicleId === 'all'
+      ? await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`).then(res => res.json())
+      : [];
+
+    const data = [
+      ...data1.map(p => ({ ...p, vehicle_id: 1 })),
+      ...data2.map(p => ({ ...p, vehicle_id: 2 })),
+    ];
+
+    if (data.length === 0) {
+      alert("No se encontraron datos para generar el mapa de calor.");
+      return;
+    }
+
+    cleanupHeatmapMode();
+    initHeatmapMode(data); // ya no depende del historial cargado antes
+
+  } catch (err) {
+    console.error('Error cargando datos para el mapa de calor:', err);
+    alert("Ocurrió un error al cargar el mapa de calor.");
+  }
 });
