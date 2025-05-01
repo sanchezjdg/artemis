@@ -8,8 +8,7 @@ import { clearRealTimePath } from "./realTimeMode.js";
 import { formatDate } from "./utils.js";
 import { stopRealTimeUpdates } from "./realTimeMode.js";
 import { traceHistoricalData } from './historicalMode.js';
-import { initHeatmapMode } from './heatmapMode.js';
-import { cleanupHeatmapMode } from './heatmapMode.js';
+import { initHeatmapMode, cleanupHeatmapMode } from './heatmapMode.js';
 
 
 // Initialize socket connection using Socket.IO.
@@ -31,6 +30,9 @@ const endValue = formatDate(now);
 document.getElementById("start-datetime").value = startValue;
 document.getElementById("end-datetime").value = endValue;
 
+document.getElementById("heatmap-start").value = startValue;
+document.getElementById("heatmap-end").value = endValue;
+
 // Initialize flatpickr date/time pickers.
 flatpickr("#start-datetime", {
   enableTime: true,
@@ -45,9 +47,22 @@ flatpickr("#end-datetime", {
   maxDate: "today",
 });
 
+// 🟣 Heatmap flatpickrs
+flatpickr("#heatmap-start", {
+  enableTime: true,
+  dateFormat: "Y-m-d\\TH:i",
+  maxDate: "today",
+});
+
+flatpickr("#heatmap-end", {
+  enableTime: true,
+  dateFormat: "Y-m-d\\TH:i",
+  maxDate: "today",
+});
+
 // Set up active button color
 function setActiveButton(activeId) {
-  ["real-time-btn", "historical-btn"].forEach((id) => {
+  ["real-time-btn", "historical-btn", "heatmap-tab"].forEach((id) => {
     const btn = document.getElementById(id);
     if (btn) {
       btn.classList.remove("active");
@@ -59,7 +74,6 @@ function setActiveButton(activeId) {
   }
 }
 
-// Initialize the application when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   // Show real-time controls and hide historical form.
   document.getElementById("real-time-controls").style.display = "block";
@@ -95,6 +109,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   // Show real-time controls and hide historical form.
   document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
+  document.getElementById("heatmap-form").style.display = "none"; 
   // Clear trace results and hide them
   document.getElementById("trace-results").style.display = "none";
   document.getElementById("trace-results").innerHTML = "";
@@ -114,6 +129,7 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   stopRealTimeUpdates(socket);   
   // Clear the real-time polyline.
   clearRealTimePath();
+  document.getElementById("heatmap-form").style.display = "none";  // <- esto también
   // Hide real-time controls since auto-center is specific to real-time.
   document.getElementById("real-time-controls").style.display = "none";
   // Show the historical form.
@@ -128,5 +144,67 @@ document.getElementById("historical-btn").addEventListener("click", () => {
 });
 
 document.getElementById("heatmap-tab").addEventListener("click", () => {
-  initHeatmapMode(traceHistoricalData);
+  // Ocultar formularios de otros modos
+  document.getElementById("real-time-controls").style.display = "none";
+  document.getElementById("historical-form").style.display = "none";
+  document.getElementById("trace-time-slider-control").style.display = "none";
+  document.getElementById("trace-results").style.display = "none";
+
+  // Mostrar formulario del heatmap
+  document.getElementById("heatmap-form").style.display = "block";
+
+  // Detener modo en tiempo real si está activo
+  stopRealTimeUpdates(socket);
+
+  // Limpiar heatmap anterior si existe
+  cleanupHeatmapMode();
+
+  // Cambiar botón activo
+  setActiveButton("heatmap-tab");
+
+  // Cambiar mensaje de instrucciones
+  document.querySelector(".controls .mode-info").innerText =
+    "Selecciona el rango de tiempo para visualizar el mapa de calor:";
+});
+
+
+document.getElementById('load-heatmap').addEventListener('click', async () => {
+  const start = document.getElementById('heatmap-start').value;
+  const end = document.getElementById('heatmap-end').value;
+  const vehicleId = document.getElementById('heatmap-vehicle').value;
+
+  if (!start || !end) {
+    alert('Por favor completa las fechas de inicio y fin.');
+    return;
+  }
+
+  const startDatetime = `${start}:00`;
+  const endDatetime = `${end}:00`;
+
+  try {
+    const data1 = vehicleId === '1' || vehicleId === 'all'
+      ? await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`).then(res => res.json())
+      : [];
+
+    const data2 = vehicleId === '2' || vehicleId === 'all'
+      ? await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`).then(res => res.json())
+      : [];
+
+    const data = [
+      ...data1.map(p => ({ ...p, vehicle_id: 1 })),
+      ...data2.map(p => ({ ...p, vehicle_id: 2 })),
+    ];
+
+    if (data.length === 0) {
+      alert("No se encontraron datos para generar el mapa de calor.");
+      return;
+    }
+
+    cleanupHeatmapMode();
+    initHeatmapMode(data); // ya no depende del historial cargado antes
+
+  } catch (err) {
+    console.error('Error cargando datos para el mapa de calor:', err);
+    alert("Ocurrió un error al cargar el mapa de calor.");
+  }
 });

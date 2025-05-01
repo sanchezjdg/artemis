@@ -69,6 +69,28 @@
       <button id="load-data" class="load-button">Load Route</button>
     </div>
 
+    <!-- Heatmap form -->
+    <div id="heatmap-form" style="display: none; margin-top: 15px;">
+      <div class="input-group">
+        <label for="heatmap-vehicle">Vehicle:</label>
+        <select id="heatmap-vehicle" class="vehicle-select">
+          <option value="all">All Vehicles</option>
+          <option value="1">Vehicle 1</option>
+          <option value="2">Vehicle 2</option>
+        </select>        
+      </div>
+      <div class="input-group">
+        <label for="heatmap-start">Start:</label>
+        <input type="text" id="heatmap-start">
+      </div>
+      <div class="input-group">
+        <label for="heatmap-end">End:</label>
+        <input type="text" id="heatmap-end">
+      </div>
+      <button id="load-heatmap" class="load-button">Load Heatmap</button>
+    </div>
+
+
     <div id="trace-time-slider-control" style="display: none; margin-top: 10px;">
       <label for="trace-time-slider">Detected Moments:</label>
       <input type="range" id="trace-time-slider" min="0" max="0" value="0" step="1">

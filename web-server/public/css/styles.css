@@ -330,3 +330,16 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   margin-top: 4px;
   color: var(--white);
 }
+
+.vehicle-select {
+  margin-top: 10px;
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
