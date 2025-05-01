@@ -156,22 +156,108 @@ const radiusValueDisplay = document.getElementById("radius-value");
     document.getElementById('historical-form').prepend(vehicleSelectHistorical);
   }
 
-  // Add change event listener to clear paths when switching vehicles
-  vehicleSelectHistorical.addEventListener('change', () => {
-    if (historicalPath) {
-      if (Array.isArray(historicalPath)) {
-        historicalPath.forEach(path => {
-          if (path) clearLayer(path);
-        });
-      } else {
-        clearLayer(historicalPath);
-      }
-      historicalPath = null;
+  // Setup the auto-loading functionality
+  const startDate = document.getElementById('start-datetime');
+  const endDate = document.getElementById('end-datetime');
+  let lastFetchedStart = null;
+  let lastFetchedEnd = null;
+  let allHistoricalData = [];
+
+  async function loadAndDisplayRoute() {
+    const selectedVehicle = vehicleSelectHistorical.value;
+    const startDateTime = startDate.value;
+    const endDateTime = endDate.value;
+
+    if (!startDateTime || !endDateTime) {
+      return;
     }
-  });
-  
-// Update the data loading function to fetch all data at once and filter on frontend
-const loadButton = document.getElementById('load-data');
+
+    try {
+      // Only fetch new data if dates have changed
+      if (allHistoricalData.length === 0 || 
+          startDateTime !== lastFetchedStart || 
+          endDateTime !== lastFetchedEnd) {
+            
+        showToast('Loading route data...');
+        const response = await fetch(
+          `/historical?start=${encodeURIComponent(startDateTime + ':00')}&end=${encodeURIComponent(endDateTime + ':00')}`
+        );
+        allHistoricalData = await response.json();
+        lastFetchedStart = startDateTime;
+        lastFetchedEnd = endDateTime;
+      }
+
+      // Filter data based on selected vehicle
+      let data1 = [], data2 = [];
+      if (selectedVehicle === 'all') {
+        data1 = allHistoricalData.filter(p => p.vehicle_id === 1);
+        data2 = allHistoricalData.filter(p => p.vehicle_id === 2);
+      } else {
+        const vehicleId = parseInt(selectedVehicle);
+        if (vehicleId === 1) data1 = allHistoricalData.filter(p => p.vehicle_id === 1);
+        if (vehicleId === 2) data2 = allHistoricalData.filter(p => p.vehicle_id === 2);
+      }
+
+      if (data1.length === 0 && data2.length === 0) {
+        showToast('No route data found for the selected vehicle(s).');
+        return;
+      }
+
+      dataLoaded = true;
+      traceHistoricalData = [...data1.map(p => ({ ...p, vehicle_id: 1 })), ...data2.map(p => ({ ...p, vehicle_id: 2 }))];
+      clearLayer(historicalPath);
+
+      const map = getMap();
+
+      if (!document.getElementById("enable-trace-toggle").checked) {
+        // Clear previous polylines
+        map.eachLayer((layer) => {
+          if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+            map.removeLayer(layer);
+          }
+        });
+
+        if (data1.length > 0) {
+          const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
+            color: '#3b65ff', weight: 4, opacity: 0.8, lineJoin: 'round'
+          }).addTo(map);
+          addPolylineClickHandler(polyline1, data1);
+        }
+
+        if (data2.length > 0) {
+          const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
+            color: '#ff3b3b', weight: 4, opacity: 0.8, lineJoin: 'round'
+          }).addTo(map);
+          addPolylineClickHandler(polyline2, data2);
+        }
+
+        const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
+        if (allCoords.length > 0) {
+          map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
+        }
+      }
+
+      // Reactivate trace if enabled
+      const traceToggle = document.getElementById("enable-trace-toggle");
+      if (traceToggle.checked) {
+        getMap().off("click", onMapClickTrace);
+        const event = new Event("change");
+        traceToggle.dispatchEvent(event);
+      }
+
+    } catch (err) {
+      console.error('Error loading data:', err);
+      showToast('Error loading route data.');
+    }
+  }
+
+  // Set up event listeners for auto-loading
+  startDate.addEventListener('change', loadAndDisplayRoute);
+  endDate.addEventListener('change', loadAndDisplayRoute);
+  vehicleSelectHistorical.addEventListener('change', loadAndDisplayRoute);
+
+  // Hide the load button since it's no longer needed
+  document.getElementById('load-data').style.display = 'none';
 loadButton.addEventListener('click', async () => {
   const selectedVehicle = vehicleSelectHistorical.value;
   const lastStartDate = document.getElementById('start-datetime').value;

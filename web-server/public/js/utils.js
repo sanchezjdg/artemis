@@ -80,9 +80,9 @@ export function formatTimestamp(timestamp) {
 
     if (!datePart || !timePart) throw new Error("Invalid format");
 
-    return `Time: ${timePart}, Date: ${datePart}`;
+    return `Time: ${timePart} <br> Date: ${datePart}`;
   } catch (err) {
-    return "Time: N/A, Date: N/A";
+    return "Time: N/A <br> Date: N/A";
   }
 }
 
