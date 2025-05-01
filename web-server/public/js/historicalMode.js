@@ -14,6 +14,9 @@ let dataLoaded = false;
 let searchCircle = null; // Add global variable to track search circle
 let lastClickedPosition = null;
 
+// Add variable to track last known vehicle position
+let lastKnownPosition = null;
+
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
  */
@@ -35,11 +38,11 @@ export function initHistoricalMode() {
 
   // Set up the trace mode checkbox change listener.
   const enableTraceToggle = document.getElementById("enable-trace-toggle");
-  // Don't reset trace toggle state, let user control it
-
+  // Ensure trace mode starts disabled
+  enableTraceToggle.checked = false;
+  
   // Ensure the trace radius control visibility matches the toggle state
-  document.getElementById("trace-radius-control").style.display =
-    enableTraceToggle.checked ? "block" : "none";
+  document.getElementById("trace-radius-control").style.display = "none";
 
   enableTraceToggle.addEventListener("change", () => {
     const map = getMap();
@@ -79,6 +82,13 @@ export function initHistoricalMode() {
           map.removeLayer(searchCircle);
           searchCircle = null;
         }
+
+        // Start with the first point from the historical data
+        const firstPoint = traceHistoricalData[0];
+        const initialPosition = L.latLng(firstPoint.latitude, firstPoint.longitude);
+        lastClickedPosition = initialPosition;
+        performTraceSearch(initialPosition);
+        
         showToast(
           "Trace mode enabled. Click on the map to display trace information.",
         );
@@ -339,6 +349,9 @@ function clearTemporaryMarker() {
 function showTracePointOnMap(point) {
   const { latitude: lat, longitude: lng, timestamp: time, vehicle_id, rpm } = point;
 
+  // Update last known position
+  lastKnownPosition = L.latLng(lat, lng);
+  
   clearTemporaryMarker();
 
   // Asignar color según el ID del vehículo
