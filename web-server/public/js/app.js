@@ -9,6 +9,7 @@ import { formatDate } from "./utils.js";
 import { stopRealTimeUpdates } from "./realTimeMode.js";
 import { traceHistoricalData } from './historicalMode.js';
 import { initHeatmapMode, cleanupHeatmapMode } from './heatmapMode.js';
+import { historicalPolylines } from './historicalMode.js';
 
 
 // Initialize socket connection using Socket.IO.
