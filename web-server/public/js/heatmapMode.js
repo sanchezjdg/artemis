@@ -104,8 +104,17 @@ export function initHeatmapMode(traceHistoricalData) {
  */
 export function cleanupHeatmapMode() {
   const map = getMap();
+
   if (heatLayer) {
-    map.removeLayer(heatLayer);
+    // 🔥 Eliminar cada subcapa del grupo
+    heatLayer.eachLayer(layer => map.removeLayer(layer));
     heatLayer = null;
   }
+
+  // 🔁 Por seguridad, también elimina cualquier otra HeatLayer residual
+  map.eachLayer(layer => {
+    if (layer instanceof L.HeatLayer) {
+      map.removeLayer(layer);
+    }
+  });
 }

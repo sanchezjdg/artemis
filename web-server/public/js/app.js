@@ -125,7 +125,7 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   stopRealTimeUpdates(socket);   
   // Clear the real-time polyline.
   clearRealTimePath();
-  document.getElementById("heatmap-form").style.display = "none";  // <- esto también
+  document.getElementById("heatmap-form").style.display = "none"; 
   // Hide real-time controls since auto-center is specific to real-time.
   document.getElementById("real-time-controls").style.display = "none";
   // Show the historical form.
