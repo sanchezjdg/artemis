@@ -11,7 +11,6 @@ export let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;
-let searchCircle = null; // Add global variable to track search circle
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -41,25 +40,9 @@ const radiusValueDisplay = document.getElementById("radius-value");
     enableTraceToggle.checked ? "block" : "none";
 
   enableTraceToggle.addEventListener("change", () => {
-    const map = getMap();
-    map.off("click"); // First remove any existing click handlers
-
-    // Clean up everything when switching modes
+    // Clear any temporary marker when toggling modes
     clearTemporaryMarker();
-    clearSearchCircle();
-    
-    // Clear historical paths
-    if (historicalPath) {
-      if (Array.isArray(historicalPath)) {
-        historicalPath.forEach(path => {
-          if (path) clearLayer(path);
-        });
-      } else {
-        clearLayer(historicalPath);
-      }
-      historicalPath = null;
-    }
-    
+
     if (enableTraceToggle.checked) {
       // When trace mode is enabled:
       // Show the trace radius slider.
@@ -73,14 +56,10 @@ const radiusValueDisplay = document.getElementById("radius-value");
 
       // If data has already been loaded, enable trace functionality
       if (dataLoaded && traceHistoricalData.length > 0) {
-        // Clear any existing search circle when enabling trace mode
-        if (searchCircle) {
-          map.removeLayer(searchCircle);
-          searchCircle = null;
-        }
         showToast(
           "Trace mode enabled. Click on the map to display trace information.",
         );
+        map.off("click");
         map.on("click", onMapClickTrace);
       } else {
         showToast(
@@ -97,7 +76,7 @@ const radiusValueDisplay = document.getElementById("radius-value");
       clearSearchCircle();
       clearTemporaryMarker();
 
-      // If data has been loaded, redraw the historical paths with original colors
+      // If data has been loaded, redraw the historical path
       if (dataLoaded && traceHistoricalData.length > 0) {
         map.eachLayer((layer) => {
           if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
@@ -155,73 +134,89 @@ const radiusValueDisplay = document.getElementById("radius-value");
     `;
     document.getElementById('historical-form').prepend(vehicleSelectHistorical);
   }
-
-  // Add change event listener to clear paths when switching vehicles
-  vehicleSelectHistorical.addEventListener('change', () => {
-    if (historicalPath) {
-      if (Array.isArray(historicalPath)) {
-        historicalPath.forEach(path => {
-          if (path) clearLayer(path);
-        });
-      } else {
-        clearLayer(historicalPath);
-      }
-      historicalPath = null;
-    }
-  });
   
 // Update the data loading function to include vehicle selection
-vehicleSelectHistorical.addEventListener('change', async () => {
+const loadButton = document.getElementById('load-data');
+loadButton.addEventListener('click', async () => {
   const selectedVehicle = vehicleSelectHistorical.value;
   const lastStartDate = document.getElementById('start-datetime').value;
   const lastEndDate = document.getElementById('end-datetime').value;
 
   if (!lastStartDate || !lastEndDate) {
-    showToast('Por favor selecciona un rango de fechas válido.');
+    showToast('Please fill in both datetime fields.');
     return;
   }
 
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
 
-  showToast('Cargando ruta del vehículo...');
+  showToast('Loading route data...');
 
   try {
-    const map = getMap();
-    // Limpia rutas anteriores
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
-        map.removeLayer(layer);
-      }
-    });
+    let data1 = [], data2 = [];
 
-    const data = await fetch(
-      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=${selectedVehicle}`
-    ).then(res => res.json());
+    if (selectedVehicle === '1' || selectedVehicle === 'all') {
+      data1 = await fetch(
+        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`
+      ).then(res => res.json());
+    }
 
-    if (data.length === 0) {
-      showToast('No se encontró ruta para ese vehículo.');
+    if (selectedVehicle === '2' || selectedVehicle === 'all') {
+      data2 = await fetch(
+        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`
+      ).then(res => res.json());
+    }
+
+    if (data1.length === 0 && data2.length === 0) {
+      showToast('No route data found for the selected vehicle(s).');
       return;
     }
 
-    traceHistoricalData = data.map(p => ({ ...p, vehicle_id: selectedVehicle }));
     dataLoaded = true;
+    traceHistoricalData = [...data1.map(p => ({ ...p, vehicle_id: 1 })), ...data2.map(p => ({ ...p, vehicle_id: 2 }))];
+    clearLayer(historicalPath);
 
-    const polyline = L.polyline(data.map(p => [p.latitude, p.longitude]), {
-      color: selectedVehicle === '1' ? '#3b65ff' : '#ff3b3b',
-      weight: 4,
-      opacity: 0.8,
-      lineJoin: 'round',
-    }).addTo(map);
-    addPolylineClickHandler(polyline, data);
+    const map = getMap();
 
-    map.fitBounds(L.latLngBounds(data.map(p => [p.latitude, p.longitude])), { padding: [50, 50] });
+    if (!document.getElementById("enable-trace-toggle").checked) {
+      // Limpiar todas las polilíneas anteriores
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+          map.removeLayer(layer);
+        }
+      });
 
-    showToast('Ruta cargada automáticamente.');
+      if (data1.length > 0) {
+        const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
+          color: '#3b65ff', weight: 4, opacity: 0.8, lineJoin: 'round'
+        }).addTo(map);
+        addPolylineClickHandler(polyline1, data1);
+      }
+
+      if (data2.length > 0) {
+        const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
+          color: '#ff3b3b', weight: 4, opacity: 0.8, lineJoin: 'round'
+        }).addTo(map);
+        addPolylineClickHandler(polyline2, data2);
+      }
+
+      const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
+      map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
+    }
+
+    showToast('Route data loaded.');
+
+    // Reactivar trace si ya estaba encendido antes de cargar
+    const traceToggle = document.getElementById("enable-trace-toggle");
+    if (traceToggle.checked) {
+      getMap().off("click", onMapClickTrace); // Elimina handler duplicado si existía
+      const event = new Event("change");
+      traceToggle.dispatchEvent(event);
+    }    
 
   } catch (err) {
-    console.error('Error cargando ruta:', err);
-    showToast('Error al cargar ruta del vehículo.');
+    console.error('Error loading data:', err);
+    showToast('Error loading route data.');
   }
 });
 
@@ -260,7 +255,7 @@ function onMapClickTrace(e) {
 
   // Create and add a search circle to the map.
   const map = getMap();
-  searchCircle = L.circle(clickedLatLng, {
+  const searchCircle = L.circle(clickedLatLng, {
     radius: threshold,
     color: "red",
     fillColor: "#f03",
@@ -349,9 +344,6 @@ function clearSearchCircle() {
       map.removeLayer(layer);
     }
   });
-
-  // Clear the global searchCircle variable
-  searchCircle = null;
 }
 
 /**
@@ -407,23 +399,13 @@ function showTracePointOnMap(point) {
  * Export the clear functions to be used externally.
  */
 export function cleanupHistoricalMode() {
-  if (searchCircle) {
-    const map = getMap();
-    map.removeLayer(searchCircle);
-    searchCircle = null;
-  }
+  clearSearchCircle();
   clearTemporaryMarker();
 
-  // Remove all polylines if they exist
+  // Remove the polyline if it exists
   if (historicalPath) {
     const map = getMap();
-    if (Array.isArray(historicalPath)) {
-      historicalPath.forEach(path => {
-        if (path) map.removeLayer(path);
-      });
-    } else {
-      map.removeLayer(historicalPath);
-    }
+    map.removeLayer(historicalPath);
     historicalPath = null;
   }
 
