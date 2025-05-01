@@ -30,6 +30,9 @@ const endValue = formatDate(now);
 document.getElementById("start-datetime").value = startValue;
 document.getElementById("end-datetime").value = endValue;
 
+document.getElementById("heatmap-start").value = startValue;
+document.getElementById("heatmap-end").value = endValue;
+
 // Initialize flatpickr date/time pickers.
 flatpickr("#start-datetime", {
   enableTime: true,
