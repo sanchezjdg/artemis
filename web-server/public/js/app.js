@@ -151,6 +151,17 @@ document.getElementById("heatmap-tab").addEventListener("click", () => {
   // Detener modo en tiempo real si está activo
   stopRealTimeUpdates(socket);
 
+  const map = getMap();
+  map.eachLayer(layer => {
+    if (
+      layer instanceof L.Polyline ||
+      layer instanceof L.Marker ||
+      layer instanceof L.CircleMarker
+    ) {
+      map.removeLayer(layer);
+    }
+  });
+
   // Limpiar heatmap anterior si existe
   cleanupHeatmapMode();
 
