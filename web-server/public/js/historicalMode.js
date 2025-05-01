@@ -12,6 +12,7 @@ let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;
 let searchCircle = null; // Add global variable to track search circle
+let lastClickedPosition = null;
 
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
@@ -218,6 +219,9 @@ export function initHistoricalMode() {
 
   radiusSlider.addEventListener("input", () => {
     radiusValueDisplay.textContent = radiusSlider.value;
+    if (enableTraceToggle.checked && lastClickedPosition) {
+      performTraceSearch(lastClickedPosition);
+    }
   });
 
   // If trace toggle is already active, rerun its logic as if it was manually changed
@@ -232,6 +236,11 @@ export function initHistoricalMode() {
  * @param {Object} e - The Leaflet event object.
  */
 function onMapClickTrace(e) {
+  lastClickedPosition = e.latlng;
+  performTraceSearch(e.latlng);
+}
+
+function performTraceSearch(clickedLatLng) {
   // Ensure that historical data has been loaded.
   if (!traceHistoricalData || traceHistoricalData.length === 0) {
     showToast("Historical data not loaded. Please load data first.");
@@ -241,7 +250,6 @@ function onMapClickTrace(e) {
   // Get the search radius from the slider (or default to 100 meters).
   const radiusInput = document.getElementById("search-radius");
   const threshold = parseFloat(radiusInput.value) || 100;
-  const clickedLatLng = e.latlng;
 
   // Clear any previous search circle from the map.
   clearSearchCircle();
@@ -299,34 +307,6 @@ function onMapClickTrace(e) {
     timestampDisplay.innerText = point.timestamp;
     showTracePointOnMap(point);
   };
-
-
-  // Add click handlers to each "View" button.
-  document.querySelectorAll(".view-point").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const lat = parseFloat(btn.dataset.lat);
-      const lng = parseFloat(btn.dataset.lng);
-      const time = btn.dataset.time;
-
-      // Clear any temporary marker if it exists
-      clearTemporaryMarker();
-
-      // Create a new temporary marker at this location
-      temporaryMarker = L.marker([lat, lng]).addTo(map);
-      temporaryMarker
-        .bindPopup(
-          `<b>Recorded Moment</b><br>
-          Lat: ${lat.toFixed(5)}<br>
-          Lng: ${lng.toFixed(5)}<br>
-          RPM: ${point.rpm !== null ? point.rpm : 'No data'}<br>
-          Timestamp: ${time}`
-        )
-        .openPopup();
-
-      // Center the map on the clicked point
-      map.setView([lat, lng], 17);
-    });
-  });
 }
 
 /**
@@ -398,6 +378,8 @@ function showTracePointOnMap(point) {
  * Export the clear functions to be used externally.
  */
 export function cleanupHistoricalMode() {
+  lastClickedPosition = null; // Reset last clicked position
+  
   if (searchCircle) {
     const map = getMap();
     map.removeLayer(searchCircle);
