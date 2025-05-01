@@ -68,11 +68,12 @@ function setActiveButton(activeId) {
       btn.classList.remove("active");
     }
   });
-  document.getElementById(activeId).classList.add("active");
+  const activeBtn = document.getElementById(activeId);
+  if (activeBtn) {
+    activeBtn.classList.add("active");
+  }
 }
 
-
-// Default to real-time mode on page load
 document.addEventListener("DOMContentLoaded", () => {
   // Show real-time controls and hide historical form.
   document.getElementById("real-time-controls").style.display = "block";
@@ -87,17 +88,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeInfo = document.getElementById("close-info");
 
   infoToggle.addEventListener("click", () => {
-    // If already visible, hide it. Otherwise, show it.
-    if (infoPanel.style.display === "block") {
-      infoPanel.style.display = "none";
-    } else {
-      infoPanel.style.display = "block";
-    }
+    infoPanel.style.display = infoPanel.style.display === "block" ? "none" : "block";
   });
 
   closeInfo.addEventListener("click", () => {
     infoPanel.style.display = "none";
   });
+
+  // Show real-time controls and hide historical form
+  document.getElementById("real-time-controls").style.display = "block";
+  document.getElementById("historical-form").style.display = "none";
+  // Start real-time updates automatically
+  startRealTimeUpdates(socket);
+  setActiveButton("real-time-btn");
 });
 
 // Set up mode switching buttons.
@@ -112,10 +115,11 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   document.getElementById("trace-results").innerHTML = "";
   // Start real-time updates.
   startRealTimeUpdates(socket);
-  setActiveButton("real-time-btn");
   // Update the mode information.
   document.querySelector(".controls .mode-info").innerText =
     "Select the mode you want to use:";
+  // Set active button state last to ensure UI is consistent
+  setActiveButton("real-time-btn");
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
@@ -135,6 +139,7 @@ document.getElementById("historical-btn").addEventListener("click", () => {
     "Select a date range and optionally enable trace mode:";
   // Initialize historical mode events.
   initHistoricalMode();
+  // Set active button state last to ensure UI is consistent
   setActiveButton("historical-btn");
 });
 
