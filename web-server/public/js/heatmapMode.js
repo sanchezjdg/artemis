@@ -42,27 +42,55 @@ export function initHeatmapMode(traceHistoricalData) {
   const normalPoints = [];
   const congestedPoints = [];
 
-  // Detectar congestión y clasificar puntos
+  let clusterStart = null;
+  let currentGroup = [];
+
   traceHistoricalData.forEach((point, index, arr) => {
     if (index === 0) return;
 
     const prev = arr[index - 1];
-    const timeDiff = new Date(point.timestamp) - new Date(prev.timestamp); // ms
     const dist = L.latLng(prev.latitude, prev.longitude).distanceTo(
       L.latLng(point.latitude, point.longitude)
-    ); // m
+    );
     const rpm = point.rpm;
 
-    const isCongested = rpm > 600 && rpm < 1500 && dist < 10 && timeDiff > 30000;
-    const lat = point.latitude;
-    const lng = point.longitude;
+    const isStillCongested = rpm > 600 && rpm < 1500 && dist < 10;
 
-    if (isCongested) {
-      congestedPoints.push([lat, lng, 1]); // peso fijo 1
+    if (isStillCongested) {
+      if (!clusterStart) clusterStart = new Date(prev.timestamp);
+      currentGroup.push(point);
     } else {
-      normalPoints.push([lat, lng, 1]);
+      if (clusterStart && currentGroup.length > 0) {
+        const totalTime = new Date(currentGroup[currentGroup.length - 1].timestamp) - clusterStart;
+        const pointsToUse = currentGroup.length > 1 ? currentGroup : [prev];
+
+        if (totalTime > 30000) {
+          pointsToUse.forEach(p =>
+            congestedPoints.push([p.latitude, p.longitude, 1])
+          );
+        } else {
+          pointsToUse.forEach(p =>
+            normalPoints.push([p.latitude, p.longitude, 1])
+          );
+        }
+      }
+      clusterStart = null;
+      currentGroup = [];
+
+      // También agrega este punto como normal (por fuera del grupo)
+      normalPoints.push([point.latitude, point.longitude, 1]);
     }
   });
+
+  // Por si quedó una congestión al final sin cerrar
+  if (clusterStart && currentGroup.length > 0) {
+    const totalTime = new Date(currentGroup[currentGroup.length - 1].timestamp) - clusterStart;
+    if (totalTime > 30000) {
+      currentGroup.forEach(p => congestedPoints.push([p.latitude, p.longitude, 1]));
+    } else {
+      currentGroup.forEach(p => normalPoints.push([p.latitude, p.longitude, 1]));
+    }
+  }
 
   // Capa normal
   const normalHeat = L.heatLayer(normalPoints, {
