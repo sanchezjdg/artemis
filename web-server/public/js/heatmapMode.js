@@ -85,7 +85,7 @@ export function initHeatmapMode(traceHistoricalData) {
   // Por si quedó una congestión al final sin cerrar
   if (clusterStart && currentGroup.length > 0) {
     const totalTime = new Date(currentGroup[currentGroup.length - 1].timestamp) - clusterStart;
-    if (totalTime > 30000) {
+    if (totalTime > 10000) {
       currentGroup.forEach(p => congestedPoints.push([p.latitude, p.longitude, 1]));
     } else {
       currentGroup.forEach(p => normalPoints.push([p.latitude, p.longitude, 1]));
