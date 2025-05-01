@@ -20,8 +20,8 @@ export function initHistoricalMode() {
   // Remove any pre-existing click handlers.
   const map = getMap();
   // Update radius value display when the slider is moved
-const radiusSlider = document.getElementById("search-radius");
-const radiusValueDisplay = document.getElementById("radius-value");
+  const radiusSlider = document.getElementById("search-radius");
+  const radiusValueDisplay = document.getElementById("radius-value");
   map.off("click");
 
   // Hide trace results initially.
@@ -99,38 +99,8 @@ const radiusValueDisplay = document.getElementById("radius-value");
 
       // If data has been loaded, redraw the historical paths with original colors
       if (dataLoaded && traceHistoricalData.length > 0) {
-        map.eachLayer((layer) => {
-          if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
-            map.removeLayer(layer);
-          }
-        });
-      
-        const vehicleGroups = {};
-      
-        traceHistoricalData.forEach((point) => {
-          const id = point.vehicle_id || "unknown";
-          if (!vehicleGroups[id]) vehicleGroups[id] = [];
-          vehicleGroups[id].push(point);
-        });
-      
-        const colorMap = {
-          1: "#0078FF", // Azul
-          2: "#FF5733", // Rojo/Naranja
-        };
-      
-        Object.entries(vehicleGroups).forEach(([id, points]) => {
-          const polyline = L.polyline(points.map(p => [p.latitude, p.longitude]), {
-            color: colorMap[id] || "#8E00C2",
-            weight: 4,
-            opacity: 0.8,
-            lineJoin: "round",
-          }).addTo(map);
-          addPolylineClickHandler(polyline, points);
-        });
-      
-        const allPoints = traceHistoricalData.map(p => [p.latitude, p.longitude]);
-        map.fitBounds(L.latLngBounds(allPoints), { padding: [50, 50] });
-      }      
+        displayHistoricalPaths();
+      }
     }
   });
 
@@ -162,6 +132,15 @@ const radiusValueDisplay = document.getElementById("radius-value");
   let lastFetchedStart = null;
   let lastFetchedEnd = null;
   let allHistoricalData = [];
+
+  // Create a debounced version of loadAndDisplayRoute
+  let loadTimeout = null;
+  const debouncedLoad = () => {
+    if (loadTimeout) {
+      clearTimeout(loadTimeout);
+    }
+    loadTimeout = setTimeout(loadAndDisplayRoute, 500);
+  };
 
   async function loadAndDisplayRoute() {
     const selectedVehicle = vehicleSelectHistorical.value;
@@ -205,37 +184,7 @@ const radiusValueDisplay = document.getElementById("radius-value");
 
       dataLoaded = true;
       traceHistoricalData = [...data1.map(p => ({ ...p, vehicle_id: 1 })), ...data2.map(p => ({ ...p, vehicle_id: 2 }))];
-      clearLayer(historicalPath);
-
-      const map = getMap();
-
-      if (!document.getElementById("enable-trace-toggle").checked) {
-        // Clear previous polylines
-        map.eachLayer((layer) => {
-          if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
-            map.removeLayer(layer);
-          }
-        });
-
-        if (data1.length > 0) {
-          const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
-            color: '#3b65ff', weight: 4, opacity: 0.8, lineJoin: 'round'
-          }).addTo(map);
-          addPolylineClickHandler(polyline1, data1);
-        }
-
-        if (data2.length > 0) {
-          const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
-            color: '#ff3b3b', weight: 4, opacity: 0.8, lineJoin: 'round'
-          }).addTo(map);
-          addPolylineClickHandler(polyline2, data2);
-        }
-
-        const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
-        if (allCoords.length > 0) {
-          map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
-        }
-      }
+      displayHistoricalPaths();
 
       // Reactivate trace if enabled
       const traceToggle = document.getElementById("enable-trace-toggle");
@@ -251,104 +200,27 @@ const radiusValueDisplay = document.getElementById("radius-value");
     }
   }
 
-  // Set up event listeners for auto-loading
-  startDate.addEventListener('change', loadAndDisplayRoute);
-  endDate.addEventListener('change', loadAndDisplayRoute);
-  vehicleSelectHistorical.addEventListener('change', loadAndDisplayRoute);
+  // Set up event listeners with debouncing
+  startDate.addEventListener('change', debouncedLoad);
+  endDate.addEventListener('change', debouncedLoad);
+  vehicleSelectHistorical.addEventListener('change', debouncedLoad);
 
   // Hide the load button since it's no longer needed
-  document.getElementById('load-data').style.display = 'none';
-loadButton.addEventListener('click', async () => {
-  const selectedVehicle = vehicleSelectHistorical.value;
-  const lastStartDate = document.getElementById('start-datetime').value;
-  const lastEndDate = document.getElementById('end-datetime').value;
-
-  if (!lastStartDate || !lastEndDate) {
-    showToast('Please fill in both datetime fields.');
-    return;
+  const loadButton = document.getElementById('load-data');
+  if (loadButton) {
+    loadButton.style.display = 'none';
   }
 
-  const startDatetime = `${lastStartDate}:00`;
-  const endDatetime = `${lastEndDate}:00`;
-
-  showToast('Loading route data...');
-
-  try {
-    // Make a single fetch request for all vehicles
-    const allData = await fetch(
-      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`
-    ).then(res => res.json());
-
-    // Filter data based on selected vehicle on the frontend
-    let data1 = [], data2 = [];
-    
-    if (selectedVehicle === 'all') {
-      data1 = allData.filter(p => p.vehicle_id === 1);
-      data2 = allData.filter(p => p.vehicle_id === 2);
-    } else {
-      const vehicleId = parseInt(selectedVehicle);
-      if (vehicleId === 1) data1 = allData.filter(p => p.vehicle_id === 1);
-      if (vehicleId === 2) data2 = allData.filter(p => p.vehicle_id === 2);
-    }
-
-    if (data1.length === 0 && data2.length === 0) {
-      showToast('No route data found for the selected vehicle(s).');
-      return;
-    }
-
-    dataLoaded = true;
-    traceHistoricalData = [...data1.map(p => ({ ...p, vehicle_id: 1 })), ...data2.map(p => ({ ...p, vehicle_id: 2 }))];
-    clearLayer(historicalPath);
-
-    const map = getMap();
-
-    if (!document.getElementById("enable-trace-toggle").checked) {
-      // Limpiar todas las polilíneas anteriores
-      map.eachLayer((layer) => {
-        if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
-          map.removeLayer(layer);
-        }
-      });
-
-      if (data1.length > 0) {
-        const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
-          color: '#3b65ff', weight: 4, opacity: 0.8, lineJoin: 'round'
-        }).addTo(map);
-        addPolylineClickHandler(polyline1, data1);
-      }
-
-      if (data2.length > 0) {
-        const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
-          color: '#ff3b3b', weight: 4, opacity: 0.8, lineJoin: 'round'
-        }).addTo(map);
-        addPolylineClickHandler(polyline2, data2);
-      }
-
-      const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
-      map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
-    }
-
-    showToast('Route data loaded.');
-
-    // Reactivar trace si ya estaba encendido antes de cargar
-    const traceToggle = document.getElementById("enable-trace-toggle");
-    if (traceToggle.checked) {
-      getMap().off("click", onMapClickTrace); // Elimina handler duplicado si existía
-      const event = new Event("change");
-      traceToggle.dispatchEvent(event);
-    }    
-
-  } catch (err) {
-    console.error('Error loading data:', err);
-    showToast('Error loading route data.');
+  // Load data initially if both dates are set
+  if (startDate.value && endDate.value) {
+    loadAndDisplayRoute();
   }
-});
 
   radiusSlider.addEventListener("input", () => {
     radiusValueDisplay.textContent = radiusSlider.value;
   });
 
-  // Si trace toggle ya estaba activo, volver a ejecutar su lógica como si hubiera sido cambiado manualmente
+  // If trace toggle is already active, rerun its logic as if it was manually changed
   if (enableTraceToggle.checked) {
     const event = new Event("change");
     enableTraceToggle.dispatchEvent(event);
@@ -568,4 +440,39 @@ export function cleanupHistoricalMode() {
     slider.max = 0;
   }
   if (timestampDisplay) timestampDisplay.innerText = "";
+}
+
+// Helper function to display historical paths on the map
+function displayHistoricalPaths() {
+  const map = getMap();
+  
+  // Clear existing polylines
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+      map.removeLayer(layer);
+    }
+  });
+
+  // Group data by vehicle
+  const data1 = traceHistoricalData.filter(p => p.vehicle_id === 1);
+  const data2 = traceHistoricalData.filter(p => p.vehicle_id === 2);
+
+  if (data1.length > 0) {
+    const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
+      color: '#3b65ff', weight: 4, opacity: 0.8, lineJoin: 'round'
+    }).addTo(map);
+    addPolylineClickHandler(polyline1, data1);
+  }
+
+  if (data2.length > 0) {
+    const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
+      color: '#ff3b3b', weight: 4, opacity: 0.8, lineJoin: 'round'
+    }).addTo(map);
+    addPolylineClickHandler(polyline2, data2);
+  }
+
+  const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
+  if (allCoords.length > 0) {
+    map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
+  }
 }
