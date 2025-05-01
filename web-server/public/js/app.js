@@ -8,7 +8,6 @@ import { clearRealTimePath } from "./realTimeMode.js";
 import { formatDate } from "./utils.js";
 import { stopRealTimeUpdates } from "./realTimeMode.js";
 import { traceHistoricalData } from './historicalMode.js';
-import { cleanupHeatmapMode } from './heatmapMode.js';
 import { initHeatmapMode, cleanupHeatmapMode } from './heatmapMode.js';
 
 
