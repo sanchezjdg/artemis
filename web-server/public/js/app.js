@@ -143,6 +143,51 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   setActiveButton("historical-btn");
 });
 
+
+// Create a debounced heatmap update function
+let heatmapTimeout = null;
+const updateHeatmap = async () => {
+  const start = document.getElementById('heatmap-start').value;
+  const end = document.getElementById('heatmap-end').value;
+  const vehicleId = document.getElementById('heatmap-vehicle').value;
+
+  if (!start || !end) return;
+
+  const startDatetime = `${start}:00`;
+  const endDatetime = `${end}:00`;
+
+  try {
+    // Single request to get all vehicle data
+    const allData = await fetch(
+      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`
+    ).then(res => res.json());
+
+    // Filter data based on vehicle selection
+    const data = allData.filter(p => 
+      vehicleId === 'all' || p.vehicle_id === parseInt(vehicleId)
+    );
+
+    if (data.length === 0) {
+      alert("No data found for generating the heatmap.");
+      return;
+    }
+
+    cleanupHeatmapMode();
+    initHeatmapMode(data);
+
+  } catch (err) {
+    console.error('Error loading heatmap data:', err);
+    alert("An error occurred while loading the heatmap.");
+  }
+};
+
+const debouncedHeatmapUpdate = () => {
+  if (heatmapTimeout) {
+    clearTimeout(heatmapTimeout);
+  }
+  heatmapTimeout = setTimeout(updateHeatmap, 500);
+};
+
 document.getElementById("heatmap-tab").addEventListener("click", () => {
   // Ocultar formularios de otros modos
   document.getElementById("real-time-controls").style.display = "none";
@@ -165,43 +210,15 @@ document.getElementById("heatmap-tab").addEventListener("click", () => {
   // Cambiar mensaje de instrucciones
   document.querySelector(".controls .mode-info").innerText =
     "Selecciona el rango de tiempo para visualizar el mapa de calor:";
-});
 
-
-document.getElementById('load-heatmap').addEventListener('click', async () => {
-  const start = document.getElementById('heatmap-start').value;
-  const end = document.getElementById('heatmap-end').value;
-  const vehicleId = document.getElementById('heatmap-vehicle').value;
-
-  if (!start || !end) {
-    alert('Por favor completa las fechas de inicio y fin.');
-    return;
-  }
-
-  const startDatetime = `${start}:00`;
-  const endDatetime = `${end}:00`;
-
-  try {
-    // Single request to get all vehicle data
-    const allData = await fetch(
-      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`
-    ).then(res => res.json());
-
-    // Filter data based on vehicle selection
-    const data = allData.filter(p => 
-      vehicleId === 'all' || p.vehicle_id === parseInt(vehicleId)
-    );
-
-    if (data.length === 0) {
-      alert("No se encontraron datos para generar el mapa de calor.");
-      return;
-    }
-
-    cleanupHeatmapMode();
-    initHeatmapMode(data); // ya no depende del historial cargado antes
-
-  } catch (err) {
-    console.error('Error cargando datos para el mapa de calor:', err);
-    alert("Ocurrió un error al cargar el mapa de calor.");
+  // Load data initially if dates are set
+  if (document.getElementById('heatmap-start').value && 
+      document.getElementById('heatmap-end').value) {
+    updateHeatmap();
   }
 });
+
+// Add event listeners for input changes
+document.getElementById('heatmap-start').addEventListener('change', debouncedHeatmapUpdate);
+document.getElementById('heatmap-end').addEventListener('change', debouncedHeatmapUpdate);
+document.getElementById('heatmap-vehicle').addEventListener('change', debouncedHeatmapUpdate);
