@@ -230,7 +230,7 @@ export function initHistoricalMode() {
   radiusSlider.addEventListener("input", () => {
     radiusValueDisplay.textContent = radiusSlider.value;
     if (enableTraceToggle.checked && lastClickedPosition) {
-      performTraceSearch(lastClickedPosition);
+      performTraceSearch(lastClickedPosition, false);
     }
   });
 
@@ -247,10 +247,10 @@ export function initHistoricalMode() {
  */
 function onMapClickTrace(e) {
   lastClickedPosition = e.latlng;
-  performTraceSearch(e.latlng);
+  performTraceSearch(e.latlng, true);
 }
 
-function performTraceSearch(clickedLatLng) {
+function performTraceSearch(clickedLatLng, isNewClick = false) {
   // Ensure that historical data has been loaded.
   if (!traceHistoricalData || traceHistoricalData.length === 0) {
     showToast("Historical data not loaded. Please load data first.");
@@ -289,9 +289,12 @@ function performTraceSearch(clickedLatLng) {
   resultsContainer.innerHTML = "";
 
   if (nearbyPoints.length === 0) {
-    showToast(
-      "No vehicle pass detected within the radius. Try clicking closer to the route.",
-    );
+    // Only show the toast message if this is a new click position
+    if (isNewClick) {
+      showToast(
+        "No vehicle pass detected within the radius. Try clicking closer to the route.",
+      );
+    }
     return;
   }
 
