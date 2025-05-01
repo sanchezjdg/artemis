@@ -76,14 +76,6 @@ function setActiveButton(activeId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Show real-time controls and hide historical form.
-  document.getElementById("real-time-controls").style.display = "block";
-  document.getElementById("historical-form").style.display = "none";
-  // Start real-time updates automatically
-  startRealTimeUpdates(socket);
-});
-
-document.addEventListener("DOMContentLoaded", () => {
   const infoToggle = document.getElementById("info-toggle");
   const infoPanel = document.getElementById("info-panel");
   const closeInfo = document.getElementById("close-info");
@@ -99,28 +91,39 @@ document.addEventListener("DOMContentLoaded", () => {
   // Show real-time controls and hide historical form
   document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
+  document.getElementById("heatmap-form").style.display = "none";
+  
+  // Set initial mode info
+  document.querySelector(".controls .mode-info").innerText = "Currently tracking vehicles in real-time:";
+  
   // Start real-time updates automatically
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
 });
 
 // Set up mode switching buttons.
-document.getElementById("real-time-btn").addEventListener("click", () => {
-  cleanupHeatmapMode(); // Limpia el heatmap si estaba activo
-  // Show real-time controls and hide historical form.
+document.getElementById("real-time-btn").addEventListener("click", async () => {
+  cleanupHeatmapMode(); // Cleanup heatmap if active
+  
+  // First, stop any existing updates and clear the path
+  stopRealTimeUpdates(socket);
+  clearRealTimePath();
+  
+  // Update UI elements
   document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
-  document.getElementById("heatmap-form").style.display = "none"; 
-  // Clear trace results and hide them
+  document.getElementById("heatmap-form").style.display = "none";
   document.getElementById("trace-results").style.display = "none";
   document.getElementById("trace-results").innerHTML = "";
-  // Start real-time updates.
-  startRealTimeUpdates(socket);
-  // Update the mode information.
-  document.querySelector(".controls .mode-info").innerText =
-    "Select the mode you want to use:";
-  // Set active button state last to ensure UI is consistent
+  
+  // Update mode info text
+  document.querySelector(".controls .mode-info").innerText = "Currently tracking vehicles in real-time:";
+  
+  // Set active button state
   setActiveButton("real-time-btn");
+  
+  // Finally, start real-time updates
+  await startRealTimeUpdates(socket);
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
@@ -173,6 +176,9 @@ const updateHeatmap = async () => {
       return;
     }
 
+
+    showToast("Generating heatmap, please wait...");
+
     cleanupHeatmapMode();
     initHeatmapMode(data);
 
@@ -210,7 +216,7 @@ document.getElementById("heatmap-tab").addEventListener("click", () => {
 
   // Cambiar mensaje de instrucciones
   document.querySelector(".controls .mode-info").innerText =
-    "Selecciona el rango de tiempo para visualizar el mapa de calor:";
+    "Select a date range to visualize the heat map:";
 
   // Load data initially if dates are set
   if (document.getElementById('heatmap-start').value && 
