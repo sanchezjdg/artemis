@@ -182,18 +182,15 @@ document.getElementById('load-heatmap').addEventListener('click', async () => {
   const endDatetime = `${end}:00`;
 
   try {
-    const data1 = vehicleId === '1' || vehicleId === 'all'
-      ? await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`).then(res => res.json())
-      : [];
+    // Single request to get all vehicle data
+    const allData = await fetch(
+      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`
+    ).then(res => res.json());
 
-    const data2 = vehicleId === '2' || vehicleId === 'all'
-      ? await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`).then(res => res.json())
-      : [];
-
-    const data = [
-      ...data1.map(p => ({ ...p, vehicle_id: 1 })),
-      ...data2.map(p => ({ ...p, vehicle_id: 2 })),
-    ];
+    // Filter data based on vehicle selection
+    const data = allData.filter(p => 
+      vehicleId === 'all' || p.vehicle_id === parseInt(vehicleId)
+    );
 
     if (data.length === 0) {
       alert("No se encontraron datos para generar el mapa de calor.");

@@ -170,7 +170,7 @@ const radiusValueDisplay = document.getElementById("radius-value");
     }
   });
   
-// Update the data loading function to include vehicle selection
+// Update the data loading function to fetch all data at once and filter on frontend
 const loadButton = document.getElementById('load-data');
 loadButton.addEventListener('click', async () => {
   const selectedVehicle = vehicleSelectHistorical.value;
@@ -188,18 +188,21 @@ loadButton.addEventListener('click', async () => {
   showToast('Loading route data...');
 
   try {
+    // Make a single fetch request for all vehicles
+    const allData = await fetch(
+      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`
+    ).then(res => res.json());
+
+    // Filter data based on selected vehicle on the frontend
     let data1 = [], data2 = [];
-
-    if (selectedVehicle === '1' || selectedVehicle === 'all') {
-      data1 = await fetch(
-        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`
-      ).then(res => res.json());
-    }
-
-    if (selectedVehicle === '2' || selectedVehicle === 'all') {
-      data2 = await fetch(
-        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`
-      ).then(res => res.json());
+    
+    if (selectedVehicle === 'all') {
+      data1 = allData.filter(p => p.vehicle_id === 1);
+      data2 = allData.filter(p => p.vehicle_id === 2);
+    } else {
+      const vehicleId = parseInt(selectedVehicle);
+      if (vehicleId === 1) data1 = allData.filter(p => p.vehicle_id === 1);
+      if (vehicleId === 2) data2 = allData.filter(p => p.vehicle_id === 2);
     }
 
     if (data1.length === 0 && data2.length === 0) {

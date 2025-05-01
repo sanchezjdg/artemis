@@ -54,14 +54,14 @@ function isValidDateRange(start, end) {
   return { valid: true };
 }
 
-// API endpoint for historical data
+// API endpoint for historical data - optimized to fetch all vehicles at once
 app.get("/historical", async (req, res) => {
-  const { start, end, vehicle_id } = req.query;
+  const { start, end } = req.query;
 
-  if (!start || !end || !vehicle_id) {
+  if (!start || !end) {
     return res
       .status(400)
-      .json({ error: "Missing start, end or vehicle_id parameter." });
+      .json({ error: "Missing start or end parameter." });
   }
 
   const validation = isValidDateRange(start, end);
@@ -74,9 +74,8 @@ app.get("/historical", async (req, res) => {
     const query = `
       SELECT * FROM steinstable 
       WHERE timestamp BETWEEN ? AND ? 
-        AND vehicle_id = ? 
       ORDER BY timestamp ASC`;
-    const [rows] = await connection.query(query, [start, end, vehicle_id]);
+    const [rows] = await connection.query(query, [start, end]);
     connection.release();
     res.json(rows);
   } catch (error) {
