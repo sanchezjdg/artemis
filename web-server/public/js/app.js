@@ -106,6 +106,7 @@ document.getElementById("real-time-btn").addEventListener("click", () => {
   // Show real-time controls and hide historical form.
   document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
+  document.getElementById("heatmap-form").style.display = "none"; 
   // Clear trace results and hide them
   document.getElementById("trace-results").style.display = "none";
   document.getElementById("trace-results").innerHTML = "";
@@ -124,6 +125,7 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   stopRealTimeUpdates(socket);   
   // Clear the real-time polyline.
   clearRealTimePath();
+  document.getElementById("heatmap-form").style.display = "none";  // <- esto también
   // Hide real-time controls since auto-center is specific to real-time.
   document.getElementById("real-time-controls").style.display = "none";
   // Show the historical form.
