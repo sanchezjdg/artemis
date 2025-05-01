@@ -1,4 +1,6 @@
 import { getMap } from './mapHandler.js';
+import { cleanupHistoricalMode } from './historicalMode.js';
+
 
 let heatLayer = null;
 
@@ -8,6 +10,7 @@ let heatLayer = null;
  * @param {Array} traceHistoricalData 
  */
 export function initHeatmapMode(traceHistoricalData) {
+  cleanupHistoricalMode(); // ⬅ Limpia cualquier rastro del modo histórico
   const map = getMap();
 
   // Oculta elementos del modo histórico si están presentes
