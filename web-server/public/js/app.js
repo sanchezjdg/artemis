@@ -9,6 +9,7 @@ import { formatDate } from "./utils.js";
 import { stopRealTimeUpdates } from "./realTimeMode.js";
 import { traceHistoricalData } from './historicalMode.js';
 import { initHeatmapMode, cleanupHeatmapMode } from './heatmapMode.js';
+import { showToast } from "./toast.js";
 
 
 // Initialize socket connection using Socket.IO.
@@ -168,7 +169,7 @@ const updateHeatmap = async () => {
     );
 
     if (data.length === 0) {
-      alert("No data found for generating the heatmap.");
+      showToast("No data found for generating the heatmap.");
       return;
     }
 
@@ -177,7 +178,7 @@ const updateHeatmap = async () => {
 
   } catch (err) {
     console.error('Error loading heatmap data:', err);
-    alert("An error occurred while loading the heatmap.");
+    showToast("An error occurred while loading the heatmap.");
   }
 };
 
