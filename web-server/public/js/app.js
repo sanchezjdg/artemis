@@ -59,7 +59,7 @@ flatpickr("#heatmap-end", {
 
 // Set up active button color
 function setActiveButton(activeId) {
-  ["real-time-btn", "historical-btn"].forEach((id) => {
+  ["real-time-btn", "historical-btn", "heatmap-tab"].forEach((id) => {
     const btn = document.getElementById(id);
     if (btn) {
       btn.classList.remove("active");
@@ -67,6 +67,7 @@ function setActiveButton(activeId) {
   });
   document.getElementById(activeId).classList.add("active");
 }
+
 
 // Default to real-time mode on page load
 document.addEventListener("DOMContentLoaded", () => {
@@ -133,8 +134,29 @@ document.getElementById("historical-btn").addEventListener("click", () => {
 });
 
 document.getElementById("heatmap-tab").addEventListener("click", () => {
-  initHeatmapMode(traceHistoricalData);
+  // Ocultar formularios de otros modos
+  document.getElementById("real-time-controls").style.display = "none";
+  document.getElementById("historical-form").style.display = "none";
+  document.getElementById("trace-time-slider-control").style.display = "none";
+  document.getElementById("trace-results").style.display = "none";
+
+  // Mostrar formulario del heatmap
+  document.getElementById("heatmap-form").style.display = "block";
+
+  // Detener modo en tiempo real si está activo
+  stopRealTimeUpdates(socket);
+
+  // Limpiar heatmap anterior si existe
+  cleanupHeatmapMode();
+
+  // Cambiar botón activo
+  setActiveButton("heatmap-tab");
+
+  // Cambiar mensaje de instrucciones
+  document.querySelector(".controls .mode-info").innerText =
+    "Selecciona el rango de tiempo para visualizar el mapa de calor:";
 });
+
 
 document.getElementById('load-heatmap').addEventListener('click', async () => {
   const start = document.getElementById('heatmap-start').value;
