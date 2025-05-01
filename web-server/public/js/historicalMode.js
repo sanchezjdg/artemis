@@ -171,87 +171,57 @@ const radiusValueDisplay = document.getElementById("radius-value");
   });
   
 // Update the data loading function to include vehicle selection
-const loadButton = document.getElementById('load-data');
-loadButton.addEventListener('click', async () => {
+vehicleSelectHistorical.addEventListener('change', async () => {
   const selectedVehicle = vehicleSelectHistorical.value;
   const lastStartDate = document.getElementById('start-datetime').value;
   const lastEndDate = document.getElementById('end-datetime').value;
 
   if (!lastStartDate || !lastEndDate) {
-    showToast('Please fill in both datetime fields.');
+    showToast('Por favor selecciona un rango de fechas válido.');
     return;
   }
 
   const startDatetime = `${lastStartDate}:00`;
   const endDatetime = `${lastEndDate}:00`;
 
-  showToast('Loading route data...');
+  showToast('Cargando ruta del vehículo...');
 
   try {
-    let data1 = [], data2 = [];
+    const map = getMap();
+    // Limpia rutas anteriores
+    map.eachLayer((layer) => {
+      if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+        map.removeLayer(layer);
+      }
+    });
 
-    if (selectedVehicle === '1' || selectedVehicle === 'all') {
-      data1 = await fetch(
-        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`
-      ).then(res => res.json());
-    }
+    const data = await fetch(
+      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=${selectedVehicle}`
+    ).then(res => res.json());
 
-    if (selectedVehicle === '2' || selectedVehicle === 'all') {
-      data2 = await fetch(
-        `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`
-      ).then(res => res.json());
-    }
-
-    if (data1.length === 0 && data2.length === 0) {
-      showToast('No route data found for the selected vehicle(s).');
+    if (data.length === 0) {
+      showToast('No se encontró ruta para ese vehículo.');
       return;
     }
 
+    traceHistoricalData = data.map(p => ({ ...p, vehicle_id: selectedVehicle }));
     dataLoaded = true;
-    traceHistoricalData = [...data1.map(p => ({ ...p, vehicle_id: 1 })), ...data2.map(p => ({ ...p, vehicle_id: 2 }))];
-    clearLayer(historicalPath);
 
-    const map = getMap();
+    const polyline = L.polyline(data.map(p => [p.latitude, p.longitude]), {
+      color: selectedVehicle === '1' ? '#3b65ff' : '#ff3b3b',
+      weight: 4,
+      opacity: 0.8,
+      lineJoin: 'round',
+    }).addTo(map);
+    addPolylineClickHandler(polyline, data);
 
-    if (!document.getElementById("enable-trace-toggle").checked) {
-      // Limpiar todas las polilíneas anteriores
-      map.eachLayer((layer) => {
-        if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
-          map.removeLayer(layer);
-        }
-      });
+    map.fitBounds(L.latLngBounds(data.map(p => [p.latitude, p.longitude])), { padding: [50, 50] });
 
-      if (data1.length > 0) {
-        const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
-          color: '#3b65ff', weight: 4, opacity: 0.8, lineJoin: 'round'
-        }).addTo(map);
-        addPolylineClickHandler(polyline1, data1);
-      }
-
-      if (data2.length > 0) {
-        const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
-          color: '#ff3b3b', weight: 4, opacity: 0.8, lineJoin: 'round'
-        }).addTo(map);
-        addPolylineClickHandler(polyline2, data2);
-      }
-
-      const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
-      map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
-    }
-
-    showToast('Route data loaded.');
-
-    // Reactivar trace si ya estaba encendido antes de cargar
-    const traceToggle = document.getElementById("enable-trace-toggle");
-    if (traceToggle.checked) {
-      getMap().off("click", onMapClickTrace); // Elimina handler duplicado si existía
-      const event = new Event("change");
-      traceToggle.dispatchEvent(event);
-    }    
+    showToast('Ruta cargada automáticamente.');
 
   } catch (err) {
-    console.error('Error loading data:', err);
-    showToast('Error loading route data.');
+    console.error('Error cargando ruta:', err);
+    showToast('Error al cargar ruta del vehículo.');
   }
 });
 
