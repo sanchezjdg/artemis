@@ -86,15 +86,25 @@ export function formatTimestamp(timestamp) {
   }
 }
 
-export function updateFixedPanel(vehicleId, latitude, longitude, rpm, timestamp) {
+export function updateFixedPanel(vehicleId, rpm, timestamp) {
   const panel = document.getElementById("fixed-info-panel");
   const vehicleInfo = document.getElementById(`vehicle-${vehicleId}-info`);
 
-  if (vehicleInfo) {
-    vehicleInfo.innerHTML = `
-      <b>Vehicle ${vehicleId}:</b><br>
-      RPM: ${rpm !== null ? rpm : "No data"}<br>
-      ${timestamp}<br>
-    `;
-  }
+  if (!vehicleInfo) return;
+
+  const rpmValue = rpm !== null && rpm !== undefined ? rpm : 0;
+  const rpmPercent = Math.min(rpmValue / 6000, 1) * 100; // Asume 6000 rpm como máximo
+  const dateOnly = timestamp?.split("T")[0] || "N/A";
+  const timeOnly = timestamp?.split("T")[1]?.split(".")[0] || "N/A";
+
+  vehicleInfo.innerHTML = `
+    <div class="fixed-info-header">Vehicle ${vehicleId}</div>
+    <div class="fixed-info-rpm">RPM: ${rpmValue}</div>
+    <div class="rpm-bar-container">
+      <div class="rpm-bar" style="width: ${rpmPercent}%;"></div>
+    </div>
+    <div style="font-size: 12px; color: var(--gray);">
+      Time: ${timeOnly}, Date: ${dateOnly}
+    </div>
+  `;
 }
