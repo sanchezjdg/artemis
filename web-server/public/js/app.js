@@ -9,6 +9,7 @@ import { formatDate } from "./utils.js";
 import { stopRealTimeUpdates } from "./realTimeMode.js";
 import { traceHistoricalData } from './historicalMode.js';
 import { initHeatmapMode, cleanupHeatmapMode } from './heatmapMode.js';
+import { showToast } from "./toast.js";
 
 
 // Initialize socket connection using Socket.IO.
@@ -75,14 +76,6 @@ function setActiveButton(activeId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Show real-time controls and hide historical form.
-  document.getElementById("real-time-controls").style.display = "block";
-  document.getElementById("historical-form").style.display = "none";
-  // Start real-time updates automatically
-  startRealTimeUpdates(socket);
-});
-
-document.addEventListener("DOMContentLoaded", () => {
   const infoToggle = document.getElementById("info-toggle");
   const infoPanel = document.getElementById("info-panel");
   const closeInfo = document.getElementById("close-info");
@@ -98,28 +91,39 @@ document.addEventListener("DOMContentLoaded", () => {
   // Show real-time controls and hide historical form
   document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
+  document.getElementById("heatmap-form").style.display = "none";
+  
+  // Set initial mode info
+  document.querySelector(".controls .mode-info").innerText = "Currently tracking vehicles in real-time:";
+  
   // Start real-time updates automatically
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
 });
 
 // Set up mode switching buttons.
-document.getElementById("real-time-btn").addEventListener("click", () => {
-  cleanupHeatmapMode(); // Limpia el heatmap si estaba activo
-  // Show real-time controls and hide historical form.
+document.getElementById("real-time-btn").addEventListener("click", async () => {
+  cleanupHeatmapMode(); // Cleanup heatmap if active
+  
+  // First, stop any existing updates and clear the path
+  stopRealTimeUpdates(socket);
+  clearRealTimePath();
+  
+  // Update UI elements
   document.getElementById("real-time-controls").style.display = "block";
   document.getElementById("historical-form").style.display = "none";
-  document.getElementById("heatmap-form").style.display = "none"; 
-  // Clear trace results and hide them
+  document.getElementById("heatmap-form").style.display = "none";
   document.getElementById("trace-results").style.display = "none";
   document.getElementById("trace-results").innerHTML = "";
-  // Start real-time updates.
-  startRealTimeUpdates(socket);
-  // Update the mode information.
-  document.querySelector(".controls .mode-info").innerText =
-    "Select the mode you want to use:";
-  // Set active button state last to ensure UI is consistent
+  
+  // Update mode info text
+  document.querySelector(".controls .mode-info").innerText = "Currently tracking vehicles in real-time:";
+  
+  // Set active button state
   setActiveButton("real-time-btn");
+  
+  // Finally, start real-time updates
+  await startRealTimeUpdates(socket);
 });
 
 document.getElementById("historical-btn").addEventListener("click", () => {
@@ -143,6 +147,54 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   setActiveButton("historical-btn");
 });
 
+
+// Create a debounced heatmap update function
+let heatmapTimeout = null;
+const updateHeatmap = async () => {
+  const start = document.getElementById('heatmap-start').value;
+  const end = document.getElementById('heatmap-end').value;
+  const vehicleId = document.getElementById('heatmap-vehicle').value;
+
+  if (!start || !end) return;
+
+  const startDatetime = `${start}:00`;
+  const endDatetime = `${end}:00`;
+
+  try {
+    // Single request to get all vehicle data
+    const allData = await fetch(
+      `/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}`
+    ).then(res => res.json());
+
+    // Filter data based on vehicle selection
+    const data = allData.filter(p => 
+      vehicleId === 'all' || p.vehicle_id === parseInt(vehicleId)
+    );
+
+    if (data.length === 0) {
+      showToast("No data found for generating the heatmap.");
+      return;
+    }
+
+
+    showToast("Generating heatmap, please wait...");
+
+    cleanupHeatmapMode();
+    initHeatmapMode(data);
+
+  } catch (err) {
+    console.error('Error loading heatmap data:', err);
+    showToast("An error occurred while loading the heatmap.");
+  }
+};
+
+const debouncedHeatmapUpdate = () => {
+  if (heatmapTimeout) {
+    clearTimeout(heatmapTimeout);
+  }
+  heatmapTimeout = setTimeout(updateHeatmap, 500);
+};
+
 document.getElementById("heatmap-tab").addEventListener("click", () => {
   // Ocultar formularios de otros modos
   document.getElementById("real-time-controls").style.display = "none";
@@ -164,47 +216,16 @@ document.getElementById("heatmap-tab").addEventListener("click", () => {
 
   // Cambiar mensaje de instrucciones
   document.querySelector(".controls .mode-info").innerText =
-    "Selecciona el rango de tiempo para visualizar el mapa de calor:";
-});
+    "Select a date range to visualize the heat map:";
 
-
-document.getElementById('load-heatmap').addEventListener('click', async () => {
-  const start = document.getElementById('heatmap-start').value;
-  const end = document.getElementById('heatmap-end').value;
-  const vehicleId = document.getElementById('heatmap-vehicle').value;
-
-  if (!start || !end) {
-    alert('Por favor completa las fechas de inicio y fin.');
-    return;
-  }
-
-  const startDatetime = `${start}:00`;
-  const endDatetime = `${end}:00`;
-
-  try {
-    const data1 = vehicleId === '1' || vehicleId === 'all'
-      ? await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=1`).then(res => res.json())
-      : [];
-
-    const data2 = vehicleId === '2' || vehicleId === 'all'
-      ? await fetch(`/historical?start=${encodeURIComponent(startDatetime)}&end=${encodeURIComponent(endDatetime)}&vehicle_id=2`).then(res => res.json())
-      : [];
-
-    const data = [
-      ...data1.map(p => ({ ...p, vehicle_id: 1 })),
-      ...data2.map(p => ({ ...p, vehicle_id: 2 })),
-    ];
-
-    if (data.length === 0) {
-      alert("No se encontraron datos para generar el mapa de calor.");
-      return;
-    }
-
-    cleanupHeatmapMode();
-    initHeatmapMode(data); // ya no depende del historial cargado antes
-
-  } catch (err) {
-    console.error('Error cargando datos para el mapa de calor:', err);
-    alert("Ocurrió un error al cargar el mapa de calor.");
+  // Load data initially if dates are set
+  if (document.getElementById('heatmap-start').value && 
+      document.getElementById('heatmap-end').value) {
+    updateHeatmap();
   }
 });
+
+// Add event listeners for input changes
+document.getElementById('heatmap-start').addEventListener('change', debouncedHeatmapUpdate);
+document.getElementById('heatmap-end').addEventListener('change', debouncedHeatmapUpdate);
+document.getElementById('heatmap-vehicle').addEventListener('change', debouncedHeatmapUpdate);
