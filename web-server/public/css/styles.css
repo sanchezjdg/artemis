@@ -343,3 +343,54 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   font-weight: bold;
   cursor: pointer;
 }
+
+#main-container {
+  max-width: 100%;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+header {
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+button {
+  width: 100%;
+  max-width: 200px;
+  font-size: 1rem;
+}
+
+input[type="text"],
+input[type="range"] {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  #map {
+    height: 50vh;
+  }
+
+  #trace-time-slider-control {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  #view-mode-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  #view-mode-controls button {
+    width: 45%;
+  }
+}
