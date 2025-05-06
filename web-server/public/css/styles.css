@@ -366,46 +366,26 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
-#main-container {
-  max-width: 100%;
-  padding: 0.5rem;
-  box-sizing: border-box;
-}
-
-header h1 {
-  font-size: 1.5rem;
-  text-align: center;
-}
-
-header {
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-button {
-  width: 100%;
-  max-width: 200px;
-  font-size: 1rem;
-}
-
-input[type="text"],
-input[type="range"] {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
 @media (max-width: 600px) {
-  #map {
-    height: 50vh;
+  /* Asegura que el contenedor principal se adapte */
+  #main-container {
+    padding: 0.5rem;
+    box-sizing: border-box;
   }
 
-  #trace-time-slider-control {
+  /* Acomoda el encabezado para pantallas chicas */
+  header {
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 0.5rem;
   }
 
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  /* Botones con tamaño amigable */
   #view-mode-controls {
     flex-wrap: wrap;
     justify-content: center;
@@ -414,5 +394,24 @@ input[type="range"] {
 
   #view-mode-controls button {
     width: 45%;
+    min-width: 100px;
+    font-size: 1rem;
+  }
+
+  /* Slider y sus controles */
+  #trace-time-slider-control {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  input[type="range"],
+  input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* El mapa se adapta */
+  #map {
+    height: 50vh;
   }
 }
