@@ -75,7 +75,22 @@ function setActiveButton(activeId) {
   }
 }
 
+<<<<<<< HEAD
+=======
+// Default to real-time mode on page load
 document.addEventListener("DOMContentLoaded", () => {
+  // Show real-time controls and hide historical form.
+  document.getElementById("real-time-controls").style.display = "block";
+  document.getElementById("historical-form").style.display = "none";
+  // Start real-time updates automatically
+  startRealTimeUpdates(socket);
+  setActiveButton("real-time-btn");
+/*
+});
+
+>>>>>>> 73dbc390d5ebafda576ed67f9805f86feafad465
+document.addEventListener("DOMContentLoaded", () => {
+*/
   const infoToggle = document.getElementById("info-toggle");
   const infoPanel = document.getElementById("info-panel");
   const closeInfo = document.getElementById("close-info");
@@ -87,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
   closeInfo.addEventListener("click", () => {
     infoPanel.style.display = "none";
   });
+<<<<<<< HEAD
 
   // Show real-time controls and hide historical form
   document.getElementById("real-time-controls").style.display = "block";
@@ -100,7 +116,11 @@ document.addEventListener("DOMContentLoaded", () => {
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
 });
+=======
+>>>>>>> 73dbc390d5ebafda576ed67f9805f86feafad465
 
+
+/*
 // Set up mode switching buttons.
 document.getElementById("real-time-btn").addEventListener("click", async () => {
   cleanupHeatmapMode(); // Cleanup heatmap if active
@@ -146,6 +166,7 @@ document.getElementById("historical-btn").addEventListener("click", () => {
   // Set active button state last to ensure UI is consistent
   setActiveButton("historical-btn");
 });
+<<<<<<< HEAD
 
 
 // Create a debounced heatmap update function
@@ -229,3 +250,53 @@ document.getElementById("heatmap-tab").addEventListener("click", () => {
 document.getElementById('heatmap-start').addEventListener('change', debouncedHeatmapUpdate);
 document.getElementById('heatmap-end').addEventListener('change', debouncedHeatmapUpdate);
 document.getElementById('heatmap-vehicle').addEventListener('change', debouncedHeatmapUpdate);
+=======
+*/
+
+
+  // Botón Real-Time
+  realTimeBtn.addEventListener("click", () => {
+    setActiveButton("real-time-btn");
+    document.getElementById("real-time-controls").style.display = "block";
+    document.getElementById("historical-form").style.display = "none";
+    document.getElementById("trace-results").style.display = "none";
+    document.getElementById("trace-results").innerHTML = "";
+    startRealTimeUpdates(socket);
+    document.querySelector(".controls .mode-info").innerText =
+      "Select the mode you want to use:";
+  });
+
+  // Botón Histórico
+  historicalBtn.addEventListener("click", () => {
+    setActiveButton("historical-btn");
+    socket.off("updateData");
+    stopRealTimeUpdates(socket);
+    clearRealTimePath();
+    document.getElementById("real-time-controls").style.display = "none";
+    document.getElementById("historical-form").style.display = "block";
+    document.querySelector(".controls .mode-info").innerText =
+      "Select a date range and optionally enable trace mode:";
+    initHistoricalMode();
+  });
+
+  // Panel de información
+  infoToggle.addEventListener("click", () => {
+    infoPanel.style.display =
+      infoPanel.style.display === "block" ? "none" : "block";
+  });
+
+  closeInfo.addEventListener("click", () => {
+    infoPanel.style.display = "none";
+  });
+});
+
+// Función para marcar el botón activo
+function setActiveButton(activeId) {
+  ["real-time-btn", "historical-btn"].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove("active");
+  });
+  const activeBtn = document.getElementById(activeId);
+  if (activeBtn) activeBtn.classList.add("active");
+}
+>>>>>>> 73dbc390d5ebafda576ed67f9805f86feafad465
