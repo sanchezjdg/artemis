@@ -83,7 +83,7 @@ body {
     transition: all 0.3s ease-in-out;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
 }
-/*
+
 #real-time-btn {
     background: var(--bright-blue);
     color: var(--white);
@@ -93,7 +93,7 @@ body {
     background: var(--gray);
     color: var(--black);
 }
-*/
+
 .controls button:hover {
     transform: translateY(-2px);
     box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
@@ -104,18 +104,16 @@ body {
 }
 
 /* Active button effect */
-.controls #real-time-btn.active,
-.controls #historical-btn.active {
-    background: var(--bright-blue);
-    color: var(--white);
+.controls button.active {
+    background: var(--bright-blue) !important;
+    color: var(--white) !important;
     box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
     filter: brightness(1.2);
 }
 
-.controls #real-time-btn:not(.active),
-.controls #historical-btn:not(.active) {
-    background: var(--gray);
-    color: var(--black);
+.controls button:not(.active) {
+    background: var(--gray) !important;
+    color: var(--black) !important;
 }
 
 /* Historical form styling */
@@ -253,32 +251,18 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     display: none;
     z-index: 1500;
     overflow-y: auto;
-    border-right: 1px solid #444;
   }
   
   .close-info {
     background: none;
     border: none;
     color: var(--white);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     cursor: pointer;
     float: right;
   }
-
-  .info-panel p {
-    margin-bottom: 10px;
-    line-height: 1.5;
-  }
-
-  .info-panel b {
-    color: var(--info-accent);
-  }
   
-  details[open] summary {
-    margin-bottom: 0.5rem;
-  }
-
   .info-toggle {
     position: absolute;
     bottom: 20px;
@@ -292,12 +276,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     border: none;
     z-index: 2000;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    transition: background 0.3s ease;
-  }
-
-  .info-toggle:hover {
-    background: #5b7dff;
   }
 
 /* Optimize the menu for mobile devices */
@@ -364,54 +342,4 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
-}
-
-@media (max-width: 600px) {
-  /* Asegura que el contenedor principal se adapte */
-  #main-container {
-    padding: 0.5rem;
-    box-sizing: border-box;
-  }
-
-  /* Acomoda el encabezado para pantallas chicas */
-  header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.5rem;
-  }
-
-  header h1 {
-    font-size: 1.5rem;
-  }
-
-  /* Botones con tamaño amigable */
-  #view-mode-controls {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  #view-mode-controls button {
-    width: 45%;
-    min-width: 100px;
-    font-size: 1rem;
-  }
-
-  /* Slider y sus controles */
-  #trace-time-slider-control {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  input[type="range"],
-  input[type="text"] {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  /* El mapa se adapta */
-  #map {
-    height: 50vh;
-  }
 }
