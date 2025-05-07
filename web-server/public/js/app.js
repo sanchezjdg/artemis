@@ -99,6 +99,28 @@ document.addEventListener("DOMContentLoaded", () => {
   // Start real-time updates automatically
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
+
+  // Mostrar botón flotante en pantallas pequeñas para minimizar/expandir el panel fijo
+  const toggleBtn = document.getElementById("toggle-panel");
+  const fixedPanel = document.getElementById("fixed-info-panel");
+
+  if (window.innerWidth <= 600 && toggleBtn && fixedPanel) {
+    toggleBtn.style.display = "block";
+
+    let minimized = false;
+    toggleBtn.addEventListener("click", () => {
+      minimized = !minimized;
+      if (minimized) {
+        fixedPanel.style.height = "30px";
+        fixedPanel.style.overflow = "hidden";
+        toggleBtn.textContent = "Expand";
+      } else {
+        fixedPanel.style.height = "";
+        fixedPanel.style.overflow = "auto";
+        toggleBtn.textContent = "Minimize";
+      }
+    });
+  }
 });
 
 // Set up mode switching buttons.
