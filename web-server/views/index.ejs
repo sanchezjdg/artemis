@@ -163,6 +163,20 @@
   <!-- mapa de calor -->
   <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
+  <!-- Minimiza y expande en móvil-->>
+  <button id="toggle-panel" style="
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1001;
+  display: none;
+  background: #7500FA;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  ">Minimize</button>
 
   <div id="fixed-info-panel" class="vehicle-box-container" style="
   position: fixed;
@@ -178,20 +192,6 @@
   max-height: 40%;
   overflow-y: auto;
 ">
-<!-- Minimiza y expande en móvil-->>
-<button id="toggle-panel" style="
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  z-index: 1001;
-  display: none;
-  background: #7500FA;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-">Minimize</button>
 
   <div id="vehicle-1-info" class="vehicle-box"></div>
   <hr style="border-color: rgba(255,255,255,0.2)">
