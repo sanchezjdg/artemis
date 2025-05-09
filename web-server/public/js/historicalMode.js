@@ -213,6 +213,14 @@ export function initHistoricalMode() {
       // Enable the trace mode switch if data is loaded
       newTraceToggle.disabled = false;
 
+      // Hide the trace mode switch and its label if no data is available
+      const traceToggleContainer = document.getElementById("trace-toggle-container");
+      if (!dataLoaded) {
+        traceToggleContainer.style.display = "none";
+      } else {
+        traceToggleContainer.style.display = "block";
+      }
+
     } catch (err) {
       console.error('Error loading data:', err);
       showToast('Error loading route data.');
