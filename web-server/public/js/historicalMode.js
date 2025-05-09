@@ -60,14 +60,23 @@ export function initHistoricalMode() {
   // Ensure the trace radius control visibility matches the toggle state
   document.getElementById("trace-radius-control").style.display = "none";
 
+  // Disable the trace mode switch if no route data is available
+  newTraceToggle.disabled = !dataLoaded;
+
   newTraceToggle.addEventListener("change", () => {
+    if (!dataLoaded) {
+      showToast("No route data available. Please select a valid date range.");
+      newTraceToggle.checked = false;
+      return;
+    }
+
     const map = getMap();
     map.off("click"); // First remove any existing click handlers
 
     // Clean up everything when switching modes
     clearTemporaryMarker();
     clearSearchCircle();
-    
+
     // Clear historical paths
     if (historicalPath) {
       if (Array.isArray(historicalPath)) {
@@ -79,54 +88,34 @@ export function initHistoricalMode() {
       }
       historicalPath = null;
     }
-    
+
     if (newTraceToggle.checked) {
       // When trace mode is enabled:
-      // Show the trace radius slider.
       document.getElementById("trace-radius-control").style.display = "block";
-      // Eliminar cualquier polilínea visible de ambos vehículos al activar trace
       map.eachLayer(layer => {
         if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
           map.removeLayer(layer);
         }
       });
 
-      // If data has already been loaded, enable trace functionality
-      if (dataLoaded && traceHistoricalData.length > 0) {
-        // Clear any existing search circle when enabling trace mode
-        if (searchCircle) {
-          map.removeLayer(searchCircle);
-          searchCircle = null;
-        }
-
-        // Start with the first point from the historical data
+      if (traceHistoricalData.length > 0) {
         const firstPoint = traceHistoricalData[0];
         const initialPosition = L.latLng(firstPoint.latitude, firstPoint.longitude);
         lastClickedPosition = initialPosition;
         performTraceSearch(initialPosition);
-        
-        showToast(
-          "Trace mode enabled. Click on the map to display trace information.",
-        );
+
+        showToast("Trace mode enabled. Click on the map to display trace information.");
         map.on("click", onMapClickTrace);
-      } else {
-        showToast(
-          "Please load route data first using the 'Load Route' button.",
-        );
       }
     } else {
-      // When trace mode is disabled:
-      // Hide both the trace radius slider and the detected moments slider
       document.getElementById("trace-radius-control").style.display = "none";
       document.getElementById("trace-time-slider-control").style.display = "none";
-      // Remove the click event for trace mode
       map.off("click");
-      
+
       clearSearchCircle();
       clearTemporaryMarker();
 
-      // If data has been loaded, redraw the historical paths with original colors
-      if (dataLoaded && traceHistoricalData.length > 0) {
+      if (traceHistoricalData.length > 0) {
         displayHistoricalPaths();
       }
     }
