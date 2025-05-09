@@ -36,7 +36,7 @@ export function initHistoricalMode() {
   const marker = getMarker();
   clearLayer(marker);
 
-  // Create and set up the trace mode switch toggle
+  // Ensure the container and switch are not duplicated
   const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
   if (!enableTraceToggleContainer) {
     const container = document.createElement("div");
