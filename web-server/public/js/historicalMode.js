@@ -348,6 +348,18 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
   resultsContainer.innerHTML = "";
 
   if (nearbyPoints.length === 0) {
+    // Clear the slider and detected moments if no points are found
+    const sliderControl = document.getElementById("trace-time-slider-control");
+    const slider = document.getElementById("trace-time-slider");
+    const timestampDisplay = document.getElementById("trace-timestamp-display");
+
+    if (sliderControl) sliderControl.style.display = "none";
+    if (slider) {
+      slider.value = 0;
+      slider.max = 0;
+    }
+    if (timestampDisplay) timestampDisplay.innerText = "";
+
     // Only show the toast message if this is a new click position
     if (isNewClick) {
       showToast(
