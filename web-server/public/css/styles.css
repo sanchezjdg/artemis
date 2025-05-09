@@ -278,25 +278,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
   }
 
-/* Add custom styles for the Bootstrap switch if needed */
-.form-check-input {
-  width: 2.5em;
-  height: 1.5em;
-  background-color: #ddd;
-  border-radius: 1em;
-  transition: background-color 0.3s;
-}
-
-.form-check-input:checked {
-  background-color: #3b65ff;
-}
-
-.form-check-label {
-  margin-left: 0.5em;
-  font-weight: bold;
-  color: #000;
-}
-
 /* Optimize the menu for mobile devices */
 @media (max-width: 768px) {
   .controls {
@@ -517,6 +498,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     min-width: 120px;
   }
 }
-
-
+ 
+  
 

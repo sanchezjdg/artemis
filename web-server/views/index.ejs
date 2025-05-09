@@ -54,6 +54,11 @@
         <label for="end-datetime">End:</label>
         <input type="text" id="end-datetime">
       </div>
+      <!-- Trace radius control: will be shown only when trace mode is enabled -->
+      <div id="trace-radius-control" style="display: none; margin-top: 10px;">
+        <label for="search-radius">Search Radius: <span id="radius-value">100</span> m</label>
+        <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
+      </div>
     </div>
 
     <!-- Heatmap form -->
@@ -77,23 +82,10 @@
     </div>
 
 
-    <!-- Enable Trace Mode Switch with Bootstrap styling -->
-    <div class="form-check form-switch" id="enable-trace-toggle-container">
-      <input class="form-check-input" type="checkbox" id="enable-trace-toggle">
-      <label class="form-check-label" for="enable-trace-toggle">Enable Trace Mode</label>
-    </div>
-
-    <!-- Trace radius control: moved below Enable Trace Mode -->
-    <div id="trace-radius-control" style="display: none; margin-top: 10px;">
-      <label for="search-radius">Search Radius: <span id="radius-value">100</span> m</label>
-      <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
-    </div>
-
-    <!-- Detected moments slider: moved below Enable Trace Mode -->
     <div id="trace-time-slider-control" style="display: none; margin-top: 10px;">
       <label for="trace-time-slider">Detected Moments:</label>
-      <input type="range" id="trace-time-slider" min="0" max="0" step="1">
-      <span id="trace-timestamp-display"></span>
+      <input type="range" id="trace-time-slider" min="0" max="0" value="0" step="1">
+      <div id="trace-timestamp-display" style="margin-top: 4px; font-size: 12px;"></div>
     </div>
     
     <!-- Trace results panel -->
