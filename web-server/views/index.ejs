@@ -54,10 +54,26 @@
         <label for="end-datetime">End:</label>
         <input type="text" id="end-datetime">
       </div>
-      <!-- Trace radius control: will be shown only when trace mode is enabled -->
+      <!-- Enable Trace Mode Switch -->
+      <div class="input-group" id="enable-trace-toggle-container">
+        <label class="switch">
+          <input type="checkbox" id="enable-trace-toggle">
+          <span class="slider round"></span>
+        </label>
+        <span style="margin-left: 10px;">Enable Trace Mode</span>
+      </div>
+
+      <!-- Trace radius control: moved below Enable Trace Mode -->
       <div id="trace-radius-control" style="display: none; margin-top: 10px;">
         <label for="search-radius">Search Radius: <span id="radius-value">100</span> m</label>
         <input type="range" id="search-radius" min="10" max="1000" value="100" step="10">
+      </div>
+
+      <!-- Detected moments slider: moved below Enable Trace Mode -->
+      <div id="trace-time-slider-control" style="display: none; margin-top: 10px;">
+        <label for="trace-time-slider">Detected Moments:</label>
+        <input type="range" id="trace-time-slider" min="0" max="0" step="1">
+        <span id="trace-timestamp-display"></span>
       </div>
     </div>
 
