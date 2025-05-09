@@ -36,15 +36,31 @@ export function initHistoricalMode() {
   const marker = getMarker();
   clearLayer(marker);
 
-  // Set up the trace mode checkbox change listener.
+  // Create and set up the trace mode switch toggle
   const enableTraceToggle = document.getElementById("enable-trace-toggle");
+  const switchLabel = document.createElement('label');
+  switchLabel.className = 'switch';
+  const switchInput = document.createElement('input');
+  switchInput.type = 'checkbox';
+  switchInput.id = 'enable-trace-toggle';
+  const switchSpan = document.createElement('span');
+  switchSpan.className = 'slider round';
+  
+  switchLabel.appendChild(switchInput);
+  switchLabel.appendChild(switchSpan);
+  
+  // Replace the existing checkbox with our new switch
+  enableTraceToggle.parentNode.replaceChild(switchLabel, enableTraceToggle);
+  
+  // Get reference to the new switch input
+  const newTraceToggle = switchInput;
   // Ensure trace mode starts disabled
-  enableTraceToggle.checked = false;
+  newTraceToggle.checked = false;
   
   // Ensure the trace radius control visibility matches the toggle state
   document.getElementById("trace-radius-control").style.display = "none";
 
-  enableTraceToggle.addEventListener("change", () => {
+  newTraceToggle.addEventListener("change", () => {
     const map = getMap();
     map.off("click"); // First remove any existing click handlers
 
@@ -64,7 +80,7 @@ export function initHistoricalMode() {
       historicalPath = null;
     }
     
-    if (enableTraceToggle.checked) {
+    if (newTraceToggle.checked) {
       // When trace mode is enabled:
       // Show the trace radius slider.
       document.getElementById("trace-radius-control").style.display = "block";
@@ -199,11 +215,10 @@ export function initHistoricalMode() {
       displayHistoricalPaths();
 
       // Reactivate trace if enabled
-      const traceToggle = document.getElementById("enable-trace-toggle");
-      if (traceToggle.checked) {
+      if (newTraceToggle.checked) {
         getMap().off("click", onMapClickTrace);
         const event = new Event("change");
-        traceToggle.dispatchEvent(event);
+        newTraceToggle.dispatchEvent(event);
       }
 
     } catch (err) {
@@ -230,15 +245,15 @@ export function initHistoricalMode() {
 
   radiusSlider.addEventListener("input", () => {
     radiusValueDisplay.textContent = radiusSlider.value;
-    if (enableTraceToggle.checked && lastClickedPosition) {
+    if (newTraceToggle.checked && lastClickedPosition) {
       performTraceSearch(lastClickedPosition, false);
     }
   });
 
   // If trace toggle is already active, rerun its logic as if it was manually changed
-  if (enableTraceToggle.checked) {
+  if (newTraceToggle.checked) {
     const event = new Event("change");
-    enableTraceToggle.dispatchEvent(event);
+    newTraceToggle.dispatchEvent(event);
   }
 }
 
