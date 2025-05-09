@@ -210,6 +210,9 @@ export function initHistoricalMode() {
         newTraceToggle.dispatchEvent(event);
       }
 
+      // Enable the trace mode switch if data is loaded
+      newTraceToggle.disabled = false;
+
     } catch (err) {
       console.error('Error loading data:', err);
       showToast('Error loading route data.');
