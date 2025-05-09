@@ -74,6 +74,9 @@ export function initHistoricalMode() {
   // Ensure the trace radius control visibility matches the toggle state
   document.getElementById("trace-radius-control").style.display = "none";
 
+  // Add a flag to track if the toast message has been shown
+  let traceModeToastShown = false;
+
   newTraceToggle.addEventListener("change", () => {
     const map = getMap();
     map.off("click"); // First remove any existing click handlers
@@ -119,9 +122,12 @@ export function initHistoricalMode() {
         lastClickedPosition = initialPosition;
         performTraceSearch(initialPosition);
         
-        showToast(
-          "Trace mode enabled. Click on the map to display trace information.",
-        );
+        // Show the toast message only if it hasn't been shown yet
+        if (!traceModeToastShown) {
+          showToast("Trace mode enabled. Click on the map to display trace information.");
+          traceModeToastShown = true;
+        }
+
         map.on("click", onMapClickTrace);
       } else {
         showToast(
@@ -143,6 +149,9 @@ export function initHistoricalMode() {
       if (dataLoaded && traceHistoricalData.length > 0) {
         displayHistoricalPaths();
       }
+
+      // Reset the toast flag when disabling trace mode
+      traceModeToastShown = false;
     }
   });
 
