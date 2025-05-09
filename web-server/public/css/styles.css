@@ -119,7 +119,14 @@ body {
 /* Historical form styling */
 #historical-form {
     margin-top: 8px;
-    display: none;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Add spacing between child elements */
+}
+
+#historical-form .input-group,
+#trace-radius-control {
+    margin: 0; /* Reset margins for consistency */
 }
 
 .input-group {
@@ -174,14 +181,14 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 /* Trace Radius Control */
 #trace-radius-control {
-    display: none;
-    margin-top: 10px;
+    display: flex; /* Use flexbox for alignment */
+    flex-direction: column; /* Stack elements vertically */
+    gap: 10px; /* Add spacing between elements */
 }
 
-#trace-radius-control label {
-    font-size: 13px;
-    margin-bottom: 4px;
-    display: block;
+#trace-radius-control label,
+#trace-radius-control input {
+    margin: 0; /* Reset margins for consistency */
 }
 
 #trace-radius-control input[type="number"] {
@@ -498,6 +505,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     min-width: 120px;
   }
 }
- 
-  
+
+
 
