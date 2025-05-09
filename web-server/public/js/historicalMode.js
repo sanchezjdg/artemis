@@ -37,23 +37,37 @@ export function initHistoricalMode() {
   clearLayer(marker);
 
   // Create and set up the trace mode switch toggle
-  const enableTraceToggle = document.getElementById("enable-trace-toggle");
-  const switchLabel = document.createElement('label');
-  switchLabel.className = 'switch';
-  const switchInput = document.createElement('input');
-  switchInput.type = 'checkbox';
-  switchInput.id = 'enable-trace-toggle';
-  const switchSpan = document.createElement('span');
-  switchSpan.className = 'slider round';
-  
-  switchLabel.appendChild(switchInput);
-  switchLabel.appendChild(switchSpan);
-  
-  // Replace the existing checkbox with our new switch
-  enableTraceToggle.parentNode.replaceChild(switchLabel, enableTraceToggle);
-  
+  const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
+  if (!enableTraceToggleContainer) {
+    const container = document.createElement("div");
+    container.id = "enable-trace-toggle-container";
+    container.style.display = "none"; // Initially hidden
+    container.style.marginTop = "10px";
+
+    const switchLabel = document.createElement("label");
+    switchLabel.className = "switch";
+
+    const switchInput = document.createElement("input");
+    switchInput.type = "checkbox";
+    switchInput.id = "enable-trace-toggle";
+
+    const switchSpan = document.createElement("span");
+    switchSpan.className = "slider round";
+
+    const labelText = document.createElement("span");
+    labelText.textContent = "Enable Trace Mode";
+    labelText.style.marginLeft = "10px";
+
+    switchLabel.appendChild(switchInput);
+    switchLabel.appendChild(switchSpan);
+    container.appendChild(switchLabel);
+    container.appendChild(labelText);
+
+    document.getElementById("historical-form").appendChild(container);
+  }
+
   // Get reference to the new switch input
-  const newTraceToggle = switchInput;
+  const newTraceToggle = document.getElementById("enable-trace-toggle");
   // Ensure trace mode starts disabled
   newTraceToggle.checked = false;
   
@@ -213,6 +227,12 @@ export function initHistoricalMode() {
       dataLoaded = true;
       traceHistoricalData = [...data1.map(p => ({ ...p, vehicle_id: 1 })), ...data2.map(p => ({ ...p, vehicle_id: 2 }))];
       displayHistoricalPaths();
+
+      // Show the trace mode toggle only when data is loaded
+      const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
+      if (enableTraceToggleContainer) {
+        enableTraceToggleContainer.style.display = "block";
+      }
 
       // Reactivate trace if enabled
       if (newTraceToggle.checked) {
