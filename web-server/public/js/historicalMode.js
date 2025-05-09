@@ -230,6 +230,15 @@ export function initHistoricalMode() {
 
       if (data1.length === 0 && data2.length === 0) {
         showToast('No route data found for the selected vehicle(s).');
+
+        // Clear any existing polylines
+        const map = getMap();
+        map.eachLayer((layer) => {
+          if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+            map.removeLayer(layer);
+          }
+        });
+
         // Hide the trace mode toggle if no data is available
         const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
         if (enableTraceToggleContainer) {
