@@ -221,6 +221,11 @@ export function initHistoricalMode() {
 
       if (data1.length === 0 && data2.length === 0) {
         showToast('No route data found for the selected vehicle(s).');
+        // Hide the trace mode toggle if no data is available
+        const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
+        if (enableTraceToggleContainer) {
+          enableTraceToggleContainer.style.display = "none";
+        }
         return;
       }
 
