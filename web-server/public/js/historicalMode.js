@@ -13,7 +13,6 @@ let temporaryMarker = null;
 let dataLoaded = false;
 let searchCircle = null; // Add global variable to track search circle
 let lastClickedPosition = null;
-let tracePolyline = null; // Add variable to track trace polyline within circle
 
 // Add variable to track last known vehicle position
 let lastKnownPosition = null;
@@ -109,15 +108,6 @@ export function initHistoricalMode() {
       
       clearSearchCircle();
       clearTemporaryMarker();
-      // Clear trace polylines
-      if (tracePolyline) {
-        if (Array.isArray(tracePolyline)) {
-          tracePolyline.forEach(polyline => map.removeLayer(polyline));
-        } else {
-          map.removeLayer(tracePolyline);
-        }
-        tracePolyline = null;
-      }
 
       // If data has been loaded, redraw the historical paths with original colors
       if (dataLoaded && traceHistoricalData.length > 0) {
@@ -275,12 +265,8 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
   // Clear any previous search circle from the map.
   clearSearchCircle();
 
-  // Clear any temporary marker and existing polyline
+  // Clear any temporary marker if it exists
   clearTemporaryMarker();
-  if (tracePolyline) {
-    map.removeLayer(tracePolyline);
-    tracePolyline = null;
-  }
 
   // Create and add a search circle to the map.
   const map = getMap();
@@ -313,35 +299,6 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
     return;
   }
 
-  // Create a polyline for the detected points
-  const pointsByVehicle = {};
-  nearbyPoints.forEach(point => {
-    if (!pointsByVehicle[point.vehicle_id]) {
-      pointsByVehicle[point.vehicle_id] = [];
-    }
-    pointsByVehicle[point.vehicle_id].push([point.latitude, point.longitude]);
-  });
-
-  // Create polylines for each vehicle with appropriate colors
-  Object.entries(pointsByVehicle).forEach(([vehicleId, points]) => {
-    const colorMap = {
-      1: "#3b65ff", // Blue
-      2: "#ff3b3b", // Red
-    };
-    const color = colorMap[vehicleId] || "#666";
-    
-    const polyline = L.polyline(points, {
-      color: color,
-      weight: 3,
-      opacity: 0.8,
-      lineJoin: 'round'
-    }).addTo(map);
-
-    // Store the polyline so we can remove it later
-    if (!tracePolyline) tracePolyline = [];
-    tracePolyline.push(polyline);
-  });
-
   // Display each nearby point as a result with a "View" button.
   // Guardar puntos cercanos para navegación por slider
   window.traceSliderPoints = nearbyPoints;
@@ -363,44 +320,6 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
     const point = nearbyPoints[slider.value];
     timestampDisplay.innerText = point.timestamp;
     showTracePointOnMap(point);
-
-    // Update polylines to show path until current point
-    if (tracePolyline) {
-      if (Array.isArray(tracePolyline)) {
-        tracePolyline.forEach(polyline => map.removeLayer(polyline));
-      } else {
-        map.removeLayer(tracePolyline);
-      }
-      tracePolyline = null;
-    }
-
-    // Create new polylines up to current point
-    const currentPoints = nearbyPoints.slice(0, parseInt(slider.value) + 1);
-    const pointsByVehicle = {};
-    currentPoints.forEach(p => {
-      if (!pointsByVehicle[p.vehicle_id]) {
-        pointsByVehicle[p.vehicle_id] = [];
-      }
-      pointsByVehicle[p.vehicle_id].push([p.latitude, p.longitude]);
-    });
-
-    Object.entries(pointsByVehicle).forEach(([vehicleId, points]) => {
-      const colorMap = {
-        1: "#3b65ff", // Blue
-        2: "#ff3b3b", // Red
-      };
-      const color = colorMap[vehicleId] || "#666";
-      
-      const polyline = L.polyline(points, {
-        color: color,
-        weight: 3,
-        opacity: 0.8,
-        lineJoin: 'round'
-      }).addTo(map);
-
-      if (!tracePolyline) tracePolyline = [];
-      tracePolyline.push(polyline);
-    });
   };
 }
 
@@ -483,18 +402,6 @@ export function cleanupHistoricalMode() {
     map.removeLayer(searchCircle);
     searchCircle = null;
   }
-
-  // Clean up trace polylines
-  if (tracePolyline) {
-    const map = getMap();
-    if (Array.isArray(tracePolyline)) {
-      tracePolyline.forEach(polyline => map.removeLayer(polyline));
-    } else {
-      map.removeLayer(tracePolyline);
-    }
-    tracePolyline = null;
-  }
-  
   clearTemporaryMarker();
 
   // Remove all polylines if they exist
@@ -508,5 +415,63 @@ export function cleanupHistoricalMode() {
       map.removeLayer(historicalPath);
     }
     historicalPath = null;
+  }
+
+  // Limpiar cualquier polilínea residual
+  const map = getMap();
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+      map.removeLayer(layer);
+    }
+  });
+
+  // Reset data loaded state
+  dataLoaded = false;
+
+  // Ocultar y resetear el slider de tiempo
+  const sliderControl = document.getElementById("trace-time-slider-control");
+  const slider = document.getElementById("trace-time-slider");
+  const timestampDisplay = document.getElementById("trace-timestamp-display");
+
+  if (sliderControl) sliderControl.style.display = "none";
+  if (slider) {
+    slider.value = 0;
+    slider.max = 0;
+  }
+  if (timestampDisplay) timestampDisplay.innerText = "";
+}
+
+// Helper function to display historical paths on the map
+function displayHistoricalPaths() {
+  const map = getMap();
+  
+  // Clear existing polylines
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Polyline && !(layer instanceof L.Circle)) {
+      map.removeLayer(layer);
+    }
+  });
+
+  // Group data by vehicle
+  const data1 = traceHistoricalData.filter(p => p.vehicle_id === 1);
+  const data2 = traceHistoricalData.filter(p => p.vehicle_id === 2);
+
+  if (data1.length > 0) {
+    const polyline1 = L.polyline(data1.map(p => [p.latitude, p.longitude]), {
+      color: '#3b65ff', weight: 4, opacity: 0.8, lineJoin: 'round'
+    }).addTo(map);
+    addPolylineClickHandler(polyline1, data1);
+  }
+
+  if (data2.length > 0) {
+    const polyline2 = L.polyline(data2.map(p => [p.latitude, p.longitude]), {
+      color: '#ff3b3b', weight: 4, opacity: 0.8, lineJoin: 'round'
+    }).addTo(map);
+    addPolylineClickHandler(polyline2, data2);
+  }
+
+  const allCoords = [...data1, ...data2].map(p => [p.latitude, p.longitude]);
+  if (allCoords.length > 0) {
+    map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
   }
 }
