@@ -367,7 +367,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 
   #trace-time-slider-control {
-    display: none;
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 10px;
