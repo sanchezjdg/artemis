@@ -288,20 +288,21 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   @media (max-width: 600px) {
     .controls {
       margin: 0 auto;
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
+      right: 0;
       z-index: 1000;
-      width: 100vw;
-      max-height: 90vh;
+      width: 100%;
+      height: auto;
       overflow-y: auto;
       background-color: #210d41;
-      padding: 1rem;
+      padding: 0.5rem;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
       font-size: 0.85rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       box-sizing: border-box;
     }
   
@@ -313,9 +314,10 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     .controls.minimized {
       max-height: 40px;
       overflow: hidden;
-      padding: 0.3rem;
+      padding: 0.3rem 0.5rem;
       font-size: 0.8rem;
       transition: max-height 0.3s ease;
+      height: 2.5rem;
     }
   
     .button-group {
@@ -351,13 +353,17 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   
     #trace-results {
       font-size: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
     }
 
     #trace-time-slider-control {
-      display: flex !important; /* forzamos el display si JS lo activa */
+      display: none;
       flex-direction: column;
       gap: 0.5rem;
     }
+
 
     #heatmap-form {
       display: flex;
@@ -371,4 +377,14 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     #heatmap-form select {
       font-size: 0.9rem;
     }
+
+    
+  #toggle-panel {
+    display: block;
+    position: fixed;
+    top: 0.3rem;
+    right: 0.3rem;
+    z-index: 1100;
+  }
+
   }
