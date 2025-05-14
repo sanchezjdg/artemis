@@ -37,6 +37,21 @@ export function initHistoricalMode() {
   const marker = getMarker();
   clearLayer(marker);
 
+
+  /**
+ * Actualiza el radio del círculo de búsqueda en el mapa.
+ */
+  function updateSearchCircleRadius() {
+      if (!searchCircle || !lastClickedPosition) return;
+
+      const radiusInput = document.getElementById("search-radius");
+      const threshold = parseFloat(radiusInput.value) || 100;
+      searchCircle.setRadius(threshold);
+
+      // Actualiza los puntos dentro del radio
+      performTraceSearch(lastClickedPosition, false);
+  }
+
   // Crear el botón de flecha para activar el modo trace
   let traceEnabled = false;
   const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
@@ -56,6 +71,12 @@ export function initHistoricalMode() {
 
       traceButton.addEventListener("click", () => {
           traceEnabled = !traceEnabled;
+          // Maneja el cambio de radio
+          document.getElementById("search-radius").addEventListener("input", () => {
+              const radiusValueDisplay = document.getElementById("radius-value");
+              radiusValueDisplay.textContent = document.getElementById("search-radius").value;
+              updateSearchCircleRadius();
+          });
 
           if (traceEnabled) {
               traceButton.classList.add("active");
@@ -333,87 +354,86 @@ function onMapClickTrace(e) {
 }
 
 function performTraceSearch(clickedLatLng, isNewClick = false) {
-  // Ensure that historical data has been loaded.
-  if (!traceHistoricalData || traceHistoricalData.length === 0) {
-    showToast("Historical data not loaded. Please load data first.");
-    return;
-  }
+    // Asegúrate de que los datos históricos estén cargados.
+    if (!traceHistoricalData || traceHistoricalData.length === 0) {
+        showToast("Historical data not loaded. Please load data first.");
+        return;
+    }
 
-  // Get the search radius from the slider (or default to 100 meters).
-  const radiusInput = document.getElementById("search-radius");
-  const threshold = parseFloat(radiusInput.value) || 100;
+    // Obtener el radio de búsqueda del slider (por defecto 100 m).
+    const radiusInput = document.getElementById("search-radius");
+    const threshold = parseFloat(radiusInput.value) || 100;
 
-  // Clear any previous search circle from the map.
-  clearSearchCircle();
+    // Limpiar cualquier círculo anterior del mapa.
+    clearSearchCircle();
 
-  // Clear any temporary marker if it exists
-  clearTemporaryMarker();
+    // Crear y agregar un nuevo círculo al mapa.
+    const map = getMap();
+    searchCircle = L.circle(clickedLatLng, {
+        radius: threshold,
+        color: "red",
+        fillColor: "#f03",
+        fillOpacity: 0.2,
+    }).addTo(map);
 
-  // Create and add a search circle to the map.
-  const map = getMap();
-  const searchCircle = L.circle(clickedLatLng, {
-    radius: threshold,
-    color: "red",
-    fillColor: "#f03",
-    fillOpacity: 0.2,
-  }).addTo(map);
+    // Filtrar los puntos que están dentro del radio y ordenarlos por timestamp
+    const nearbyPoints = traceHistoricalData.filter((point) => {
+        const dist = clickedLatLng.distanceTo(L.latLng(point.latitude, point.longitude));
+        return dist <= threshold;
+    }).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-  // Filter data points that are within the search radius and sort by timestamp
-  const nearbyPoints = traceHistoricalData.filter((point) => {
-    const dist = clickedLatLng.distanceTo(
-      L.latLng(point.latitude, point.longitude),
-    );
-    return dist <= threshold;
-  }).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    // Limpiar los resultados previos
+    const resultsContainer = document.getElementById("trace-results");
+    resultsContainer.innerHTML = "";
 
-  // Clear previous trace results.
-  const resultsContainer = document.getElementById("trace-results");
-  resultsContainer.innerHTML = "";
+    if (nearbyPoints.length === 0) {
+        // Si no hay puntos, oculta el slider y el timestamp
+        const sliderControl = document.getElementById("trace-time-slider-control");
+        const slider = document.getElementById("trace-time-slider");
+        const timestampDisplay = document.getElementById("trace-timestamp-display");
 
-  if (nearbyPoints.length === 0) {
-    // Clear the slider and detected moments if no points are found
-    const sliderControl = document.getElementById("trace-time-slider-control");
+        if (sliderControl) sliderControl.style.display = "none";
+        if (slider) {
+            slider.value = 0;
+            slider.max = 0;
+        }
+        if (timestampDisplay) timestampDisplay.innerText = "";
+
+        if (isNewClick) {
+            showToast("No vehicle pass detected within the radius. Try clicking closer to the route.");
+        }
+        return;
+    }
+
+    // Guardar los puntos para el slider
+    window.traceSliderPoints = nearbyPoints;
     const slider = document.getElementById("trace-time-slider");
+    const sliderControl = document.getElementById("trace-time-slider-control");
     const timestampDisplay = document.getElementById("trace-timestamp-display");
 
-    if (sliderControl) sliderControl.style.display = "none";
-    if (slider) {
-      slider.value = 0;
-      slider.max = 0;
-    }
-    if (timestampDisplay) timestampDisplay.innerText = "";
+    slider.max = nearbyPoints.length - 1;
+    slider.value = 0;
+    sliderControl.style.display = "block";
+    resultsContainer.style.display = "none"; // Ocultamos lista anterior
+    timestampDisplay.innerText = nearbyPoints[0].timestamp;
 
-    // Only show the toast message if this is a new click position
-    if (isNewClick) {
-      showToast(
-        "No vehicle pass detected within the radius. Try clicking closer to the route.",
-      );
-    }
-    return;
-  }
+    // Mostrar el primer punto en el mapa inmediatamente
+    showTracePointOnMap(nearbyPoints[0]);
 
-  // Display each nearby point as a result with a "View" button.
-  // Guardar puntos cercanos para navegación por slider
-  window.traceSliderPoints = nearbyPoints;
-  const slider = document.getElementById("trace-time-slider");
-  const sliderControl = document.getElementById("trace-time-slider-control");
-  const timestampDisplay = document.getElementById("trace-timestamp-display");
+    // Dibujar la polilínea solo para los puntos dentro del círculo
+    const polyline = L.polyline(nearbyPoints.map(p => [p.latitude, p.longitude]), {
+        color: '#3b65ff',
+        weight: 4,
+        opacity: 0.8,
+        lineJoin: 'round'
+    }).addTo(map);
 
-  slider.max = nearbyPoints.length - 1;
-  slider.value = 0;
-  sliderControl.style.display = "block";
-  resultsContainer.style.display = "none"; // Ocultamos lista anterior
-  timestampDisplay.innerText = nearbyPoints[0].timestamp;
-
-  // Mostrar el primer punto en el mapa inmediatamente
-  showTracePointOnMap(nearbyPoints[0]);
-
-  // Al mover el slider, actualizar el punto mostrado
-  slider.oninput = () => {
-    const point = nearbyPoints[slider.value];
-    timestampDisplay.innerText = point.timestamp;
-    showTracePointOnMap(point);
-  };
+    // Al mover el slider, actualizar el punto mostrado
+    slider.oninput = () => {
+        const point = nearbyPoints[slider.value];
+        timestampDisplay.innerText = point.timestamp;
+        showTracePointOnMap(point);
+    };
 }
 
 /**
