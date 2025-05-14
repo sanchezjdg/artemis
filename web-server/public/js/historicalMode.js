@@ -13,6 +13,7 @@ let temporaryMarker = null;
 let dataLoaded = false;
 let searchCircle = null; // Add global variable to track search circle
 let lastClickedPosition = null;
+let tracePolyline = null;
 
 // Add variable to track last known vehicle position
 let lastKnownPosition = null;
@@ -385,6 +386,21 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
   // Mostrar el primer punto en el mapa inmediatamente
   showTracePointOnMap(nearbyPoints[0]);
 
+  // Eliminar la línea anterior si existe
+if (tracePolyline) {
+  getMap().removeLayer(tracePolyline);
+  tracePolyline = null;
+}
+
+// Crear una polilínea conectando los puntos cercanos en orden temporal
+const latLngs = nearbyPoints.map(p => [p.latitude, p.longitude]);
+tracePolyline = L.polyline(latLngs, {
+  color: '#555', // gris neutro, o podés usar colorMap[p.vehicle_id]
+  weight: 4,
+  opacity: 0.8,
+  lineJoin: 'round'
+}).addTo(getMap());
+
   // Al mover el slider, actualizar el punto mostrado
   slider.oninput = () => {
     const point = nearbyPoints[slider.value];
@@ -485,6 +501,12 @@ export function cleanupHistoricalMode() {
       map.removeLayer(historicalPath);
     }
     historicalPath = null;
+
+    if (tracePolyline) {
+      getMap().removeLayer(tracePolyline);
+      tracePolyline = null;
+    }
+
   }
 
   // Limpiar cualquier polilínea residual
