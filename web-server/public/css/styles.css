@@ -285,14 +285,80 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
   }
 
-  /* Por defecto, ocultamos el botón flotante en pantallas grandes */
-  #toggle-controls-float {
-  display: none;
+/* Optimize the menu for mobile devices */
+@media (max-width: 768px) {
+  .controls {
+    width: 80%;
+    max-width: none;
+    padding: 5px;
+    font-size: 10px;
   }
 
-/* Estilos optimizados solo para móviles (hasta 600px) */
+  .controls h2 {
+    font-size: 14px;
+  }
+
+  .controls button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .input-group label {
+    font-size: 12px;
+  }
+
+  .input-group input {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .load-button {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+
+#vehicle-select {
+  margin-bottom: 6px;
+}
+
+#trace-time-slider-control {
+  display: none;
+  margin-top: 10px;
+}
+
+#trace-time-slider {
+  width: 100%;
+}
+
+#trace-timestamp-display {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 4px;
+  color: var(--white);
+}
+
+.vehicle-select {
+  margin-top: 10px;
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 @media (max-width: 600px) {
-  /* Encabezado */
+  /* Asegura que el contenedor principal se adapte */
+  #main-container {
+    padding: 0.5rem;
+    box-sizing: border-box;
+  }
+
+  /* Acomoda el encabezado para pantallas chicas */
   header {
     flex-direction: column;
     align-items: center;
@@ -304,7 +370,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-size: 1.5rem;
   }
 
-  /* Controles de modo */
+  /* Botones con tamaño amigable */
   #view-mode-controls {
     flex-wrap: wrap;
     justify-content: center;
@@ -317,28 +383,22 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-size: 1rem;
   }
 
+  /* Slider y sus controles */
+  #trace-time-slider-control {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  input[type="range"],
+  input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .controls {
-    position: fixed;          
-    left: 0;               
-    top: 0;                   
-    height: 100%;             
-    width: 90%;               
-    background: white;     
-    padding: 0.8rem;           
-    font-size: 0.9rem;         
-    z-index: 999;              
-    transition: transform 0.3s ease-in-out; 
-  }
-  
-
-  .controls h2 {
-    font-size: 14px;
-  }
-
-  .controls button,
-  .load-button {
-    padding: 6px 10px;
-    font-size: 12px;
+    width: 90%;
+    padding: 0.8rem;
+    font-size: 0.9rem;
   }
 
   .controls .mode-info,
@@ -353,62 +413,49 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     gap: 0.3rem;
   }
 
-  .input-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: space-between;
+  .vehicle-box {
+    flex: 1 1 100%;
+    font-size: 0.85rem;
+    padding: 0.6rem;
   }
 
-  .input-group label,
-  .input-group input {
-    font-size: 12px;
-  }
-
-  .input-group input {
-    padding: 6px;
-  }
-
-  .input-group > div {
-    flex: 1;
-    min-width: 120px;
-  }
-
-  #vehicle-select {
-    margin-bottom: 6px;
-  }
-
-  #trace-time-slider-control {
+  #info-panel {
     flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 10px;
+    align-items: center;
   }
-
-  #trace-time-slider {
-    width: 100%;
+  
+  .vehicle-box {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
   }
-
-  #trace-timestamp-display {
-    text-align: center;
-    font-size: 12px;
-    margin-top: 4px;
-    color: var(--white);
+  
+  #fixed-info-panel {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: calc(100% - 20px);
+    height: auto;
+    max-height: none;
+    max-width: 95vw;
   }
-
-  .vehicle-select {
-    margin-top: 10px;
-    width: 100%;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    color: #000;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
+  
+    
+  #fixed-info-panel hr {
+    display: none;
   }
-
-  /* Panel de información fija con cajas horizontales */
+  
   #fixed-info-panel {
     position: fixed;
     bottom: 10px;
@@ -430,57 +477,34 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     overflow: auto;
   }
 
-  #fixed-info-panel hr {
-    display: none;
+  #toggle-panel {
+    display: block;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 10000;
+    background-color: #6200ee;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
   }
 
-  .vehicle-box {
+  .input-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  .input-group > div {
     flex: 1;
-    min-width: 0;
-    overflow: auto;
-    font-size: 0.85rem;
-    padding: 0.6rem;
+    min-width: 120px;
   }
-
-  #info-panel {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  /* En styles.css */
-.toggle-controls {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 1100;
-  background-color: #7500FA;
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  display: block !important; 
-}
-
-.controls.minimized {
-  transform: translateX(-100%);
 }
 
 
-.floating-btn {
-  display: none;
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 10px 15px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-
-}
 
