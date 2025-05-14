@@ -102,8 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Mostrar botón flotante en pantallas pequeñas para minimizar/expandir el panel fijo
   const controlsPanel = document.querySelector(".controls");
+  const toggleBtn = document.getElementById("toggle-controls");
 
-  if (window.innerWidth <= 600 && controlsPanel) {
+  if (window.innerWidth <= 600 && controlsPanel && toggleBtn) {
     toggleBtn.style.display = "block";
 
     let minimized = false;

@@ -434,4 +434,24 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     flex-direction: column;
     align-items: center;
   }
+
+  /* En styles.css */
+.toggle-controls {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1100;
+  background-color: #7500FA;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  display: none; /* solo se muestra en JS si es necesario */
+}
+.controls.minimized {
+  height: 40px;
+  overflow: hidden;
+}
+
 }
