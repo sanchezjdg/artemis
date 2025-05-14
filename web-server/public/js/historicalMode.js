@@ -14,6 +14,46 @@ let dataLoaded = false;
 
 let searchCircle = null; // Add global variable to track search circle
 let lastClickedPosition = null;
+/**
+ * Actualiza el radio del círculo de búsqueda.
+ */
+function updateSearchCircleRadius() {
+    if (!searchCircle || !lastClickedPosition) return;
+
+    const radiusInput = document.getElementById("search-radius");
+    const threshold = parseFloat(radiusInput.value) || 100;
+    searchCircle.setRadius(threshold);
+
+    // Actualiza los puntos dentro del radio
+    performTraceSearch(lastClickedPosition, false);
+}
+
+
+
+
+/**
+ * Crea y actualiza el círculo de búsqueda en el mapa.
+ * @param {L.LatLng} position - La posición inicial del círculo.
+ */
+function createSearchCircle(position) {
+    const map = getMap();
+    const radiusInput = document.getElementById("search-radius");
+    const threshold = parseFloat(radiusInput.value) || 100;
+
+    // Limpiar cualquier círculo anterior
+    clearSearchCircle();
+
+    // Crear un nuevo círculo
+    searchCircle = L.circle(position, {
+        radius: threshold,
+        color: "red",
+        fillColor: "#f03",
+        fillOpacity: 0.2,
+    }).addTo(map);
+
+    lastClickedPosition = position;
+    performTraceSearch(position, false);
+}
 
 // Add variable to track last known vehicle position
 let lastKnownPosition = null;
@@ -53,60 +93,108 @@ export function initHistoricalMode() {
   }
 
   // Crear el botón de flecha para activar el modo trace
-  let traceEnabled = false;
-  const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
-  if (!enableTraceToggleContainer) {
-      const container = document.createElement("div");
-      container.id = "enable-trace-toggle-container";
-      container.style.display = "none"; // Inicialmente oculto
-      container.style.marginTop = "10px";
+ // Crear el botón de flecha para activar el modo trace
+let traceEnabled = false;
+const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
+if (!enableTraceToggleContainer) {
+    const container = document.createElement("div");
+    container.id = "enable-trace-toggle-container";
+    container.style.display = "none";
+    container.style.marginTop = "10px";
 
-      const traceButton = document.createElement("button");
-      traceButton.id = "enable-trace-toggle";
-      traceButton.className = "dropdown-arrow";
-      traceButton.innerHTML = "Enable Trace Mode ▼";
+    const traceButton = document.createElement("button");
+    traceButton.id = "enable-trace-toggle";
+    traceButton.className = "dropdown-arrow";
+    traceButton.innerHTML = "Enable Trace Mode ▼";
 
-      container.appendChild(traceButton);
-      document.getElementById("historical-form").appendChild(container);
+    container.appendChild(traceButton);
+    document.getElementById("historical-form").appendChild(container);
 
-      traceButton.addEventListener("click", () => {
-          traceEnabled = !traceEnabled;
-          // Maneja el cambio de radio
-          document.getElementById("search-radius").addEventListener("input", () => {
-              const radiusValueDisplay = document.getElementById("radius-value");
-              radiusValueDisplay.textContent = document.getElementById("search-radius").value;
-              updateSearchCircleRadius();
-          });
+    traceButton.addEventListener("click", () => {
+        traceEnabled = !traceEnabled;
+        const map = getMap();
 
-          if (traceEnabled) {
-              traceButton.classList.add("active");
-              traceButton.innerHTML = "Disable Trace Mode ▲";
-              document.getElementById("trace-radius-control").style.display = "block";
+        if (traceEnabled) {
+            traceButton.classList.add("active");
+            traceButton.innerHTML = "Disable Trace Mode ▲";
+            document.getElementById("trace-radius-control").style.display = "block";
 
-              // Verifica si los datos están cargados antes de habilitar el trace
-              if (dataLoaded && traceHistoricalData.length > 0) {
-                  const map = getMap();
-                  map.on("click", onMapClickTrace);
-                  showToast("Trace mode enabled. Click on the map to display trace information.");
-              } else {
-                  showToast("Please load route data first using the 'Load Route' button.");
-              }
-          } else {
-              traceButton.classList.remove("active");
-              traceButton.innerHTML = "Enable Trace Mode ▼";
-              document.getElementById("trace-radius-control").style.display = "none";
-              document.getElementById("trace-time-slider-control").style.display = "none";
+            if (dataLoaded && traceHistoricalData.length > 0) {
+                showToast("Trace mode enabled. Adjust the radius to refine the area.");
+                
+                // Crear el círculo en una posición inicial fija (por ejemplo, el centro del mapa)
+                if (!searchCircle) {
+                    const initialPosition = map.getCenter();
+                    lastClickedPosition = initialPosition;
+                    createSearchCircle(initialPosition);
+                }
+                function performTraceSearch(clickedLatLng, isNewClick = false) {
+                    if (!traceHistoricalData || traceHistoricalData.length === 0) {
+                        showToast("Historical data not loaded. Please load data first.");
+                        return;
+                    }
 
-              // Limpiar los rastros anteriores
-              clearTemporaryMarker();
-              clearSearchCircle();
+                    const radiusInput = document.getElementById("search-radius");
+                    const threshold = parseFloat(radiusInput.value) || 100;
 
-              if (dataLoaded && traceHistoricalData.length > 0) {
-                  displayHistoricalPaths();
-              }
-          }
-      });
-  }
+                    // Filtrar los puntos que están dentro del radio
+                    const nearbyPoints = traceHistoricalData.filter((point) => {
+                        const dist = clickedLatLng.distanceTo(L.latLng(point.latitude, point.longitude));
+                        return dist <= threshold;
+                    }).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                    if (nearbyPoints.length === 0) {
+                        clearSlider();
+                        showToast("No vehicle pass detected within the radius.");
+                        return;
+                    }
+
+                    // Limpiar cualquier polilínea anterior
+                    if (historicalPath) clearLayer(historicalPath);
+
+                    // Dibujar solo los puntos dentro del círculo
+                    historicalPath = L.polyline(nearbyPoints.map(p => [p.latitude, p.longitude]), {
+                        color: '#3b65ff',
+                        weight: 4,
+                        opacity: 0.8,
+                        lineJoin: 'round'
+                    }).addTo(getMap());
+
+                    // Mostrar el primer punto
+                    showTracePointOnMap(nearbyPoints[0]);
+
+                    // Configurar el slider
+                    const slider = document.getElementById("trace-time-slider");
+                    const sliderControl = document.getElementById("trace-time-slider-control");
+                    const timestampDisplay = document.getElementById("trace-timestamp-display");
+
+                    slider.max = nearbyPoints.length - 1;
+                    slider.value = 0;
+                    sliderControl.style.display = "block";
+                    timestampDisplay.innerText = nearbyPoints[0].timestamp;
+
+                    slider.oninput = () => {
+                        const point = nearbyPoints[slider.value];
+                        timestampDisplay.innerText = point.timestamp;
+                        showTracePointOnMap(point);
+                    };
+                }          
+            } else {
+                showToast("Please load route data first using the 'Load Route' button.");
+            }
+        } else {
+            traceButton.classList.remove("active");
+            traceButton.innerHTML = "Enable Trace Mode ▼";
+            document.getElementById("trace-radius-control").style.display = "none";
+            clearTemporaryMarker();
+            clearSearchCircle();
+
+            if (dataLoaded && traceHistoricalData.length > 0) {
+                displayHistoricalPaths();
+            }
+        }
+    });
+}
 
   // Get reference to the new switch input
   const newTraceToggle = document.getElementById("enable-trace-toggle");
