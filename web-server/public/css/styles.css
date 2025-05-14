@@ -506,5 +506,25 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 }
 
+/* Estilo para el botón de flecha */
+.dropdown-arrow {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: var(--bright-blue);
+    color: var(--white);
+    font-weight: bold;
+    font-size: 14px;
+    border: 1px solid var(--bright-blue);
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+    margin-bottom: 10px;
+}
+
+.dropdown-arrow.active {
+    background-color: var(--gray);
+    color: var(--black);
+}
 
 

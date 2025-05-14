@@ -38,35 +38,55 @@ export function initHistoricalMode() {
   clearLayer(marker);
 
   // Ensure the container and switch are not duplicated
-  const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
-  if (!enableTraceToggleContainer) {
+const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
+if (!enableTraceToggleContainer) {
     const container = document.createElement("div");
     container.id = "enable-trace-toggle-container";
-    container.style.display = "none"; // Initially hidden
+    container.style.display = "none"; // Inicialmente oculto
     container.style.marginTop = "10px";
 
-    const switchLabel = document.createElement("label");
-    switchLabel.className = "switch";
+    // Crear el botón de flecha
+    const dropdownButton = document.createElement("button");
+    dropdownButton.id = "enable-trace-toggle";
+    dropdownButton.className = "dropdown-arrow";
+    dropdownButton.innerHTML = "Enable Trace Mode ▼";
 
-    const switchInput = document.createElement("input");
-    switchInput.type = "checkbox";
-    switchInput.id = "enable-trace-toggle";
-
-    const switchSpan = document.createElement("span");
-    switchSpan.className = "slider round";
-
-    const labelText = document.createElement("span");
-    labelText.textContent = "Enable Trace Mode";
-    labelText.style.marginLeft = "10px";
-
-    switchLabel.appendChild(switchInput);
-    switchLabel.appendChild(switchSpan);
-    container.appendChild(switchLabel);
-    container.appendChild(labelText);
-
+    container.appendChild(dropdownButton);
     document.getElementById("historical-form").appendChild(container);
-  }
 
+    // Manejar el estado del botón
+    dropdownButton.addEventListener("click", () => {
+        const map = getMap();
+        map.off("click"); // Elimina cualquier evento de clic existente
+
+        // Limpiar todo al cambiar de modo
+        clearTemporaryMarker();
+        clearSearchCircle();
+
+        if (dropdownButton.classList.contains("active")) {
+            // Desactivar modo trace
+            dropdownButton.classList.remove("active");
+            dropdownButton.innerHTML = "Enable Trace Mode ▼";
+            document.getElementById("trace-radius-control").style.display = "none";
+            document.getElementById("trace-time-slider-control").style.display = "none";
+
+            if (dataLoaded && traceHistoricalData.length > 0) {
+                displayHistoricalPaths();
+            }
+        } else {
+            // Activar modo trace
+            dropdownButton.classList.add("active");
+            dropdownButton.innerHTML = "Disable Trace Mode ▲";
+            document.getElementById("trace-radius-control").style.display = "block";
+
+            if (dataLoaded && traceHistoricalData.length > 0) {
+                getMap().off("click", onMapClickTrace);
+                const event = new Event("change");
+                dropdownButton.dispatchEvent(event);
+            }
+        }
+    });
+}
   // Get reference to the new switch input
   const newTraceToggle = document.getElementById("enable-trace-toggle");
   // Ensure trace mode starts disabled
