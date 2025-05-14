@@ -317,13 +317,19 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-size: 1rem;
   }
 
-  /* Panel lateral .controls */
   .controls {
-    width: 90%;
-    padding: 0.8rem;
-    font-size: 0.9rem;
-    transition: transform 0.3s ease-in-out;
+    position: fixed;          
+    left: 0;               
+    top: 0;                   
+    height: 100%;             
+    width: 90%;               
+    background: white;     
+    padding: 0.8rem;           
+    font-size: 0.9rem;         
+    z-index: 999;              
+    transition: transform 0.3s ease-in-out; 
   }
+  
 
   .controls h2 {
     font-size: 14px;
@@ -458,7 +464,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .controls.minimized {
   transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
 }
 
 
