@@ -64,7 +64,6 @@
     <!-- Heatmap form -->
     <div id="heatmap-form" style="display: none; margin-top: 15px;">
       <div class="input-group">
-        <label for="heatmap-vehicle">Vehicle:</label>
         <select id="heatmap-vehicle" class="vehicle-select">
           <option value="all">All Vehicles</option>
           <option value="1">Vehicle 1</option>
@@ -91,6 +90,8 @@
     <!-- Trace results panel -->
     <div id="trace-results" class="trace-results" style="margin-top: 10px;"></div>
   </div> <!-- End of controls overlay -->
+
+  <button id="toggle-controls" class="toggle-controls">Minimize</button>
 
   <!-- Map Container -->
   <div id="map"></div>
@@ -156,20 +157,9 @@
   <!-- mapa de calor -->
   <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
-  <!-- Minimiza y expande en móvil-->>
-  <button id="toggle-panel" style="
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  z-index: 1001;
-  display: none;
-  background: #7500FA;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  ">Minimize</button>
+
+  <!-- Botón flotante para minimizar/expandir el panel en móviles -->
+  <button id="floating-btn" class="floating-btn">Minimize</button>
 
   <div id="fixed-info-panel" class="vehicle-box-container" style="
   position: fixed;
