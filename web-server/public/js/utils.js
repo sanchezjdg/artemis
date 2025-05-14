@@ -86,7 +86,7 @@ export function formatTimestamp(timestamp) {
   }
 }
 
-export function updateFixedPanel(vehicleId, rpm, timestamp) {
+export function updateFixedPanel(vehicleId, latitude, longitude, rpm, timestamp) {
   const panel = document.getElementById("fixed-info-panel");
   const vehicleInfo = document.getElementById(`vehicle-${vehicleId}-info`);
 
