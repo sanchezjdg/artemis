@@ -38,38 +38,34 @@ export function initHistoricalMode() {
   clearLayer(marker);
 
   // Ensure the container and switch are not duplicated
-// Ensure the container and dropdown are not duplicated
-const enableTraceDropdownContainer = document.getElementById("enable-trace-dropdown-container");
-if (!enableTraceDropdownContainer) {
+  const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
+  if (!enableTraceToggleContainer) {
     const container = document.createElement("div");
-    container.id = "enable-trace-dropdown-container";
+    container.id = "enable-trace-toggle-container";
     container.style.display = "none"; // Initially hidden
     container.style.marginTop = "10px";
 
-    const label = document.createElement("label");
-    label.htmlFor = "trace-mode-select";
-    label.textContent = "Trace Mode:";
-    
-    const select = document.createElement("select");
-    select.id = "trace-mode-select";
-    select.style.width = "100%";
-    select.style.padding = "8px";
-    select.style.marginTop = "5px";
-    select.style.borderRadius = "5px";
-    select.style.border = "1px solid #ccc";
-    select.style.backgroundColor = "#f8f8f8";
-    select.style.fontSize = "14px";
-    select.style.color = "#333";
-    select.style.cursor = "pointer";
-    select.innerHTML = `
-        <option value="off">Disabled</option>
-        <option value="on">Enabled</option>
-    `;
+    const switchLabel = document.createElement("label");
+    switchLabel.className = "switch";
 
-    container.appendChild(label);
-    container.appendChild(select);
+    const switchInput = document.createElement("input");
+    switchInput.type = "checkbox";
+    switchInput.id = "enable-trace-toggle";
+
+    const switchSpan = document.createElement("span");
+    switchSpan.className = "slider round";
+
+    const labelText = document.createElement("span");
+    labelText.textContent = "Enable Trace Mode";
+    labelText.style.marginLeft = "10px";
+
+    switchLabel.appendChild(switchInput);
+    switchLabel.appendChild(switchSpan);
+    container.appendChild(switchLabel);
+    container.appendChild(labelText);
+
     document.getElementById("historical-form").appendChild(container);
-}
+  }
 
   // Get reference to the new switch input
   const newTraceToggle = document.getElementById("enable-trace-toggle");
