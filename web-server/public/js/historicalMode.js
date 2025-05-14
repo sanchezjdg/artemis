@@ -273,10 +273,12 @@ if (!enableTraceToggleContainer) {
       displayHistoricalPaths();
 
       // Show the trace mode toggle only when data is loaded
+      // Mostrar el contenedor del botón solo cuando hay datos cargados
       const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
-      if (enableTraceToggleContainer) {
-        enableTraceToggleContainer.style.display = "block";
+      if (enableTraceToggleContainer && dataLoaded) {
+          enableTraceToggleContainer.style.display = "block";
       }
+
 
       // Reactivate trace if enabled
       if (newTraceToggle.checked) {
