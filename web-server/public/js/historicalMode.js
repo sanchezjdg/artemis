@@ -384,8 +384,9 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
   timestampDisplay.innerText = nearbyPoints[0].timestamp;
 
   // Mostrar el primer punto en el mapa inmediatamente
-  showTracePointOnMap(nearbyPoints[0]);
-
+  showTracePointOnMap(nearbyPoints[0])
+  
+  
 // Agrupar puntos por vehicle_id
 const groupedByVehicle = {};
 nearbyPoints.forEach(point => {
@@ -419,7 +420,6 @@ tracePolyline = Object.entries(groupedByVehicle).map(([vehicleId, coords]) => {
     lineJoin: 'round',
   }).addTo(getMap());
 });
-
 
   // Al mover el slider, actualizar el punto mostrado
   slider.oninput = () => {
@@ -521,6 +521,7 @@ export function cleanupHistoricalMode() {
       map.removeLayer(historicalPath);
     }
     historicalPath = null;
+
 
   if (tracePolyline) {
     const map = getMap();
