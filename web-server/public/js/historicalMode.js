@@ -386,20 +386,40 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
   // Mostrar el primer punto en el mapa inmediatamente
   showTracePointOnMap(nearbyPoints[0]);
 
-  // Eliminar la línea anterior si existe
+// Agrupar puntos por vehicle_id
+const groupedByVehicle = {};
+nearbyPoints.forEach(point => {
+  const { vehicle_id } = point;
+  if (!groupedByVehicle[vehicle_id]) {
+    groupedByVehicle[vehicle_id] = [];
+  }
+  groupedByVehicle[vehicle_id].push([point.latitude, point.longitude]);
+});
+
+// Borrar polilíneas anteriores si las hay
 if (tracePolyline) {
-  getMap().removeLayer(tracePolyline);
+  if (Array.isArray(tracePolyline)) {
+    tracePolyline.forEach(line => getMap().removeLayer(line));
+  } else {
+    getMap().removeLayer(tracePolyline);
+  }
   tracePolyline = null;
 }
 
-// Crear una polilínea conectando los puntos cercanos en orden temporal
-const latLngs = nearbyPoints.map(p => [p.latitude, p.longitude]);
-tracePolyline = L.polyline(latLngs, {
-  color: '#555', // gris neutro, o podés usar colorMap[p.vehicle_id]
-  weight: 4,
-  opacity: 0.8,
-  lineJoin: 'round'
-}).addTo(getMap());
+// Crear una línea por cada vehículo
+tracePolyline = Object.entries(groupedByVehicle).map(([vehicleId, coords]) => {
+  const colorMap = {
+    1: "#3b65ff", // azul
+    2: "#ff3b3b", // rojo
+  };
+  return L.polyline(coords, {
+    color: colorMap[vehicleId] || "#555",
+    weight: 4,
+    opacity: 0.8,
+    lineJoin: 'round',
+  }).addTo(getMap());
+});
+
 
   // Al mover el slider, actualizar el punto mostrado
   slider.oninput = () => {
@@ -502,10 +522,16 @@ export function cleanupHistoricalMode() {
     }
     historicalPath = null;
 
-    if (tracePolyline) {
-      getMap().removeLayer(tracePolyline);
-      tracePolyline = null;
+  if (tracePolyline) {
+    const map = getMap();
+    if (Array.isArray(tracePolyline)) {
+      tracePolyline.forEach(line => map.removeLayer(line));
+    } else {
+      map.removeLayer(tracePolyline);
     }
+    tracePolyline = null;
+  }
+
 
   }
 
