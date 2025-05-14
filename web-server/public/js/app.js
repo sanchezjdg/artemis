@@ -103,12 +103,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Mostrar botón flotante en pantallas pequeñas para minimizar/expandir el panel fijo
   const controlsPanel = document.querySelector(".controls");
   const toggleBtn = document.getElementById("toggle-controls");
-  controlsPanel.classList.toggle("minimized");
 
   if (window.innerWidth <= 600 && controlsPanel && toggleBtn) {
     toggleBtn.style.display = "block";
-
-    let minimized = false;
+    controlsPanel.classList.add("minimized"); // Minimiza el panel
+    toggleBtn.textContent = "Expand"; // Cambia el texto del botón a "Expand"
+    
+    let minimized = true;
     toggleBtn.addEventListener("click", () => {
       minimized = !minimized;
       if (minimized) {
