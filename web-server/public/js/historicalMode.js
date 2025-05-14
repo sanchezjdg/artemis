@@ -37,56 +37,56 @@ export function initHistoricalMode() {
   const marker = getMarker();
   clearLayer(marker);
 
-  // Ensure the container and switch are not duplicated
-const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
-if (!enableTraceToggleContainer) {
-    const container = document.createElement("div");
-    container.id = "enable-trace-toggle-container";
-    container.style.display = "none"; // Inicialmente oculto
-    container.style.marginTop = "10px";
+  // Crear el botón de flecha para activar el modo trace
+  let traceEnabled = false;
+  const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
+  if (!enableTraceToggleContainer) {
+      const container = document.createElement("div");
+      container.id = "enable-trace-toggle-container";
+      container.style.display = "none"; // Inicialmente oculto
+      container.style.marginTop = "10px";
 
-    // Crear el botón de flecha
-    const dropdownButton = document.createElement("button");
-    dropdownButton.id = "enable-trace-toggle";
-    dropdownButton.className = "dropdown-arrow";
-    dropdownButton.innerHTML = "Enable Trace Mode ▼";
+      const traceButton = document.createElement("button");
+      traceButton.id = "enable-trace-toggle";
+      traceButton.className = "dropdown-arrow";
+      traceButton.innerHTML = "Enable Trace Mode ▼";
 
-    container.appendChild(dropdownButton);
-    document.getElementById("historical-form").appendChild(container);
+      container.appendChild(traceButton);
+      document.getElementById("historical-form").appendChild(container);
 
-    // Manejar el estado del botón
-    dropdownButton.addEventListener("click", () => {
-        const map = getMap();
-        map.off("click"); // Elimina cualquier evento de clic existente
+      traceButton.addEventListener("click", () => {
+          traceEnabled = !traceEnabled;
 
-        // Limpiar todo al cambiar de modo
-        clearTemporaryMarker();
-        clearSearchCircle();
+          if (traceEnabled) {
+              traceButton.classList.add("active");
+              traceButton.innerHTML = "Disable Trace Mode ▲";
+              document.getElementById("trace-radius-control").style.display = "block";
 
-        if (dropdownButton.classList.contains("active")) {
-            // Desactivar modo trace
-            dropdownButton.classList.remove("active");
-            dropdownButton.innerHTML = "Enable Trace Mode ▼";
-            document.getElementById("trace-radius-control").style.display = "none";
-            document.getElementById("trace-time-slider-control").style.display = "none";
+              // Verifica si los datos están cargados antes de habilitar el trace
+              if (dataLoaded && traceHistoricalData.length > 0) {
+                  const map = getMap();
+                  map.on("click", onMapClickTrace);
+                  showToast("Trace mode enabled. Click on the map to display trace information.");
+              } else {
+                  showToast("Please load route data first using the 'Load Route' button.");
+              }
+          } else {
+              traceButton.classList.remove("active");
+              traceButton.innerHTML = "Enable Trace Mode ▼";
+              document.getElementById("trace-radius-control").style.display = "none";
+              document.getElementById("trace-time-slider-control").style.display = "none";
 
-            if (dataLoaded && traceHistoricalData.length > 0) {
-                displayHistoricalPaths();
-            }
-        } else {
-            // Activar modo trace
-            dropdownButton.classList.add("active");
-            dropdownButton.innerHTML = "Disable Trace Mode ▲";
-            document.getElementById("trace-radius-control").style.display = "block";
+              // Limpiar los rastros anteriores
+              clearTemporaryMarker();
+              clearSearchCircle();
 
-            if (dataLoaded && traceHistoricalData.length > 0) {
-                getMap().off("click", onMapClickTrace);
-                const event = new Event("change");
-                dropdownButton.dispatchEvent(event);
-            }
-        }
-    });
-}
+              if (dataLoaded && traceHistoricalData.length > 0) {
+                  displayHistoricalPaths();
+              }
+          }
+      });
+  }
+
   // Get reference to the new switch input
   const newTraceToggle = document.getElementById("enable-trace-toggle");
   // Ensure trace mode starts disabled
