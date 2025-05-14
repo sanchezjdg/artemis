@@ -34,7 +34,8 @@ export function initHeatmapMode(traceHistoricalData) {
     if (
       layer instanceof L.Polyline ||
       layer instanceof L.Marker ||
-      layer instanceof L.CircleMarker
+      layer instanceof L.CircleMarker ||
+      layer instanceof L.Circle 
     ) {
       map.removeLayer(layer);
     }

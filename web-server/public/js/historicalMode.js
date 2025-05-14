@@ -503,14 +503,17 @@ function showTracePointOnMap(point) {
 export function cleanupHistoricalMode() {
   lastClickedPosition = null; // Reset last clicked position
   
+  // Limpiar círculo de búsqueda
   if (searchCircle) {
     const map = getMap();
     map.removeLayer(searchCircle);
     searchCircle = null;
   }
+
+  // Limpiar marcador temporal
   clearTemporaryMarker();
 
-  // Remove all polylines if they exist
+  // Limpiar polilíneas históricas
   if (historicalPath) {
     const map = getMap();
     if (Array.isArray(historicalPath)) {
@@ -521,8 +524,9 @@ export function cleanupHistoricalMode() {
       map.removeLayer(historicalPath);
     }
     historicalPath = null;
+  }
 
-
+  // Limpiar polilíneas de trace
   if (tracePolyline) {
     const map = getMap();
     if (Array.isArray(tracePolyline)) {
@@ -531,9 +535,6 @@ export function cleanupHistoricalMode() {
       map.removeLayer(tracePolyline);
     }
     tracePolyline = null;
-  }
-
-
   }
 
   // Limpiar cualquier polilínea residual
