@@ -11,6 +11,7 @@ export let traceHistoricalData = [];
 let traceViewLine = null;
 let temporaryMarker = null;
 let dataLoaded = false;
+
 let searchCircle = null; // Add global variable to track search circle
 let lastClickedPosition = null;
 
@@ -145,7 +146,7 @@ export function initHistoricalMode() {
       clearSearchCircle();
       clearTemporaryMarker();
 
-      // If data has been loaded, redraw the historical paths with original colors
+      // If data has been loaded, redraw the historical path
       if (dataLoaded && traceHistoricalData.length > 0) {
         displayHistoricalPaths();
       }
@@ -328,7 +329,7 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
 
   // Create and add a search circle to the map.
   const map = getMap();
-  searchCircle = L.circle(clickedLatLng, {
+  const searchCircle = L.circle(clickedLatLng, {
     radius: threshold,
     color: "red",
     fillColor: "#f03",
@@ -404,9 +405,6 @@ function clearSearchCircle() {
       map.removeLayer(layer);
     }
   });
-
-  // Clear the global searchCircle variable
-  searchCircle = null;
 }
 
 /**
@@ -474,16 +472,10 @@ export function cleanupHistoricalMode() {
   }
   clearTemporaryMarker();
 
-  // Remove all polylines if they exist
+  // Remove the polyline if it exists
   if (historicalPath) {
     const map = getMap();
-    if (Array.isArray(historicalPath)) {
-      historicalPath.forEach(path => {
-        if (path) map.removeLayer(path);
-      });
-    } else {
-      map.removeLayer(historicalPath);
-    }
+    map.removeLayer(historicalPath);
     historicalPath = null;
   }
 
