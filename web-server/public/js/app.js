@@ -101,24 +101,22 @@ document.addEventListener("DOMContentLoaded", () => {
   setActiveButton("real-time-btn");
 
   // Mostrar botón flotante en pantallas pequeñas para minimizar/expandir el panel fijo
-  const controlsPanel = document.querySelector(".controls");
-  const toggleBtn = document.getElementById("floating-btn");
+  const toggleBtn = document.getElementById("toggle-panel");
+  const fixedPanel = document.getElementById("fixed-info-panel");
 
-  if (window.innerWidth <= 600 && controlsPanel && toggleBtn) {
+  if (window.innerWidth <= 600 && toggleBtn && fixedPanel) {
     toggleBtn.style.display = "block";
-    controlsPanel.classList.add("minimized"); // Minimiza el panel
 
-    let minimized = true;
-
-    toggleBtn.textContent = "Expand"; // Cambia el texto del botón a "Expand"
-    
+    let minimized = false;
     toggleBtn.addEventListener("click", () => {
       minimized = !minimized;
       if (minimized) {
-        controlsPanel.classList.add("minimized");
+        fixedPanel.style.height = "30px";
+        fixedPanel.style.overflow = "hidden";
         toggleBtn.textContent = "Expand";
       } else {
-        controlsPanel.classList.remove("minimized");
+        fixedPanel.style.height = "";
+        fixedPanel.style.overflow = "auto";
         toggleBtn.textContent = "Minimize";
       }
     });
