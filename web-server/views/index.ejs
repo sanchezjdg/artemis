@@ -101,46 +101,62 @@
   </div>
 
 
-  <!-- Panel de información -->
+
+  <!-- Info Panel -->
 <div id="info-panel" class="info-panel">
   <button id="close-info" class="close-info">X</button>
-  <h3>🛈 Guía rápida</h3>
+  <h3>🛈 Quick Guide</h3>
   <p>
-    <strong>¿Qué hace esta app?</strong><br>
-    Te permite ver la <strong>ruta</strong> que ha seguido un vehículo y la <strong>velocidad</strong> a la que se movía, ya sea en tiempo real o en el pasado.
+    <strong>Track with confidence.</strong><br>
+    This platform lets you visualize the <strong>real routes</strong> and <strong>speeds</strong> of your vehicles — either in real time or from any past period.
+    <br><br>
+    All data comes directly from our proprietary mobile app installed on each vehicle, ensuring accurate, live and historical insights based on real-world movement.
   </p>
 
-  <strong>Modos disponibles</strong>
+  <strong>Explore the available features</strong>
+
   <details open>
-    <summary>🕓 Tiempo Real</summary>
+    <summary>🕓 Real-Time Mode</summary>
     <p>
-      Muestra la ubicación actual del vehículo y su velocidad en vivo. 
-      Si se está moviendo, verás por dónde va pasando.
+      Monitor your vehicle's exact location and speed live. 
+      Watch in real time as it moves along its route — ideal for logistics and control.
     </p>
   </details>
 
   <details open>
-    <summary>📆 Histórico</summary>
+    <summary>📆 Historical Mode</summary>
     <p>
-      Visualiza la ruta y velocidad que tuvo el vehículo en un periodo específico. 
-      Solo selecciona la fecha y hora de inicio y fin, y presiona <strong>Load Route</strong>.
+      Review where a vehicle was and how fast it was moving during any specific time frame. 
+      Simply pick a date and time range — if data exists, it loads automatically.
     </p>
   </details>
 
   <details open>
-    <summary>📍 Trace Mode (Búsqueda por cercanía)</summary>
+    <summary>📍 Trace Mode (Proximity Search)</summary>
     <p>
-      Funciona dentro del modo Histórico. Sirve para verificar si el vehículo pasó cerca de un lugar 
-      (por ejemplo, tu casa o un punto de interés).
+      Want to know if a vehicle passed near a key location? This feature helps you verify it with precision.
+      <br><br>
+      Trace Mode is available automatically whenever there's data in the selected range.
     </p>
     <p>
-      <em>Puedes ajustar el <strong>radio de búsqueda</strong> (por defecto: 100 metros) con la barra deslizante.</em>
+      Just move the marker — the <strong>search area</strong> will follow dynamically. Adjust the <strong>search radius</strong> to your needs (default: 100 meters).
+    </p>
+    <p>
+      <em>No clicks required — results update instantly.</em>
+    </p>
+  </details>
+
+  <details open>
+    <summary>🔥 Heatmap Mode</summary>
+    <p>
+      Identify zones with possible <strong>traffic congestion</strong> or delays.
+      The system highlights areas where vehicles consistently move slowly, based on <strong>low RPM readings</strong> from your fleet.
     </p>
   </details>
 </div>
 
 
-<!-- Botón flotante "i" -->
+<!-- Floating "i" Button -->
 <button id="info-toggle" class="info-toggle" style="background-color: #7500FA; color: white;">?</button>
 
   <!-- Toast container is dynamically added by toast.js if needed -->
