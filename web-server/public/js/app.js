@@ -81,11 +81,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeInfo = document.getElementById("close-info");
 
   infoToggle.addEventListener("click", () => {
-    infoPanel.style.display = infoPanel.style.display === "block" ? "none" : "block";
+    infoPanel.style.display   = "block";
+    infoToggle.style.display  = "none";
   });
 
   closeInfo.addEventListener("click", () => {
-    infoPanel.style.display = "none";
+    infoPanel.style.display   = "none";
+    infoToggle.style.display  = "block";
   });
 
   // Show real-time controls and hide historical form
