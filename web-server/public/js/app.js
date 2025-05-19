@@ -102,58 +102,18 @@ document.addEventListener("DOMContentLoaded", () => {
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
 
-// Lógica para envolver .controls en un <details> solo en móviles
-  const controls = document.querySelector(".controls");
+  // Mapa para que ocupe toda la pantalla
+  // Ajustar el mapa para que ocupe toda la pantalla solo en móviles
   const map = document.getElementById("map");
-  const fixedInfoPanel = document.getElementById("fixed-info-panel");
-
-  function wrapControlsInDetails() {
-    const details = document.createElement("details");
-    details.id = "controls-toggle";
-    details.setAttribute("open", "");
-
-    const summary = document.createElement("summary");
-    summary.textContent = "Controls";
-    details.appendChild(summary);
-
-    controls.parentNode.insertBefore(details, controls);
-    details.appendChild(controls);
-
-    details.addEventListener("toggle", () => {
-      if (details.open) {
-        map.style.height = "65vh";
-        map.style.top = "35vh";
-      } else {
-        map.style.height = "100vh";
-        map.style.top = "0";
-      }
-    });
-  }
-
-  function unwrapControls() {
-    const details = document.getElementById("controls-toggle");
-    if (details) {
-      details.replaceWith(controls);
+  if (map) {
+    if (window.innerWidth <= 600) { // Mismo breakpoint que el CSS
       map.style.height = "100vh";
       map.style.top = "0";
     }
-  }
-
-  // Ejecutar al cargar la página
-  if (window.innerWidth <= 768) {
-    wrapControlsInDetails();
-  }
-
-  // Manejar cambios de tamaño de ventana
-  window.addEventListener("resize", () => {
-    if (window.innerWidth <= 768) {
-      if (!document.getElementById("controls-toggle")) {
-        wrapControlsInDetails();
-      }
-    } else {
-      unwrapControls();
+    if (window.L && map.invalidateSize) {
+      map.invalidateSize();
     }
-  });
+  }
 });
 
 // Set up mode switching buttons.
