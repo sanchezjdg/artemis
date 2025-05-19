@@ -102,31 +102,30 @@ document.addEventListener("DOMContentLoaded", () => {
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
 
-  // Lógica para envolver .controls en un <details> solo en móviles
+// Lógica para envolver .controls en un <details> solo en móviles
   const controls = document.querySelector(".controls");
   const map = document.getElementById("map");
+  const fixedInfoPanel = document.getElementById("fixed-info-panel");
 
   function wrapControlsInDetails() {
-    // Crear el elemento <details>
     const details = document.createElement("details");
     details.id = "controls-toggle";
-    details.setAttribute("open", ""); // Abierto por defecto
+    details.setAttribute("open", "");
 
-    // Crear el elemento <summary>
     const summary = document.createElement("summary");
     summary.textContent = "Controls";
     details.appendChild(summary);
 
-    // Envolver el .controls en el <details>
     controls.parentNode.insertBefore(details, controls);
     details.appendChild(controls);
 
-    // Añadir un evento para ajustar el mapa cuando se abra/cierre el <details>
     details.addEventListener("toggle", () => {
       if (details.open) {
-        map.classList.remove("minimized");
+        map.style.height = "65vh";
+        map.style.top = "35vh";
       } else {
-        map.classList.add("minimized");
+        map.style.height = "100vh";
+        map.style.top = "0";
       }
     });
   }
@@ -134,9 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function unwrapControls() {
     const details = document.getElementById("controls-toggle");
     if (details) {
-      // Desenvolver el .controls y eliminar el <details>
       details.replaceWith(controls);
-      map.classList.remove("minimized"); // Asegurar que el mapa esté en su estado original
+      map.style.height = "100vh";
+      map.style.top = "0";
     }
   }
 
