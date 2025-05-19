@@ -102,27 +102,59 @@ document.addEventListener("DOMContentLoaded", () => {
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
 
-  // Mostrar botón flotante en pantallas pequeñas para minimizar/expandir el panel fijo
-  const toggleBtn = document.getElementById("toggle-panel");
-  const fixedPanel = document.getElementById("fixed-info-panel");
+  // Lógica para envolver .controls en un <details> solo en móviles
+  const controls = document.querySelector(".controls");
+  const map = document.getElementById("map");
 
-  if (window.innerWidth <= 600 && toggleBtn && fixedPanel) {
-    toggleBtn.style.display = "block";
+  function wrapControlsInDetails() {
+    // Crear el elemento <details>
+    const details = document.createElement("details");
+    details.id = "controls-toggle";
+    details.setAttribute("open", ""); // Abierto por defecto
 
-    let minimized = false;
-    toggleBtn.addEventListener("click", () => {
-      minimized = !minimized;
-      if (minimized) {
-        fixedPanel.style.height = "30px";
-        fixedPanel.style.overflow = "hidden";
-        toggleBtn.textContent = "Expand";
+    // Crear el elemento <summary>
+    const summary = document.createElement("summary");
+    summary.textContent = "Controls";
+    details.appendChild(summary);
+
+    // Envolver el .controls en el <details>
+    controls.parentNode.insertBefore(details, controls);
+    details.appendChild(controls);
+
+    // Añadir un evento para ajustar el mapa cuando se abra/cierre el <details>
+    details.addEventListener("toggle", () => {
+      if (details.open) {
+        map.classList.remove("minimized");
       } else {
-        fixedPanel.style.height = "";
-        fixedPanel.style.overflow = "auto";
-        toggleBtn.textContent = "Minimize";
+        map.classList.add("minimized");
       }
     });
   }
+
+  function unwrapControls() {
+    const details = document.getElementById("controls-toggle");
+    if (details) {
+      // Desenvolver el .controls y eliminar el <details>
+      details.replaceWith(controls);
+      map.classList.remove("minimized"); // Asegurar que el mapa esté en su estado original
+    }
+  }
+
+  // Ejecutar al cargar la página
+  if (window.innerWidth <= 768) {
+    wrapControlsInDetails();
+  }
+
+  // Manejar cambios de tamaño de ventana
+  window.addEventListener("resize", () => {
+    if (window.innerWidth <= 768) {
+      if (!document.getElementById("controls-toggle")) {
+        wrapControlsInDetails();
+      }
+    } else {
+      unwrapControls();
+    }
+  });
 });
 
 // Set up mode switching buttons.
