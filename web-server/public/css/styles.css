@@ -333,7 +333,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     gap: 8px !important;
     margin-top: 8px !important;
   }
-
   .controls #historical-form .input-group {
     display: flex;
     flex-direction: row !important; /* Asegurar que los input-groups estén en fila */

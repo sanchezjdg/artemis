@@ -96,6 +96,7 @@ export function initHistoricalMode() {
   const toggleButton = document.getElementById("trace-options-toggle");
 
   let traceModeToastShown = false;
+  let traceTimeSliderVisible = false; // Variable para rastrear la visibilidad de trace-time-slider-control
 
   newTraceToggle.addEventListener("change", () => {
     const map = getMap();
@@ -177,6 +178,7 @@ export function initHistoricalMode() {
 
       // Reset the toast flag when disabling trace mode
       traceModeToastShown = false;
+      traceTimeSliderVisible = false; // Resetear la visibilidad
     }
   });
 
@@ -185,11 +187,14 @@ export function initHistoricalMode() {
     if (traceOptionsContainer.style.display === "none") {
       traceOptionsContainer.style.display = "block";
       document.getElementById("trace-radius-control").style.display = "block";
-      if (document.getElementById("trace-time-slider-control").style.display === "block") {
+      // Mostrar trace-time-slider-control solo si estaba visible antes de minimizar
+      if (traceTimeSliderVisible) {
         document.getElementById("trace-time-slider-control").style.display = "block";
       }
       toggleButton.innerHTML = "▼"; // Flecha hacia abajo (expandido)
     } else {
+      // Guardar el estado de visibilidad de trace-time-slider-control antes de minimizar
+      traceTimeSliderVisible = document.getElementById("trace-time-slider-control").style.display === "block";
       traceOptionsContainer.style.display = "none";
       document.getElementById("trace-radius-control").style.display = "none";
       document.getElementById("trace-time-slider-control").style.display = "none";
