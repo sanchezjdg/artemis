@@ -360,8 +360,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     top: 0;
     right: 0;
     padding: 8px;
-    border-radius: 0;
-    max-height: 35vh; /* Limita la altura para dar más espacio al mapa */
+    border-radius: 0 0 10px 10px;
+    max-height: 35vh;
     overflow-y: auto;
     box-sizing: border-box;
   }
@@ -385,9 +385,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-size: 12px;
   }
 
+  /* Reorganizar formularios en filas */
+  #historical-form .input-group,
+  #heatmap-form .input-group {
+    flex: 1;
+    min-width: 120px;
+  }
+
   #historical-form,
   #heatmap-form {
-    gap: 8px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
   }
 
   .input-group label {
@@ -409,10 +420,14 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
   /* Map adjustments */
   #map {
-    height: 65vh; /* Deja espacio para controles y panel inferior */
-    position: absolute;
-    top: 35vh; /* Comienza debajo del panel de controles */
-    width: 100%;
+    height: 65vh;
+    top: 35vh;
+  }
+
+  /* Map adjustments when controls are minimized */
+  #controls-toggle:not([open]) ~ #map {
+    height: 100vh;
+    top: 0;
   }
 
   /* Fixed Info Panel adjustments */
@@ -437,22 +452,5 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   .vehicle-box {
     flex: 0 0 auto;
     width: 120px;
-  }
-
-  /* Toggle button for minimizing controls */
-  #toggle-panel {
-    display: block;
-    bottom: 25vh;
-    left: 10px;
-  }
-
-  /* Minimized state */
-  .controls.minimized {
-    display: none;
-  }
-
-  #map.minimized {
-    height: 80vh; /* Más espacio para el mapa cuando los controles están minimizados */
-    top: 0;
   }
 }
