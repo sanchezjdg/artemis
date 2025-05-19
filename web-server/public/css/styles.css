@@ -453,4 +453,22 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     flex: 0 0 auto;
     width: 120px;
   }
+
+  /* Toggle button for minimizing controls */
+  #toggle-panel {
+    display: block;
+    bottom: 25vh;
+    left: 10px;
+  }
+
+  /* Minimized state */
+  .controls.minimized {
+    display: none;
+  }
+
+  #map.minimized {
+    height: 80vh; /* Más espacio para el mapa cuando los controles están minimizados */
+    top: 0;
+  }
 }
+
