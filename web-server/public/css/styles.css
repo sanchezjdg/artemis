@@ -351,160 +351,108 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
-@media (max-width: 600px) {
-  /* Asegura que el contenedor principal se adapte */
-  #main-container {
-    padding: 0.5rem;
-    box-sizing: border-box;
-  }
-
-  /* Acomoda el encabezado para pantallas chicas */
-  header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.5rem;
-  }
-
-  header h1 {
-    font-size: 1.5rem;
-  }
-
-  /* Botones con tamaño amigable */
-  #view-mode-controls {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  #view-mode-controls button {
-    width: 45%;
-    min-width: 100px;
-    font-size: 1rem;
-  }
-
-  /* Slider y sus controles */
-  #trace-time-slider-control {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  input[type="range"],
-  input[type="text"] {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
+/* Mobile-specific adjustments (Single Media Query) */
+@media (max-width: 768px) {
+  /* Controls panel adjustments */
   .controls {
-    width: 90%;
-    padding: 0.8rem;
-    font-size: 0.9rem;
+    width: 100%;
+    max-width: 100%;
+    top: 0;
+    right: 0;
+    padding: 8px;
+    border-radius: 0;
+    max-height: 35vh; /* Limita la altura para dar más espacio al mapa */
+    overflow-y: auto;
+    box-sizing: border-box;
   }
 
-  .controls .mode-info,
-  .controls .mode-buttons button,
-  .controls select,
-  .controls label {
-    font-size: 0.85rem;
+  .controls h2 {
+    font-size: 14px;
+    margin-bottom: 4px;
   }
 
-  .controls .mode-buttons {
-    flex-wrap: wrap;
-    gap: 0.3rem;
+  .mode-info {
+    font-size: 12px;
+    margin-bottom: 4px;
   }
 
-  .vehicle-box {
-    flex: 1 1 100%;
-    font-size: 0.85rem;
-    padding: 0.6rem;
+  .button-group {
+    gap: 4px;
   }
 
-  #info-panel {
-    flex-direction: column;
-    align-items: center;
+  .controls button {
+    padding: 6px 8px;
+    font-size: 12px;
   }
-  
-  .vehicle-box {
-    flex: 1;
-    min-width: 0;
-    overflow: auto;
+
+  #historical-form,
+  #heatmap-form {
+    gap: 8px;
   }
-  
+
+  .input-group label {
+    font-size: 11px;
+  }
+
+  .input-group input {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  #trace-radius-control label {
+    font-size: 11px;
+  }
+
+  #trace-radius-control input[type="range"] {
+    margin-top: 4px;
+  }
+
+  /* Map adjustments */
+  #map {
+    height: 65vh; /* Deja espacio para controles y panel inferior */
+    position: absolute;
+    top: 35vh; /* Comienza debajo del panel de controles */
+    width: 100%;
+  }
+
+  /* Fixed Info Panel adjustments */
   #fixed-info-panel {
-    position: fixed;
-    bottom: 10px;
+    width: 90vw;
+    max-width: 90vw;
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 9999;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    border-radius: 12px;
-    padding: 8px 12px;
-    display: flex;
+    padding: 6px 8px;
     flex-direction: row;
-    gap: 8px;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: calc(100% - 20px);
-    height: auto;
-    max-height: none;
-    max-width: 95vw;
+    gap: 6px;
+    font-size: 12px;
+    max-height: 20vh;
+    overflow-x: auto;
   }
-  
-    
+
   #fixed-info-panel hr {
     display: none;
   }
-  
-  #fixed-info-panel {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 95vw;
-    max-width: 95vw;
-    z-index: 9999;
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
-    border-radius: 12px;
-    padding: 8px 12px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: space-between;
-    align-items: flex-start;
-    overflow: auto;
+
+  .vehicle-box {
+    flex: 0 0 auto;
+    width: 120px;
   }
 
+  /* Toggle button for minimizing controls */
   #toggle-panel {
     display: block;
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    z-index: 10000;
-    background-color: #6200ee;
-    color: white;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 20px;
-    font-size: 14px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    cursor: pointer;
+    bottom: 25vh;
+    left: 10px;
   }
 
-  .input-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: space-between;
+  /* Minimized state */
+  .controls.minimized {
+    display: none;
   }
-  
-  .input-group > div {
-    flex: 1;
-    min-width: 120px;
+
+  #map.minimized {
+    height: 80vh; /* Más espacio para el mapa cuando los controles están minimizados */
+    top: 0;
   }
 }
-
-
-
