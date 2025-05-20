@@ -1,19 +1,18 @@
 import { getMap } from './mapHandler.js';
 import { cleanupHistoricalMode } from './historicalMode.js';
 
-
 let heatLayer = null;
 
 /**
- * Inicializa el mapa de calor con datos históricos recibidos.
- * Los puntos de congestión (RPM bajo, poca distancia, largo tiempo) se marcan en otro color.
+ * Inicializa el modo mapa de calor solo para puntos con congestión.
+ * Se considera congestión cuando el RPM está entre 600 y 1500 y la distancia entre puntos es muy baja.
  * @param {Array} traceHistoricalData 
  */
 export function initHeatmapMode(traceHistoricalData) {
-  cleanupHistoricalMode(); // ⬅ Limpia cualquier rastro del modo histórico
+  cleanupHistoricalMode(); 
   const map = getMap();
 
-  // Oculta elementos del modo histórico si están presentes
+  // Oculta elementos de otros modos
   const form = document.getElementById("historical-form");
   if (form) form.style.display = "none";
 
@@ -29,7 +28,7 @@ export function initHeatmapMode(traceHistoricalData) {
     traceResults.innerHTML = "";
   }
 
-  // Elimina polilíneas anteriores
+  // Elimina elementos gráficos anteriores
   map.eachLayer((layer) => {
     if (
       layer instanceof L.Polyline ||
@@ -40,17 +39,14 @@ export function initHeatmapMode(traceHistoricalData) {
       map.removeLayer(layer);
     }
   });
-  
 
-  // Limpia capas anteriores
+  // Limpia heatmap previo
   if (heatLayer) {
     map.removeLayer(heatLayer);
     heatLayer = null;
   }
 
-  const normalPoints = [];
   const congestedPoints = [];
-
   let clusterStart = null;
   let currentGroup = [];
 
@@ -63,60 +59,36 @@ export function initHeatmapMode(traceHistoricalData) {
     );
     const rpm = point.rpm;
 
-    const isStillCongested = rpm > 600 && rpm < 1500 && dist < 10;
+    const isCongested = rpm > 600 && rpm < 1500 && dist < 10;
 
-    if (isStillCongested) {
+    if (isCongested) {
       if (!clusterStart) clusterStart = new Date(prev.timestamp);
       currentGroup.push(point);
     } else {
       if (clusterStart && currentGroup.length > 0) {
         const totalTime = new Date(currentGroup[currentGroup.length - 1].timestamp) - clusterStart;
-        const pointsToUse = currentGroup.length > 1 ? currentGroup : [prev];
-
         if (totalTime > 30000) {
-          pointsToUse.forEach(p =>
-            congestedPoints.push([p.latitude, p.longitude, 1])
-          );
-        } else {
-          pointsToUse.forEach(p =>
-            normalPoints.push([p.latitude, p.longitude, 1])
-          );
+          currentGroup.forEach(p => congestedPoints.push([p.latitude, p.longitude, 1]));
         }
       }
       clusterStart = null;
       currentGroup = [];
-
-      // También agrega este punto como normal (por fuera del grupo)
-      normalPoints.push([point.latitude, point.longitude, 1]);
     }
   });
 
-  // Por si quedó una congestión al final sin cerrar
+  // Por si hay una congestión abierta al final
   if (clusterStart && currentGroup.length > 0) {
     const totalTime = new Date(currentGroup[currentGroup.length - 1].timestamp) - clusterStart;
-    if (totalTime > 10000) {
+    if (totalTime > 30000) {
       currentGroup.forEach(p => congestedPoints.push([p.latitude, p.longitude, 1]));
-    } else {
-      currentGroup.forEach(p => normalPoints.push([p.latitude, p.longitude, 1]));
     }
   }
 
-  // Capa normal
-  const normalHeat = L.heatLayer(normalPoints, {
-    radius: 25,
-    blur: 15,
-    maxZoom: 17,
-    gradient: {
-      0.2: 'blue',
-      0.4: 'lime',
-      0.6: 'yellow',
-      0.8: 'orange',
-      1.0: 'red'
-    }
-  }).addTo(map);
+  // Si no hay puntos de congestión, no continúes
+  if (congestedPoints.length === 0) return;
 
-  // Capa de congestión
-  const congestedHeat = L.heatLayer(congestedPoints, {
+  // Única capa de congestión
+  heatLayer = L.heatLayer(congestedPoints, {
     radius: 25,
     blur: 20,
     maxZoom: 17,
@@ -127,12 +99,8 @@ export function initHeatmapMode(traceHistoricalData) {
     }
   }).addTo(map);
 
-  // Agrupa para poder eliminar más fácil
-  heatLayer = L.layerGroup([normalHeat, congestedHeat]);
-
-  // Centra el mapa en los datos
-  const allPoints = [...normalPoints, ...congestedPoints];
-  const bounds = L.latLngBounds(allPoints.map(p => [p[0], p[1]]));
+  // Centra el mapa
+  const bounds = L.latLngBounds(congestedPoints.map(p => [p[0], p[1]]));
   map.fitBounds(bounds, { padding: [50, 50] });
 }
 
@@ -143,12 +111,10 @@ export function cleanupHeatmapMode() {
   const map = getMap();
 
   if (heatLayer) {
-    // 🔥 Eliminar cada subcapa del grupo
     heatLayer.eachLayer(layer => map.removeLayer(layer));
     heatLayer = null;
   }
 
-  // 🔁 Por seguridad, también elimina cualquier otra HeatLayer residual
   map.eachLayer(layer => {
     if (layer instanceof L.HeatLayer) {
       map.removeLayer(layer);
