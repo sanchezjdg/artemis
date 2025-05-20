@@ -287,118 +287,34 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 /* Optimize the menu for mobile devices */
 @media (max-width: 768px) {
+/* Mobile-specific adjustments (hasta 600px como en tu código) */
   .controls {
-    width: 80%;
-    max-width: none;
-    padding: 5px;
-    font-size: 10px;
+    position: absolute;
+    top: 0;
+    left: 0; /* Cambiado de right: 0 a left: 0 para asegurar que empiece desde la izquierda */
+    width: 100%; /* Ocupa todo el ancho de la pantalla */
+    max-height: 35vh; /* Limita la altura máxima para evitar que se extienda verticalmente */
+    padding: 0.8rem;
+    font-size: 0.9rem;
+    overflow-y: auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column; /* Asegurar que los elementos dentro de .controls se apilen verticalmente */
+    background: rgba(128, 0, 128, 0.9); /* Asegurar que el fondo morado sea visible */
+    z-index: 1000; /* Asegurar que esté por encima del mapa */
+    flex-wrap: wrap;
+    gap: 18px !important;
+    margin-top: 8px; 
   }
 
   .controls h2 {
     font-size: 14px;
   }
 
-  .controls button {
+  .controls button,
+  .load-button {
     padding: 6px 10px;
     font-size: 12px;
-  }
-
-  .input-group label {
-    font-size: 12px;
-  }
-
-  .input-group input {
-    font-size: 12px;
-    padding: 6px;
-  }
-
-  .load-button {
-    font-size: 12px;
-    padding: 6px;
-  }
-}
-
-#vehicle-select {
-  margin-bottom: 6px;
-}
-
-#trace-time-slider-control {
-  display: none;
-  margin-top: 10px;
-}
-
-#trace-time-slider {
-  width: 100%;
-}
-
-#trace-timestamp-display {
-  text-align: center;
-  font-size: 12px;
-  margin-top: 4px;
-  color: var(--white);
-}
-
-.vehicle-select {
-  margin-top: 10px;
-  width: 100%;
-  padding: 5px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  color: #000;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-@media (max-width: 600px) {
-  /* Asegura que el contenedor principal se adapte */
-  #main-container {
-    padding: 0.5rem;
-    box-sizing: border-box;
-  }
-
-  /* Acomoda el encabezado para pantallas chicas */
-  header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.5rem;
-  }
-
-  header h1 {
-    font-size: 1.5rem;
-  }
-
-  /* Botones con tamaño amigable */
-  #view-mode-controls {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  #view-mode-controls button {
-    width: 45%;
-    min-width: 100px;
-    font-size: 1rem;
-  }
-
-  /* Slider y sus controles */
-  #trace-time-slider-control {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  input[type="range"],
-  input[type="text"] {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .controls {
-    width: 90%;
-    padding: 0.8rem;
-    font-size: 0.9rem;
   }
 
   .controls .mode-info,
@@ -408,54 +324,105 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-size: 0.85rem;
   }
 
-  .controls .mode-buttons {
-    flex-wrap: wrap;
-    gap: 0.3rem;
+  /* Reorganizar formularios en filas para Start y End */
+  .controls #historical-form,
+  .controls #heatmap-form {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-top: 8px !important;
   }
-
-  .vehicle-box {
-    flex: 1 1 100%;
-    font-size: 0.85rem;
-    padding: 0.6rem;
-  }
-
-  #info-panel {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .vehicle-box {
-    flex: 1;
-    min-width: 0;
-    overflow: auto;
-  }
-  
-  #fixed-info-panel {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    border-radius: 12px;
-    padding: 8px 12px;
+  .controls #historical-form .input-group {
     display: flex;
-    flex-direction: row;
-    gap: 8px;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: calc(100% - 20px);
-    height: auto;
-    max-height: none;
-    max-width: 95vw;
+    flex-direction: row !important; /* Asegurar que los input-groups estén en fila */
+    gap: 8px; /* Espacio entre Start y End */
+    flex: 1;
+    min-width: 0; /* Permitir que se ajusten */
   }
-  
-    
-  #fixed-info-panel hr {
+
+  .controls #historical-form .input-group > div {
+    flex: 1;
+    min-width: 110px; /* Mínimo para cada campo */
+  }
+
+  .input-group label,
+  .input-group input {
+    font-size: 12px;
+  }
+
+  .input-group input {
+    padding: 4px;
+  }
+
+  #vehicle-select {
+    margin-bottom: 6px;
+  }
+
+  #trace-time-slider-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 10px;
+  }
+
+  #trace-time-slider-control label {
+  font-size: 12px;
+  text-align: left; /* Asegurar que el título esté alineado a la izquierda */
+  width: 100%;
+  }
+
+  #trace-time-slider {
+    width: 100%;
+  }
+
+  #trace-timestamp-display {
+    text-align: center;
+    font-size: 12px;
+    margin-top: 4px;
+    color: var(--white);
+  }
+
+  .vehicle-select {
+    margin-top: 10px;
+    width: 100%;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #000;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  /* Estilos para el contenedor del toggle y el botón de expandir/minimizar */
+  .trace-toggle-container {
     display: none;
+    margin-top: 10px;
   }
-  
+
+  #trace-options-container {
+    margin-top: 8px;
+  }
+
+  .trace-options-toggle {
+    display: block;
+    margin: 8px auto;
+    padding: 4px 8px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .trace-options-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Fixed Info Panel adjustments (tu código funcional) */
   #fixed-info-panel {
     position: fixed;
     bottom: 10px;
@@ -477,33 +444,23 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     overflow: auto;
   }
 
-  #toggle-panel {
-    display: block;
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    z-index: 10000;
-    background-color: #6200ee;
-    color: white;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 20px;
-    font-size: 14px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    cursor: pointer;
+  #fixed-info-panel hr {
+    display: none;
   }
 
-  .input-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-  
-  .input-group > div {
+  .vehicle-box {
     flex: 1;
-    min-width: 120px;
+    min-width: 0;
+    overflow: auto;
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+
+  /* Map adjustments */
+  #map {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    height: 100vh;
   }
 }
-
-

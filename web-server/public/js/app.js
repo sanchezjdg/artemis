@@ -81,11 +81,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeInfo = document.getElementById("close-info");
 
   infoToggle.addEventListener("click", () => {
-    infoPanel.style.display = infoPanel.style.display === "block" ? "none" : "block";
+    infoPanel.style.display   = "block";
+    infoToggle.style.display  = "none";
   });
 
   closeInfo.addEventListener("click", () => {
-    infoPanel.style.display = "none";
+    infoPanel.style.display   = "none";
+    infoToggle.style.display  = "block";
   });
 
   // Show real-time controls and hide historical form
@@ -100,26 +102,17 @@ document.addEventListener("DOMContentLoaded", () => {
   startRealTimeUpdates(socket);
   setActiveButton("real-time-btn");
 
-  // Mostrar botón flotante en pantallas pequeñas para minimizar/expandir el panel fijo
-  const toggleBtn = document.getElementById("toggle-panel");
-  const fixedPanel = document.getElementById("fixed-info-panel");
-
-  if (window.innerWidth <= 600 && toggleBtn && fixedPanel) {
-    toggleBtn.style.display = "block";
-
-    let minimized = false;
-    toggleBtn.addEventListener("click", () => {
-      minimized = !minimized;
-      if (minimized) {
-        fixedPanel.style.height = "30px";
-        fixedPanel.style.overflow = "hidden";
-        toggleBtn.textContent = "Expand";
-      } else {
-        fixedPanel.style.height = "";
-        fixedPanel.style.overflow = "auto";
-        toggleBtn.textContent = "Minimize";
-      }
-    });
+  // Mapa para que ocupe toda la pantalla
+  // Ajustar el mapa para que ocupe toda la pantalla solo en móviles
+  const map = document.getElementById("map");
+  if (map) {
+    if (window.innerWidth <= 600) { // Mismo breakpoint que el CSS
+      map.style.height = "100vh";
+      map.style.top = "0";
+    }
+    if (window.L && map.invalidateSize) {
+      map.invalidateSize();
+    }
   }
 });
 

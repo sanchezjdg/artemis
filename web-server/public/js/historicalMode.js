@@ -21,29 +21,28 @@ let lastKnownPosition = null;
 /**
  * Initialize historical mode: sets up event listeners on the historical form.
  */
+
+//Modified
 export function initHistoricalMode() {
-  // Remove any pre-existing click handlers.
   const map = getMap();
-  // Update radius value display when the slider is moved
   const radiusSlider = document.getElementById("search-radius");
   const radiusValueDisplay = document.getElementById("radius-value");
   map.off("click");
 
-  // Hide trace results initially.
   document.getElementById("trace-results").innerHTML = "";
   document.getElementById("trace-results").style.display = "none";
 
-  // Hide the regular marker in historical mode
+  // Ensure the trace radius control visibility matches the toggle state
+  document.getElementById("trace-radius-control").style.display = "none";
+
   const marker = getMarker();
   clearLayer(marker);
 
-  // Ensure the container and switch are not duplicated
   const enableTraceToggleContainer = document.getElementById("enable-trace-toggle-container");
   if (!enableTraceToggleContainer) {
     const container = document.createElement("div");
     container.id = "enable-trace-toggle-container";
-    container.style.display = "none"; // Initially hidden
-    container.style.marginTop = "10px";
+    container.className = "trace-toggle-container";
 
     const switchLabel = document.createElement("label");
     switchLabel.className = "switch";
@@ -64,29 +63,48 @@ export function initHistoricalMode() {
     container.appendChild(switchLabel);
     container.appendChild(labelText);
 
+    // Crear un contenedor para los elementos adicionales (como trace-radius-control)
+    const traceOptionsContainer = document.createElement("div");
+    traceOptionsContainer.id = "trace-options-container";
+    traceOptionsContainer.className = "trace-options-container";
+    traceOptionsContainer.style.display = "none"; // Inicialmente oculto
+
+    // Mover los elementos trace-radius-control y trace-time-slider-control al nuevo contenedor
+    const traceRadiusControl = document.getElementById("trace-radius-control");
+    const traceTimeSliderControl = document.getElementById("trace-time-slider-control");
+    if (traceRadiusControl) traceOptionsContainer.appendChild(traceRadiusControl);
+    if (traceTimeSliderControl) traceOptionsContainer.appendChild(traceTimeSliderControl);
+
+    // Crear el botón de expandir/minimizar
+    const toggleButton = document.createElement("button");
+    toggleButton.id = "trace-options-toggle";
+    toggleButton.className = "trace-options-toggle";
+    toggleButton.innerHTML = "▼"; // Flecha hacia abajo por defecto
+    toggleButton.style.display = "none"; // Oculto hasta que se active Enable Trace Mode
+
+    // Añadir el botón y el contenedor al DOM
+    container.appendChild(toggleButton);
+    container.appendChild(traceOptionsContainer);
+
     document.getElementById("historical-form").appendChild(container);
   }
 
-  // Get reference to the new switch input
   const newTraceToggle = document.getElementById("enable-trace-toggle");
-  // Ensure trace mode starts disabled
   newTraceToggle.checked = false;
-  
-  // Ensure the trace radius control visibility matches the toggle state
-  document.getElementById("trace-radius-control").style.display = "none";
 
-  // Add a flag to track if the toast message has been shown
+  const traceOptionsContainer = document.getElementById("trace-options-container");
+  const toggleButton = document.getElementById("trace-options-toggle");
+
   let traceModeToastShown = false;
+  let traceTimeSliderVisible = false; // Variable para rastrear la visibilidad de trace-time-slider-control
 
   newTraceToggle.addEventListener("change", () => {
     const map = getMap();
-    map.off("click"); // First remove any existing click handlers
+    map.off("click");
 
-    // Clean up everything when switching modes
     clearTemporaryMarker();
     clearSearchCircle();
-    
-    // Clear historical paths
+
     if (historicalPath) {
       if (Array.isArray(historicalPath)) {
         historicalPath.forEach(path => {
@@ -97,7 +115,7 @@ export function initHistoricalMode() {
       }
       historicalPath = null;
     }
-    
+
     if (newTraceToggle.checked) {
       // When trace mode is enabled:
       // Show the trace radius slider.
@@ -108,6 +126,10 @@ export function initHistoricalMode() {
           map.removeLayer(layer);
         }
       });
+
+      // Mostrar el botón de expandir/minimizar
+      toggleButton.style.display = "block";
+      traceOptionsContainer.style.display = "block"; // Mostrar inicialmente
 
       // If data has already been loaded, enable trace functionality
       if (dataLoaded && traceHistoricalData.length > 0) {
@@ -122,7 +144,7 @@ export function initHistoricalMode() {
         const initialPosition = L.latLng(firstPoint.latitude, firstPoint.longitude);
         lastClickedPosition = initialPosition;
         performTraceSearch(initialPosition);
-        
+
         // Show the toast message only if it hasn't been shown yet
         if (!traceModeToastShown) {
           showToast("Trace mode enabled. Click on the map to display trace information.");
@@ -131,18 +153,21 @@ export function initHistoricalMode() {
 
         map.on("click", onMapClickTrace);
       } else {
-        showToast(
-          "Please load route data first using the 'Load Route' button.",
-        );
+        showToast("Please load route data first using the 'Load Route' button.");
+        toggleButton.style.display = "none"; // Ocultar si no hay datos
+        traceOptionsContainer.style.display = "none";
       }
     } else {
       // When trace mode is disabled:
       // Hide both the trace radius slider and the detected moments slider
       document.getElementById("trace-radius-control").style.display = "none";
       document.getElementById("trace-time-slider-control").style.display = "none";
+      // Ocultar el contenedor de opciones y el botón de toggle
+      toggleButton.style.display = "none";
+      traceOptionsContainer.style.display = "none";
       // Remove the click event for trace mode
       map.off("click");
-      
+
       clearSearchCircle();
       clearTemporaryMarker();
 
@@ -153,8 +178,31 @@ export function initHistoricalMode() {
 
       // Reset the toast flag when disabling trace mode
       traceModeToastShown = false;
+      traceTimeSliderVisible = false; // Resetear la visibilidad
     }
   });
+
+  // Añadir funcionalidad al botón de expandir/minimizar
+  toggleButton.addEventListener("click", () => {
+    if (traceOptionsContainer.style.display === "none") {
+      traceOptionsContainer.style.display = "block";
+      document.getElementById("trace-radius-control").style.display = "block";
+      // Mostrar trace-time-slider-control solo si estaba visible antes de minimizar
+      if (traceTimeSliderVisible) {
+        document.getElementById("trace-time-slider-control").style.display = "block";
+      }
+      toggleButton.innerHTML = "▼"; // Flecha hacia abajo (expandido)
+    } else {
+      // Guardar el estado de visibilidad de trace-time-slider-control antes de minimizar
+      traceTimeSliderVisible = document.getElementById("trace-time-slider-control").style.display === "block";
+      traceOptionsContainer.style.display = "none";
+      document.getElementById("trace-radius-control").style.display = "none";
+      document.getElementById("trace-time-slider-control").style.display = "none";
+      toggleButton.innerHTML = "▲"; // Flecha hacia arriba (minimizado)
+    }
+  });
+
+  //Modified
 
   let vehicleSelectHistorical = document.getElementById('vehicle-select-historical');
   if (!vehicleSelectHistorical) {
