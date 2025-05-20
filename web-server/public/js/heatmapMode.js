@@ -81,7 +81,7 @@ export function initHeatmapMode(traceHistoricalData) {
       currentGroup = [];
 
       // Agrega punto normal con peso 1
-      heatPoints.push([point.latitude, point.longitude, 1]);
+      heatPoints.push([point.latitude, point.longitude, 0.5]);
     }
   });
 
