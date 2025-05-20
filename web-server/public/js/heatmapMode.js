@@ -4,15 +4,15 @@ import { cleanupHistoricalMode } from './historicalMode.js';
 let heatLayer = null;
 
 /**
- * Inicializa el mapa de calor con todos los puntos recorridos.
- * Los puntos de congestión reciben más peso en la capa.
+ * Inicializa el mapa de calor mostrando el recorrido completo.
+ * Las zonas con congestión se visualizan con mayor intensidad.
  * @param {Array} traceHistoricalData 
  */
 export function initHeatmapMode(traceHistoricalData) {
   cleanupHistoricalMode();
   const map = getMap();
 
-  // Oculta elementos de otros modos
+  // Oculta controles de otros modos
   const form = document.getElementById("historical-form");
   if (form) form.style.display = "none";
 
@@ -28,20 +28,21 @@ export function initHeatmapMode(traceHistoricalData) {
     traceResults.innerHTML = "";
   }
 
-  // Limpieza de elementos anteriores
+  // Limpia capas gráficas previas
   map.eachLayer((layer) => {
     if (
       layer instanceof L.Polyline ||
       layer instanceof L.Marker ||
       layer instanceof L.CircleMarker ||
-      layer instanceof L.Circle 
+      layer instanceof L.Circle
     ) {
       map.removeLayer(layer);
     }
   });
 
+  // Limpieza previa de heatLayer
   if (heatLayer) {
-    map.removeLayer(heatLayer);
+    if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
     heatLayer = null;
   }
 
@@ -66,30 +67,42 @@ export function initHeatmapMode(traceHistoricalData) {
     } else {
       if (clusterStart && currentGroup.length > 0) {
         const totalTime = new Date(currentGroup[currentGroup.length - 1].timestamp) - clusterStart;
-        const weight = totalTime > 30000 ? 3 : 1.5;
+
+        let weight = 1.5;
+        if (totalTime >= 10000 && totalTime < 30000) weight = 3;
+        else if (totalTime >= 30000) weight = 5;
+
         currentGroup.forEach(p =>
           heatPoints.push([p.latitude, p.longitude, weight])
         );
       }
+
       clusterStart = null;
       currentGroup = [];
 
-      // Agrega punto normal
+      // Agrega punto normal con peso 1
       heatPoints.push([point.latitude, point.longitude, 1]);
     }
   });
 
-  // Por si queda un grupo congestionado al final
+  // Congestión al final
   if (clusterStart && currentGroup.length > 0) {
     const totalTime = new Date(currentGroup[currentGroup.length - 1].timestamp) - clusterStart;
-    const weight = totalTime > 30000 ? 3 : 1.5;
+
+    let weight = 1.5;
+    if (totalTime >= 10000 && totalTime < 30000) weight = 3;
+    else if (totalTime >= 30000) weight = 5;
+
     currentGroup.forEach(p =>
       heatPoints.push([p.latitude, p.longitude, weight])
     );
   }
 
-  // Capa única de calor
-  heatLayer = L.heatLayer(heatPoints, {
+  // Si no hay puntos, no hacemos nada
+  if (heatPoints.length === 0) return;
+
+  // Una sola capa con gradiente multicolor
+  const heat = L.heatLayer(heatPoints, {
     radius: 25,
     blur: 15,
     maxZoom: 17,
@@ -100,24 +113,28 @@ export function initHeatmapMode(traceHistoricalData) {
       0.8: 'orange',
       1.0: 'red'
     }
-  }).addTo(map);
+  });
 
-  // Centra el mapa en todos los puntos
+  // Agrupa y agrega al mapa
+  heatLayer = L.layerGroup([heat]).addTo(map);
+
+  // Centrado automático
   const bounds = L.latLngBounds(heatPoints.map(p => [p[0], p[1]]));
   map.fitBounds(bounds, { padding: [50, 50] });
 }
 
 /**
- * Limpia el mapa de calor.
+ * Limpia la capa de calor del mapa.
  */
 export function cleanupHeatmapMode() {
   const map = getMap();
 
-  if (heatLayer) {
-    heatLayer.eachLayer(layer => map.removeLayer(layer));
+  if (heatLayer && map.hasLayer(heatLayer)) {
+    map.removeLayer(heatLayer);
     heatLayer = null;
   }
 
+  // Seguridad adicional
   map.eachLayer(layer => {
     if (layer instanceof L.HeatLayer) {
       map.removeLayer(layer);
