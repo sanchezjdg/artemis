@@ -324,7 +324,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .trace-options-toggle {
     display: block;
-    width: 200px;            /* Puedes ajustar este ancho */
+    width: 100%;        /* Puedes ajustar este ancho */
     margin: 0 auto;              /* ⬅️ Esto lo centra */
     padding: 10px;
     font-size: 16px;
