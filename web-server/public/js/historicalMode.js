@@ -79,7 +79,7 @@ export function initHistoricalMode() {
     const toggleButton = document.createElement("button");
     toggleButton.id = "trace-options-toggle";
     toggleButton.className = "trace-options-toggle";
-    toggleButton.innerHTML = "▼"; // Flecha hacia abajo por defecto
+    toggleButton.innerHTML = "▼ Show Options";
     toggleButton.style.display = "none"; // Oculto hasta que se active Enable Trace Mode
 
     // Añadir el botón y el contenedor al DOM
@@ -191,14 +191,14 @@ export function initHistoricalMode() {
       if (traceTimeSliderVisible) {
         document.getElementById("trace-time-slider-control").style.display = "block";
       }
-      toggleButton.innerHTML = "▼"; // Flecha hacia abajo (expandido)
+      toggleButton.innerHTML = "▼ Show Options";
     } else {
       // Guardar el estado de visibilidad de trace-time-slider-control antes de minimizar
       traceTimeSliderVisible = document.getElementById("trace-time-slider-control").style.display === "block";
       traceOptionsContainer.style.display = "none";
       document.getElementById("trace-radius-control").style.display = "none";
       document.getElementById("trace-time-slider-control").style.display = "none";
-      toggleButton.innerHTML = "▲"; // Flecha hacia arriba (minimizado)
+      toggleButton.innerHTML = "▲ Hide Options";
     }
   });
 
