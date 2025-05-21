@@ -250,8 +250,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     position: absolute;
     top: 0;
     left: 0;
-    width: 300px;
-    height: 100%;
+    width: 400px;
+    height: 150%;
     background-color: var(--dark-purple);
     color: var(--white);
     padding: 20px;
