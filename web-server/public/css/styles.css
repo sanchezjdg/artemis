@@ -491,3 +491,28 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     height: 100vh;
   }
 }
+
+/* --- MODO RESPONSIVO: Visibilidad de modos --- */
+@media (max-width: 768px) {
+  #real-time-controls,
+  #historical-form,
+  #heatmap-form {
+    display: none !important;
+  }
+
+  .controls.show-real-time #real-time-controls {
+    display: block !important;
+  }
+
+  .controls.show-historical #historical-form {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .controls.show-heatmap #heatmap-form {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
