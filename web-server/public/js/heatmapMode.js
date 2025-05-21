@@ -1,19 +1,35 @@
 import { getMap } from './mapHandler.js';
 import { cleanupHistoricalMode } from './historicalMode.js';
 
-
 let heatLayer = null;
 
 /**
- * Inicializa el mapa de calor con datos históricos recibidos.
- * Los puntos de congestión (RPM bajo, poca distancia, largo tiempo) se marcan en otro color.
+ * Inicializa el mapa de calor mostrando el recorrido completo.
+ * Las zonas con congestión se visualizan con mayor intensidad.
  * @param {Array} traceHistoricalData 
  */
 export function initHeatmapMode(traceHistoricalData) {
-  cleanupHistoricalMode(); // ⬅ Limpia cualquier rastro del modo histórico
+  cleanupHistoricalMode();
+
+  // 🛑 NUEVO BLOQUE: desactiva y oculta todo lo relacionado con Trace Mode
+  const traceToggle = document.getElementById("enable-trace-toggle");
+  if (traceToggle) {
+    traceToggle.checked = false;
+    const event = new Event("change");
+    traceToggle.dispatchEvent(event);
+  }
+
+  const traceOptionsContainer = document.getElementById("trace-options-container");
+  const traceOptionsToggle = document.getElementById("trace-options-toggle");
+  if (traceOptionsContainer) traceOptionsContainer.style.display = "none";
+  if (traceOptionsToggle) traceOptionsToggle.style.display = "none";
+
+  const toggleContainer = document.getElementById("enable-trace-toggle-container");
+  if (toggleContainer) toggleContainer.style.display = "none";
+
   const map = getMap();
 
-  // Oculta elementos del modo histórico si están presentes
+  // Oculta controles de otros modos
   const form = document.getElementById("historical-form");
   if (form) form.style.display = "none";
 
@@ -29,27 +45,25 @@ export function initHeatmapMode(traceHistoricalData) {
     traceResults.innerHTML = "";
   }
 
-  // Elimina polilíneas anteriores
+  // Limpia capas gráficas previas
   map.eachLayer((layer) => {
     if (
       layer instanceof L.Polyline ||
       layer instanceof L.Marker ||
-      layer instanceof L.CircleMarker
+      layer instanceof L.CircleMarker ||
+      layer instanceof L.Circle
     ) {
       map.removeLayer(layer);
     }
   });
-  
 
-  // Limpia capas anteriores
+  // Limpieza previa de heatLayer
   if (heatLayer) {
-    map.removeLayer(heatLayer);
+    if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
     heatLayer = null;
   }
 
-  const normalPoints = [];
-  const congestedPoints = [];
-
+  const heatPoints = [];
   let clusterStart = null;
   let currentGroup = [];
 
@@ -62,46 +76,50 @@ export function initHeatmapMode(traceHistoricalData) {
     );
     const rpm = point.rpm;
 
-    const isStillCongested = rpm > 600 && rpm < 1500 && dist < 10;
+    const isCongested = rpm > 600 && rpm < 1500 && dist < 10;
 
-    if (isStillCongested) {
+    if (isCongested) {
       if (!clusterStart) clusterStart = new Date(prev.timestamp);
       currentGroup.push(point);
     } else {
       if (clusterStart && currentGroup.length > 0) {
         const totalTime = new Date(currentGroup[currentGroup.length - 1].timestamp) - clusterStart;
-        const pointsToUse = currentGroup.length > 1 ? currentGroup : [prev];
 
-        if (totalTime > 30000) {
-          pointsToUse.forEach(p =>
-            congestedPoints.push([p.latitude, p.longitude, 1])
-          );
-        } else {
-          pointsToUse.forEach(p =>
-            normalPoints.push([p.latitude, p.longitude, 1])
-          );
-        }
+        let weight = 1.5;
+        if (totalTime >= 10000 && totalTime < 30000) weight = 3;
+        else if (totalTime >= 30000) weight = 5;
+
+        currentGroup.forEach(p =>
+          heatPoints.push([p.latitude, p.longitude, weight])
+        );
       }
+
       clusterStart = null;
       currentGroup = [];
 
-      // También agrega este punto como normal (por fuera del grupo)
-      normalPoints.push([point.latitude, point.longitude, 1]);
+      // Agrega punto normal con peso 1
+      heatPoints.push([point.latitude, point.longitude, 0.5]);
     }
   });
 
-  // Por si quedó una congestión al final sin cerrar
+  // Congestión al final
   if (clusterStart && currentGroup.length > 0) {
     const totalTime = new Date(currentGroup[currentGroup.length - 1].timestamp) - clusterStart;
-    if (totalTime > 10000) {
-      currentGroup.forEach(p => congestedPoints.push([p.latitude, p.longitude, 1]));
-    } else {
-      currentGroup.forEach(p => normalPoints.push([p.latitude, p.longitude, 1]));
-    }
+
+    let weight = 1.5;
+    if (totalTime >= 10000 && totalTime < 30000) weight = 3;
+    else if (totalTime >= 30000) weight = 5;
+
+    currentGroup.forEach(p =>
+      heatPoints.push([p.latitude, p.longitude, weight])
+    );
   }
 
-  // Capa normal
-  const normalHeat = L.heatLayer(normalPoints, {
+  // Si no hay puntos, no hacemos nada
+  if (heatPoints.length === 0) return;
+
+  // Una sola capa con gradiente multicolor
+  const heat = L.heatLayer(heatPoints, {
     radius: 25,
     blur: 15,
     maxZoom: 17,
@@ -112,42 +130,28 @@ export function initHeatmapMode(traceHistoricalData) {
       0.8: 'orange',
       1.0: 'red'
     }
-  }).addTo(map);
+  });
 
-  // Capa de congestión
-  const congestedHeat = L.heatLayer(congestedPoints, {
-    radius: 25,
-    blur: 20,
-    maxZoom: 17,
-    gradient: {
-      0.4: '#8e00c2',
-      0.7: '#c100c7',
-      1.0: '#ff00e6'
-    }
-  }).addTo(map);
+  // Agrupa y agrega al mapa
+  heatLayer = L.layerGroup([heat]).addTo(map);
 
-  // Agrupa para poder eliminar más fácil
-  heatLayer = L.layerGroup([normalHeat, congestedHeat]);
-
-  // Centra el mapa en los datos
-  const allPoints = [...normalPoints, ...congestedPoints];
-  const bounds = L.latLngBounds(allPoints.map(p => [p[0], p[1]]));
+  // Centrado automático
+  const bounds = L.latLngBounds(heatPoints.map(p => [p[0], p[1]]));
   map.fitBounds(bounds, { padding: [50, 50] });
 }
 
 /**
- * Limpia el mapa de calor del mapa Leaflet.
+ * Limpia la capa de calor del mapa.
  */
 export function cleanupHeatmapMode() {
   const map = getMap();
 
-  if (heatLayer) {
-    // 🔥 Eliminar cada subcapa del grupo
-    heatLayer.eachLayer(layer => map.removeLayer(layer));
+  if (heatLayer && map.hasLayer(heatLayer)) {
+    map.removeLayer(heatLayer);
     heatLayer = null;
   }
 
-  // 🔁 Por seguridad, también elimina cualquier otra HeatLayer residual
+  // Seguridad adicional
   map.eachLayer(layer => {
     if (layer instanceof L.HeatLayer) {
       map.removeLayer(layer);

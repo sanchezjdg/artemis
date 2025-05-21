@@ -55,7 +55,7 @@ export function initHistoricalMode() {
     switchSpan.className = "slider round";
 
     const labelText = document.createElement("span");
-    labelText.textContent = "Enable Trace Mode";
+    labelText.textContent = "Enable Trace Search";
     labelText.style.marginLeft = "10px";
 
     switchLabel.appendChild(switchInput);
@@ -79,7 +79,7 @@ export function initHistoricalMode() {
     const toggleButton = document.createElement("button");
     toggleButton.id = "trace-options-toggle";
     toggleButton.className = "trace-options-toggle";
-    toggleButton.innerHTML = "▼"; // Flecha hacia abajo por defecto
+    toggleButton.innerHTML = "▼ Show Options";
     toggleButton.style.display = "none"; // Oculto hasta que se active Enable Trace Mode
 
     // Añadir el botón y el contenedor al DOM
@@ -188,12 +188,12 @@ export function initHistoricalMode() {
       if (document.getElementById("trace-time-slider-control").style.display === "block") {
         document.getElementById("trace-time-slider-control").style.display = "block";
       }
-      toggleButton.innerHTML = "▼"; // Flecha hacia abajo (expandido)
+      toggleButton.innerHTML = "▼ Show Options";
     } else {
       traceOptionsContainer.style.display = "none";
       document.getElementById("trace-radius-control").style.display = "none";
       document.getElementById("trace-time-slider-control").style.display = "none";
-      toggleButton.innerHTML = "▲"; // Flecha hacia arriba (minimizado)
+      toggleButton.innerHTML = "▲ Hide Options";
     }
   });
 
@@ -401,6 +401,7 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
     if (slider) {
       slider.value = 0;
       slider.max = 0;
+      slider.oninput = null; // 🛑 Desactivar el evento del slider
     }
     if (timestampDisplay) timestampDisplay.innerText = "";
 
@@ -410,6 +411,19 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
         "No vehicle pass detected within the radius. Try clicking closer to the route.",
       );
     }
+
+    // 🛑 Limpiar tracePolyline si no se encontraron puntos
+    if (tracePolyline) {
+      if (Array.isArray(tracePolyline)) {
+        tracePolyline.forEach(line => getMap().removeLayer(line));
+      } else {
+        getMap().removeLayer(tracePolyline);
+      }
+      tracePolyline = null;
+    }
+
+    // 🛑 Borrar los puntos guardados para el slider
+    window.traceSliderPoints = [];
     return;
   }
 
@@ -546,14 +560,17 @@ function showTracePointOnMap(point) {
 export function cleanupHistoricalMode() {
   lastClickedPosition = null; // Reset last clicked position
   
+  // Limpiar círculo de búsqueda
   if (searchCircle) {
     const map = getMap();
     map.removeLayer(searchCircle);
     searchCircle = null;
   }
+
+  // Limpiar marcador temporal
   clearTemporaryMarker();
 
-  // Remove all polylines if they exist
+  // Limpiar polilíneas históricas
   if (historicalPath) {
     const map = getMap();
     if (Array.isArray(historicalPath)) {
@@ -564,8 +581,9 @@ export function cleanupHistoricalMode() {
       map.removeLayer(historicalPath);
     }
     historicalPath = null;
+  }
 
-
+  // Limpiar polilíneas de trace
   if (tracePolyline) {
     const map = getMap();
     if (Array.isArray(tracePolyline)) {
@@ -574,9 +592,6 @@ export function cleanupHistoricalMode() {
       map.removeLayer(tracePolyline);
     }
     tracePolyline = null;
-  }
-
-
   }
 
   // Limpiar cualquier polilínea residual
