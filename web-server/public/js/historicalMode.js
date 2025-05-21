@@ -55,7 +55,7 @@ export function initHistoricalMode() {
     switchSpan.className = "slider round";
 
     const labelText = document.createElement("span");
-    labelText.textContent = "Enable Trace Mode";
+    labelText.textContent = "Enable Trace Search";
     labelText.style.marginLeft = "10px";
 
     switchLabel.appendChild(switchInput);
