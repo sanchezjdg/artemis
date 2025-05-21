@@ -285,6 +285,26 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
   }
 
+.vehicle-select {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--bright-blue);
+  background-color: var(--dark-purple);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.vehicle-select:focus {
+  outline: none;
+  border-color: var(--gray);
+}
+
+
 /* Optimize the menu for mobile devices */
 @media (max-width: 768px) {
 /* Mobile-specific adjustments (hasta 600px como en tu código) */
