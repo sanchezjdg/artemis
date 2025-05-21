@@ -406,6 +406,7 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
     if (slider) {
       slider.value = 0;
       slider.max = 0;
+      slider.oninput = null; // 🛑 Desactivar el evento del slider
     }
     if (timestampDisplay) timestampDisplay.innerText = "";
 
@@ -415,6 +416,19 @@ function performTraceSearch(clickedLatLng, isNewClick = false) {
         "No vehicle pass detected within the radius. Try clicking closer to the route.",
       );
     }
+
+    // 🛑 Limpiar tracePolyline si no se encontraron puntos
+    if (tracePolyline) {
+      if (Array.isArray(tracePolyline)) {
+        tracePolyline.forEach(line => getMap().removeLayer(line));
+      } else {
+        getMap().removeLayer(tracePolyline);
+      }
+      tracePolyline = null;
+    }
+
+    // 🛑 Borrar los puntos guardados para el slider
+    window.traceSliderPoints = [];
     return;
   }
 

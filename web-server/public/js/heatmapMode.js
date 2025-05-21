@@ -10,6 +10,23 @@ let heatLayer = null;
  */
 export function initHeatmapMode(traceHistoricalData) {
   cleanupHistoricalMode();
+
+  // 🛑 NUEVO BLOQUE: desactiva y oculta todo lo relacionado con Trace Mode
+  const traceToggle = document.getElementById("enable-trace-toggle");
+  if (traceToggle) {
+    traceToggle.checked = false;
+    const event = new Event("change");
+    traceToggle.dispatchEvent(event);
+  }
+
+  const traceOptionsContainer = document.getElementById("trace-options-container");
+  const traceOptionsToggle = document.getElementById("trace-options-toggle");
+  if (traceOptionsContainer) traceOptionsContainer.style.display = "none";
+  if (traceOptionsToggle) traceOptionsToggle.style.display = "none";
+
+  const toggleContainer = document.getElementById("enable-trace-toggle-container");
+  if (toggleContainer) toggleContainer.style.display = "none";
+
   const map = getMap();
 
   // Oculta controles de otros modos

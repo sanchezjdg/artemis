@@ -285,26 +285,38 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
   }
 
+.vehicle-select {
+  margin-top: 10px;
+  width: 100%;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.vehicle-select:focus {
+  outline: none;
+  border-color: var(--bright-blue);
+}
+
 /* Optimize the menu for mobile devices */
 @media (max-width: 768px) {
 /* Mobile-specific adjustments (hasta 600px como en tu código) */
   .controls {
-    position: absolute;
-    top: 0;
-    left: 0; /* Cambiado de right: 0 a left: 0 para asegurar que empiece desde la izquierda */
-    width: 100%; /* Ocupa todo el ancho de la pantalla */
-    max-height: 35vh; /* Limita la altura máxima para evitar que se extienda verticalmente */
+    width: 90%;
     padding: 0.8rem;
     font-size: 0.9rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+    max-height: 35vh;
     overflow-y: auto;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column; /* Asegurar que los elementos dentro de .controls se apilen verticalmente */
-    background: rgba(128, 0, 128, 0.9); /* Asegurar que el fondo morado sea visible */
-    z-index: 1000; /* Asegurar que esté por encima del mapa */
-    flex-wrap: wrap;
-    gap: 18px !important;
-    margin-top: 8px; 
   }
 
   .controls h2 {
@@ -330,20 +342,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
-    gap: 8px !important;
+    gap: 10px !important;
     margin-top: 8px !important;
   }
   .controls #historical-form .input-group {
     display: flex;
     flex-direction: row !important; /* Asegurar que los input-groups estén en fila */
-    gap: 8px; /* Espacio entre Start y End */
+    gap: 10px; /* Espacio entre Start y End */
     flex: 1;
     min-width: 0; /* Permitir que se ajusten */
   }
 
   .controls #historical-form .input-group > div {
     flex: 1;
-    min-width: 110px; /* Mínimo para cada campo */
+    min-width: 120px; /* Mínimo para cada campo */
   }
 
   .input-group label,
@@ -352,7 +364,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 
   .input-group input {
-    padding: 4px;
+    padding: 6px;
   }
 
   #vehicle-select {
@@ -360,16 +372,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 
   #trace-time-slider-control {
-    display: flex;
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 10px;
-  }
-
-  #trace-time-slider-control label {
-  font-size: 12px;
-  text-align: left; /* Asegurar que el título esté alineado a la izquierda */
-  width: 100%;
   }
 
   #trace-time-slider {
