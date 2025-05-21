@@ -304,8 +304,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border-color: var(--bright-blue);
 }
 
-
-
 /* Optimize the menu for mobile devices */
 @media (max-width: 768px) {
 /* Mobile-specific adjustments (hasta 600px como en tu código) */
