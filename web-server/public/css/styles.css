@@ -356,6 +356,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     box-sizing: border-box;
   }
 
+  #historical-form,
+  #heatmap-form {
+  position: relative;
+  z-index: 1;
+  }
+
   .controls h2 {
     font-size: 14px;
   }
