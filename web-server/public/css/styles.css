@@ -288,7 +288,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .vehicle-select {
   margin-top: 10px;
   width: 100%;
-  padding: 8px;
+  padding: 6px;
   border-radius: 6px;
   border: 1px solid #ccc;
   background-color: #fff;
