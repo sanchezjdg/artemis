@@ -290,9 +290,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   width: 100%;
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid var(--bright-blue);
-  background-color: var(--dark-purple);
-  color: var(--white);
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
@@ -301,8 +301,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .vehicle-select:focus {
   outline: none;
-  border-color: var(--gray);
+  border-color: var(--bright-blue);
 }
+
 
 
 /* Optimize the menu for mobile devices */
