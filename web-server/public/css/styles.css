@@ -344,7 +344,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 /* Optimize the menu for mobile devices */
 @media (max-width: 768px) {
-/* Mobile-specific adjustments (hasta 600px como en tu código) */
   .controls {
     width: 90%;
     padding: 0.8rem;
@@ -374,26 +373,32 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-size: 0.85rem;
   }
 
-  /* Reorganizar formularios en filas para Start y End */
-  .controls #historical-form,
-  .controls #heatmap-form {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    gap: 10px !important;
-    margin-top: 8px !important;
+  /* Mantener diseño horizontal, sin forzar display */
+  .controls #historical-form {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
   }
+
+  .controls #heatmap-form {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
   .controls #historical-form .input-group {
     display: flex;
-    flex-direction: row !important; /* Asegurar que los input-groups estén en fila */
-    gap: 10px; /* Espacio entre Start y End */
+    flex-direction: row;
+    gap: 10px;
     flex: 1;
-    min-width: 0; /* Permitir que se ajusten */
+    min-width: 0;
   }
 
   .controls #historical-form .input-group > div {
     flex: 1;
-    min-width: 120px; /* Mínimo para cada campo */
+    min-width: 120px;
   }
 
   .input-group label,
@@ -403,6 +408,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
   .input-group input {
     padding: 6px;
+    width: 100%;
+    min-width: 0;
   }
 
   #vehicle-select {
@@ -439,7 +446,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
   }
 
-  /* Estilos para el contenedor del toggle y el botón de expandir/minimizar */
   .trace-toggle-container {
     display: none;
     margin-top: 10px;
@@ -449,7 +455,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     margin-top: 8px;
   }
 
-  /* Fixed Info Panel adjustments (tu código funcional) */
   #fixed-info-panel {
     position: fixed;
     bottom: 10px;
@@ -483,7 +488,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     padding: 0.6rem;
   }
 
-  /* Map adjustments */
   #map {
     position: absolute;
     width: 100%;
@@ -491,4 +495,3 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     height: 100vh;
   }
 }
-
