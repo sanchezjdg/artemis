@@ -188,12 +188,12 @@ export function initHistoricalMode() {
       if (document.getElementById("trace-time-slider-control").style.display === "block") {
         document.getElementById("trace-time-slider-control").style.display = "block";
       }
-      toggleButton.innerHTML = "▼ Show Options";
+      toggleButton.innerHTML = "▲ Hide Options";
     } else {
       traceOptionsContainer.style.display = "none";
       document.getElementById("trace-radius-control").style.display = "none";
       document.getElementById("trace-time-slider-control").style.display = "none";
-      toggleButton.innerHTML = "▲ Hide Options";
+      toggleButton.innerHTML = "▼ Show Options ";
     }
   });
 
