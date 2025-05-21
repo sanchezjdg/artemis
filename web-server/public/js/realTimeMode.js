@@ -66,7 +66,7 @@ export function startRealTimeUpdates(socket) {
             coordinates: [],
             path: L.polyline([], {
               color: color,
-              weight: 10,
+              weight: 4,
               opacity: 0.8,
               lineJoin: "round",
             }).addTo(map),
@@ -74,7 +74,7 @@ export function startRealTimeUpdates(socket) {
               radius: 20,
               fillColor: color,
               color: "#fff",
-              weight: 10,
+              weight: 4,
               opacity: 1,
               fillOpacity: 0.8
             }).addTo(map)
