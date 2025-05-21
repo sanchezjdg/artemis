@@ -71,7 +71,7 @@ export function startRealTimeUpdates(socket) {
               lineJoin: "round",
             }).addTo(map),
             marker: L.circleMarker(latlng, {
-              radius: 8,
+              radius: 20,
               fillColor: color,
               color: "#fff",
               weight: 10,
