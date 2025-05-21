@@ -431,6 +431,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
   .trace-options-toggle {
     display: inline-block;
+    width: 100%; /* Esto hace que ocupe todo el ancho */
     margin: 0 auto;
     padding: 4px 10px;
     font-size: 16px;
