@@ -304,6 +304,24 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border-color: var(--bright-blue);
 }
 
+#trace-time-slider-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+#trace-time-slider {
+  width: 100%;
+}
+
+#trace-timestamp-display {
+  text-align: center;
+  font-size: 13px;
+  color: var(--white);
+  margin-top: -4px;
+}
+
 /* Optimize the menu for mobile devices */
 @media (max-width: 768px) {
 /* Mobile-specific adjustments (hasta 600px como en tu código) */
